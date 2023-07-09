@@ -12,8 +12,8 @@ A wip pure Rust (no-std) texture decoder based on [AssetStudio's Texture2DDecode
 - adding additional formats
 
 ## Format Progress
-- [ ] ATC-RGB (works, but missing test)
-- [ ] ATC-RGBA (works, but missing test)
+- [x] ATC-RGB
+- [x] ATC-RGBA
 - [ ] ASTC (not implemented)
 - [x] BC1
 - [x] BC3
@@ -23,7 +23,7 @@ A wip pure Rust (no-std) texture decoder based on [AssetStudio's Texture2DDecode
 - [ ] BC7 (missing test)
 - [ ] EAC-R (probably fine, needs better test)
 - [ ] EAC-RG (probably fine, needs better test)
-- [ ] ETC1 (works, but missing test)
+- [x] ETC1 (works, but missing test)
 - [x] ETC2
 - [x] ETC2-A1
 - [x] ETC2-A8
