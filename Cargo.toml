@@ -1,0 +1,27 @@
+[package]
+name = "texture2ddecoder"
+version = "0.0.1"
+edition = "2021"
+include = [
+    "src/*",
+    "Cargo.toml",
+    "README.md",
+    "LICENSE-APACHE",
+    "LICENSE-MIT",
+    "COPYRIGHT"
+]
+authors = ["Rudolf Kolbe <rkolbe96@gmail.com>"]
+description = "pure Rust no-std texture decoder"
+documentation = "https://docs.rs/texture2ddecoder"
+homepage = "https://crates.io/crates/texture2ddecoder"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/UnityRustEXtractor/texture2ddecoder"
+
+[dependencies]
+half = {version="2.3.1", features = []}
+
+[dev-dependencies]
+image = "^0.24"
+ktx2 = "^0.3.0"
+lazy_static = "^1.4.0"
