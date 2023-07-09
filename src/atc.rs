@@ -55,9 +55,18 @@ fn decode_atc_block(_src: &[u8], _dst: &mut [u32]) {
         colors[13] = expand_quantized(((c1 >> 5) & 0x3f) as u8, 6);
         colors[14] = expand_quantized(((c1 >> 11) & 0x1f) as u8, 5);
 
-        colors[4] = max(0, colors[8] - colors[12] / 4);
-        colors[5] = max(0, colors[9] - colors[13] / 4);
-        colors[6] = max(0, colors[10] - colors[14] / 4);
+        colors[4] = max(
+            0,
+            ((colors[8] as u16).overflowing_sub(colors[12] as u16).0 / 4) as u8,
+        );
+        colors[5] = max(
+            0,
+            ((colors[9] as u16).overflowing_sub(colors[13] as u16).0 / 4) as u8,
+        );
+        colors[6] = max(
+            0,
+            ((colors[10] as u16).overflowing_sub(colors[14] as u16).0 / 4) as u8,
+        );
     }
 
     let mut next = 8 * 4;
