@@ -104,9 +104,9 @@ fn decode_etc1_block(data: &[u8], outbuf: &mut [u32]) {
         c[0][0] = data[0] & 0xf8;
         c[0][1] = data[1] & 0xf8;
         c[0][2] = data[2] & 0xf8;
-        c[1][0] = c[0][0] + (data[0] << 3 & 0x18) - (data[0] << 3 & 0x20);
-        c[1][1] = c[0][1] + (data[1] << 3 & 0x18) - (data[1] << 3 & 0x20);
-        c[1][2] = c[0][2] + (data[2] << 3 & 0x18) - (data[2] << 3 & 0x20);
+        c[1][0] = c[0][0].overflowing_add(data[0] << 3 & 0x18).0.overflowing_sub(data[0] << 3 & 0x20).0;
+        c[1][1] = c[0][1].overflowing_add(data[1] << 3 & 0x18).0.overflowing_sub(data[1] << 3 & 0x20).0;
+        c[1][2] = c[0][2].overflowing_add(data[2] << 3 & 0x18).0.overflowing_sub(data[2] << 3 & 0x20).0;
         c[0][0] |= c[0][0] >> 5;
         c[0][1] |= c[0][1] >> 5;
         c[0][2] |= c[0][2] >> 5;
