@@ -19,8 +19,8 @@ A wip pure Rust (no-std) texture decoder based on [AssetStudio's Texture2DDecode
 - [x] BC3
 - [x] BC4
 - [x] BC5
-- [ ] BC6 (missing test)
-- [ ] BC7 (missing test)
+- [ ] BC6 (bad test result)
+- [x] BC7
 - [ ] EAC-R (probably fine, needs better test)
 - [ ] EAC-RG (probably fine, needs better test)
 - [x] ETC1 (works, but missing test)

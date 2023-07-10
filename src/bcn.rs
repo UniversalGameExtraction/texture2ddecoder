@@ -651,15 +651,15 @@ fn unquantize(_value: u16, _signed: bool, _endpoint_bits: usize) -> u16 {
 fn finish_unquantize(_value: u16, _signed: bool) -> u16 {
     if _signed {
         let sign: u16 = _value & 0x8000;
-        (((_value & 0x7fff) * 31) >> 5) | sign
+        (((_value & 0x7fff) as u32 * 31) >> 5) as u16 | sign
     } else {
-        (_value * 31) >> 6
+        ((_value as u32 * 31) >> 6) as u16
     }
 }
 
 fn sign_extend(_value: u16, _num_bits: usize) -> u16 {
     let mask: u16 = 1 << (_num_bits - 1);
-    (_value ^ mask) - mask
+    (_value ^ mask).overflowing_sub(mask).0
 }
 
 #[inline]
@@ -1008,7 +1008,7 @@ fn decode_bc6_block(_src: &[u8], _dst: &mut [u32], _signed: bool) {
         ep_b[0] = sign_extend(ep_b[0], mi.endpoint_bits);
     }
 
-    let num_subsets: usize = !!mi.partition_bits + 1;
+    let num_subsets: usize = if mi.partition_bits != 0 {2} else {1};
 
     (1..num_subsets * 2).for_each(|ii| {
         if _signed || mi.transformed != 0 {
@@ -1020,9 +1020,9 @@ fn decode_bc6_block(_src: &[u8], _dst: &mut [u32], _signed: bool) {
         if mi.transformed != 0 {
             let mask = (1 << mi.endpoint_bits) - 1;
 
-            ep_r[ii] = (ep_r[ii] + ep_r[0]) & mask;
-            ep_g[ii] = (ep_g[ii] + ep_g[0]) & mask;
-            ep_b[ii] = (ep_b[ii] + ep_b[0]) & mask;
+            ep_r[ii] = ep_r[ii].overflowing_add(ep_r[0]).0 & mask;
+            ep_g[ii] = ep_g[ii].overflowing_add(ep_g[0]).0 & mask;
+            ep_b[ii] = ep_b[ii].overflowing_add(ep_b[0]).0 & mask;
 
             if _signed {
                 ep_r[ii] = sign_extend(ep_r[ii], mi.endpoint_bits);
@@ -1066,21 +1066,21 @@ fn decode_bc6_block(_src: &[u8], _dst: &mut [u32], _signed: bool) {
             let num = index_bits - anchor as usize;
             let index = bit.read(num) as usize;
 
-            let fc = factors[index] as u16;
+            let fc = factors[index] as u32;
             let fca = 64 - fc;
             let fcb = fc;
 
             subset_index *= 2;
             let rr = finish_unquantize(
-                (ep_r[subset_index] * fca + ep_r[subset_index + 1] * fcb + 32) >> 6,
+                ((ep_r[subset_index] as u32 * fca + ep_r[subset_index + 1] as u32 * fcb + 32) >> 6) as u16,
                 _signed,
             );
             let gg = finish_unquantize(
-                (ep_g[subset_index] * fca + ep_g[subset_index + 1] * fcb + 32) >> 6,
+                ((ep_g[subset_index] as u32 * fca + ep_g[subset_index + 1] as u32 * fcb + 32) >> 6) as u16,
                 _signed,
             );
             let bb = finish_unquantize(
-                (ep_b[subset_index] * fca + ep_b[subset_index + 1] * fcb + 32) >> 6,
+                ((ep_b[subset_index] as u32 * fca + ep_b[subset_index + 1] as u32 * fcb + 32) >> 6) as u16,
                 _signed,
             );
 
@@ -1099,7 +1099,7 @@ pub fn decode_bc6(data: &[u8], m_width: usize, m_height: usize, image: &mut [u32
 
     (0..m_blocks_y).for_each(|by| {
         (0..m_blocks_x).for_each(|bx| {
-            decode_bc6_block(data, &mut buffer, false);
+            decode_bc6_block(&data[data_offset..], &mut buffer, false);
             copy_block_buffer(
                 bx,
                 by,
@@ -1237,9 +1237,10 @@ static S_BP7_MODE_INFO: [Bc7ModeInfo; 8] = [
 
 #[inline]
 fn expand_quantized(v: u8, bits: usize) -> u8 {
-    let v = v << (8 - bits);
-    v | (v >> bits)
+    let s = ((v as u16) << (8 - bits as u16)) as u8;
+    s | s.overflowing_shr(bits as u32).0
 }
+
 
 fn decode_bc7_block(_src: &[u8], _dst: &mut [u32]) {
     let mut bit = BitReader::new(_src, 0);
@@ -1398,9 +1399,11 @@ fn decode_bc7_block(_src: &[u8], _dst: &mut [u32]) {
 
             offset[0] += num[0];
             offset[1] += num[1];
-
+            
+            // index selection mode 0 or 1
+            // !index_selection_mode == 1-index_selection_mode
             let fc: u16 = factors[index_selection_mode][index[index_selection_mode]] as u16;
-            let fa: u16 = factors[!index_selection_mode][index[!index_selection_mode]] as u16;
+            let fa: u16 = factors[1-index_selection_mode][index[1-index_selection_mode]] as u16;
 
             let fca: u16 = 64 - fc;
             let fcb: u16 = fc;
@@ -1448,7 +1451,7 @@ pub fn decode_bc7(data: &[u8], m_width: usize, m_height: usize, image: &mut [u32
 
     (0..m_blocks_y).for_each(|by| {
         (0..m_blocks_x).for_each(|bx| {
-            decode_bc7_block(data, &mut buffer);
+            decode_bc7_block(&data[data_offset..], &mut buffer);
             copy_block_buffer(
                 bx,
                 by,

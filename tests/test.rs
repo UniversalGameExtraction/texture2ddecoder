@@ -53,15 +53,15 @@ mod tests {
         test_format("BC5", "ktx2", decode_bc5)
     }
 
-    // #[test]
-    // fn test_BC6H() {
-    //     test_format("BC6H", "ktx2", decode_bc6)
-    // }
+    #[test]
+    fn test_BC6H() {
+        test_format("BC6H", "ktx2", decode_bc6)
+    }
 
-    // #[test]
-    // fn test_BC7() {
-    //     test_format("BC7", "ktx2", decode_bc7)
-    // }
+    #[test]
+    fn test_BC7() {
+        test_format("BC7", "ktx2", decode_bc7)
+    }
 
     #[test]
     fn test_ETC1_RGB() {
