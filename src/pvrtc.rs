@@ -62,9 +62,9 @@ static PVRTC1_PUNCHTHROUGH_WEIGHT: [i8; 4] = [0, 4, 4, 8];
 
 #[inline]
 const fn morton_index(x: usize, y: usize, min_dim: usize) -> usize {
-    let mut offset = 0;
-    let mut shift = 0;
-    let mut mask = 1;
+    let mut offset: usize = 0;
+    let mut shift: usize = 0;
+    let mut mask: usize = 1;
     while mask < min_dim {
         offset |= ((y & mask) | ((x & mask) << 1)) << shift;
         mask <<= 1;
@@ -178,6 +178,13 @@ fn get_texel_weights_2bpp(data: &[u8], info: &mut PVRTCTexelInfo) {
     }
 }
 
+#[inline]
+const fn interpolate_color(c1: i32, c2: i32, w: i8) -> u8 {
+    let w = w as i32;
+    let c = c1 * (8 - w) + c2 * w;
+    (c / 8) as u8
+}
+
 fn applicate_color_4bpp(_data: &[u8], info: &mut [PVRTCTexelInfo; 9], buf: &mut [u32; 32]) {
     static INTERP_WEIGHT: [[i32; 3]; 4] = [[2, 2, 0], [1, 3, 0], [0, 4, 0], [0, 3, 1]];
     let mut clr_a: [PVRTCTexelColorInt; 16] = [PVRTCTexelColorInt::default(); 16];
@@ -219,21 +226,13 @@ fn applicate_color_4bpp(_data: &[u8], info: &mut [PVRTCTexelInfo; 9], buf: &mut 
     let mut punch_through_flag: u32 = self_info.punch_through_flag;
     for i in 0..16 {
         buf[i] = color(
-            ((clr_a[i].r * (8 - self_info.weight[i] as i32)
-                + clr_b[i].r * self_info.weight[i] as i32)
-                / 8) as u8,
-            ((clr_a[i].g * (8 - self_info.weight[i] as i32)
-                + clr_b[i].g * self_info.weight[i] as i32)
-                / 8) as u8,
-            ((clr_a[i].b * (8 - self_info.weight[i] as i32)
-                + clr_b[i].b * self_info.weight[i] as i32)
-                / 8) as u8,
+            interpolate_color(clr_a[i].r, clr_b[i].r, self_info.weight[i]),
+            interpolate_color(clr_a[i].g, clr_b[i].g, self_info.weight[i]),
+            interpolate_color(clr_a[i].b, clr_b[i].b, self_info.weight[i]),
             if punch_through_flag & 1 != 0 {
                 0
             } else {
-                ((clr_a[i].a * (8 - self_info.weight[i] as i32)
-                    + clr_b[i].a * self_info.weight[i] as i32)
-                    / 8) as u8
+                interpolate_color(clr_a[i].a, clr_b[i].a, self_info.weight[i])
             },
         );
 
@@ -253,13 +252,12 @@ fn applicate_color_2bpp(_data: &[u8], info: &mut [PVRTCTexelInfo; 9], buf: &mut 
         [0, 5, 3],
     ];
     static INTERP_WEIGHT_Y: [[i32; 3]; 4] = [[2, 2, 0], [1, 3, 0], [0, 4, 0], [0, 3, 1]];
-
     let mut clr_a: [PVRTCTexelColorInt; 32] = [PVRTCTexelColorInt::default(); 32];
     let mut clr_b: [PVRTCTexelColorInt; 32] = [PVRTCTexelColorInt::default(); 32];
 
     let mut i = 0;
     (0..4).for_each(|y| {
-        (0..4).for_each(|x| {
+        (0..8).for_each(|x| {
             let mut ac = 0;
             for acy in 0..3 {
                 for acx in 0..3 {
@@ -272,10 +270,10 @@ fn applicate_color_2bpp(_data: &[u8], info: &mut [PVRTCTexelInfo; 9], buf: &mut 
                     clr_b[i].g += info[ac].b.g as i32 * interp_weight;
                     clr_b[i].b += info[ac].b.b as i32 * interp_weight;
                     clr_b[i].a += info[ac].b.a as i32 * interp_weight;
-
                     ac += 1;
                 }
             }
+
             clr_a[i].r = (clr_a[i].r >> 2) + (clr_a[i].r >> 7);
             clr_a[i].g = (clr_a[i].g >> 2) + (clr_a[i].g >> 7);
             clr_a[i].b = (clr_a[i].b >> 2) + (clr_a[i].b >> 7);
@@ -320,49 +318,49 @@ fn applicate_color_2bpp(_data: &[u8], info: &mut [PVRTCTexelInfo; 9], buf: &mut 
         for x in 0..8 {
             match self_info.weight[i] {
                 -1 => {
-                    self_info.weight[i] = (info[POSYA[y][0] as usize].weight
+                    self_info.weight[i] = ((info[POSYA[y][0] as usize].weight
                         [(i as i32 + POSYA[y][1]) as usize]
+                        as i32
                         + info[POSYB[y][0] as usize].weight[(i as i32 + POSYB[y][1]) as usize]
+                            as i32
                         + 1)
-                        / 2;
+                        / 2) as i8;
                 }
                 -2 => {
-                    self_info.weight[i] = (info[POSXL[x][0] as usize].weight
+                    self_info.weight[i] = ((info[POSXL[x][0] as usize].weight
                         [(i as i32 + POSXL[x][1]) as usize]
+                        as i32
                         + info[POSXR[x][0] as usize].weight[(i as i32 + POSXR[x][1]) as usize]
+                            as i32
                         + 1)
-                        / 2;
+                        / 2) as i8;
                 }
                 -3 => {
-                    self_info.weight[i] = (info[POSYA[y][0] as usize].weight
+                    self_info.weight[i] = ((info[POSYA[y][0] as usize].weight
                         [(i as i32 + POSYA[y][1]) as usize]
+                        as i32
                         + info[POSYB[y][0] as usize].weight[(i as i32 + POSYB[y][1]) as usize]
+                            as i32
                         + info[POSXL[x][0] as usize].weight[(i as i32 + POSXL[x][1]) as usize]
+                            as i32
                         + info[POSXR[x][0] as usize].weight[(i as i32 + POSXR[x][1]) as usize]
+                            as i32
                         + 2)
-                        / 4;
+                        / 4) as i8;
                 }
                 _ => {}
             }
+
             buf[i] = color(
-                ((clr_a[i].r * (8 - self_info.weight[i] as i32)
-                    + clr_b[i].r * self_info.weight[i] as i32)
-                    / 8) as u8,
-                ((clr_a[i].g * (8 - self_info.weight[i] as i32)
-                    + clr_b[i].g * self_info.weight[i] as i32)
-                    / 8) as u8,
-                ((clr_a[i].b * (8 - self_info.weight[i] as i32)
-                    + clr_b[i].b * self_info.weight[i] as i32)
-                    / 8) as u8,
+                interpolate_color(clr_a[i].r, clr_b[i].r, self_info.weight[i]),
+                interpolate_color(clr_a[i].g, clr_b[i].g, self_info.weight[i]),
+                interpolate_color(clr_a[i].b, clr_b[i].b, self_info.weight[i]),
                 if punch_through_flag & 1 != 0 {
                     0
                 } else {
-                    ((clr_a[i].a * (8 - self_info.weight[i] as i32)
-                        + clr_b[i].a * self_info.weight[i] as i32)
-                        / 8) as u8
+                    interpolate_color(clr_a[i].a, clr_b[i].a, self_info.weight[i])
                 },
             );
-
             i += 1;
             punch_through_flag >>= 1;
         }

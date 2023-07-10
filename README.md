@@ -27,7 +27,7 @@ A wip pure Rust (no-std) texture decoder based on [AssetStudio's Texture2DDecode
 - [x] ETC2
 - [x] ETC2-A1
 - [x] ETC2-A8
-- [ ] PVRTCI-2bpp (bad test result)
+- [x] PVRTCI-2bpp
 - [x] PVRTCI-4bpp
 - [ ] Crunched (not implemented)
   - [ ] DXT1
