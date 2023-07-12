@@ -609,45 +609,43 @@ fn decode_block_params(buf: &[u8], block_data: &mut BlockData) {
     block_data.part_num = ((buf[1] >> 3 & 3) + 1) as usize;
 
     block_data.weight_num = block_data.width * block_data.height;
-    if (block_data.dual_plane) {
+    if block_data.dual_plane {
         block_data.weight_num *= 2;
     }
-    let mut weight_bits = 0;
-    let mut config_bits = 0;
+
+    let mut config_bits: usize;
     let mut cem_base = 0;
 
-    match (WEIGHT_PREC_TABLE_A[block_data.weight_range]) {
+    let weight_bits = match WEIGHT_PREC_TABLE_A[block_data.weight_range] {
         3 => {
-            weight_bits = block_data.weight_num as i32
+            block_data.weight_num as i32
                 * WEIGHT_PREC_TABLE_B[block_data.weight_range]
-                + (block_data.weight_num as i32 * 8 + 4) / 5;
-        }
+                + (block_data.weight_num as i32 * 8 + 4) / 5
+        },
         5 => {
-            weight_bits = block_data.weight_num as i32
+            block_data.weight_num as i32
                 * WEIGHT_PREC_TABLE_B[block_data.weight_range]
-                + (block_data.weight_num as i32 * 7 + 2) / 3;
-        }
+                + (block_data.weight_num as i32 * 7 + 2) / 3
+        },
         _ => {
-            weight_bits =
-                block_data.weight_num as i32 * WEIGHT_PREC_TABLE_B[block_data.weight_range];
+            block_data.weight_num as i32 * WEIGHT_PREC_TABLE_B[block_data.weight_range]
         }
-    }
+    };
 
-    if (block_data.part_num == 1) {
+    if block_data.part_num == 1 {
         block_data.cem[0] = (u8ptr_to_u16(&buf[1..]) >> 5 & 0xf) as usize;
         config_bits = 17;
     } else {
         cem_base = (u8ptr_to_u16(&buf[2..]) >> 7 & 3) as usize;
-        if (cem_base == 0) {
-            let cem = buf[3] >> 1 & 0xf;
-            block_data.cem[0] = cem as usize;
-            block_data.cem[1] = block_data.part_num;
+        if cem_base == 0 {
+            let cem = (buf[3] >> 1 & 0xf) as usize;
+            block_data.cem[0..block_data.part_num].fill(cem);
             config_bits = 29;
         } else {
             (0..block_data.part_num).for_each(|i| {
                 block_data.cem[i] = ((buf[3] >> (i + 1) & 1) as usize + cem_base - 1) << 2
             });
-            match (block_data.part_num) {
+            match block_data.part_num {
                 2 => {
                     block_data.cem[0] |= (buf[3] >> 3 & 3) as usize;
                     block_data.cem[1] |= (getbits(buf, 126 - weight_bits, 2)) as usize;
@@ -670,7 +668,7 @@ fn decode_block_params(buf: &[u8], block_data: &mut BlockData) {
         }
     }
 
-    if (block_data.dual_plane) {
+    if block_data.dual_plane {
         config_bits += 2;
         block_data.plane_selector = getbits(
             buf,
@@ -690,7 +688,7 @@ fn decode_block_params(buf: &[u8], block_data: &mut BlockData) {
     (0..block_data.part_num)
         .for_each(|i| block_data.endpoint_value_num += (block_data.cem[i] >> 1 & 6) + 2);
 
-    let mut endpoint_bits: usize = 0;
+    let mut endpoint_bits: usize;
     for i in 0..CEM_TABLE_A.len() {
         match CEM_TABLE_A[i] {
             3 => {
@@ -705,7 +703,7 @@ fn decode_block_params(buf: &[u8], block_data: &mut BlockData) {
                 endpoint_bits = block_data.endpoint_value_num * CEM_TABLE_B[i];
             }
         }
-        if (endpoint_bits <= remain_bits) {
+        if endpoint_bits <= remain_bits {
             block_data.cem_range = i;
             break;
         }
@@ -715,9 +713,9 @@ fn decode_block_params(buf: &[u8], block_data: &mut BlockData) {
 fn decode_endpoints_hdr7(endpoints: &mut [i32], v: &[i32]) {
     let modeval = (v[2] >> 4 & 0x8) | (v[1] >> 5 & 0x4) | (v[0] >> 6);
     let (major_component, mode) = {
-        if ((modeval & 0xc) != 0xc) {
+        if (modeval & 0xc) != 0xc {
             (modeval >> 2, modeval & 3)
-        } else if (modeval != 0xf) {
+        } else if modeval != 0xf {
             (modeval & 3, 4)
         } else {
             (0, 5)
@@ -725,7 +723,7 @@ fn decode_endpoints_hdr7(endpoints: &mut [i32], v: &[i32]) {
     };
     let mut c: [i32; 4] = [v[0] & 0x3f, v[1] & 0x1f, v[2] & 0x1f, v[3] & 0x1f];
 
-    match (mode) {
+    match mode {
         0 => {
             c[3] |= v[3] & 0x60;
             c[0] |= v[3] >> 1 & 0x40;
@@ -793,52 +791,56 @@ fn decode_endpoints_hdr7(endpoints: &mut [i32], v: &[i32]) {
         }
         _ => {}
     }
-    if (mode != 5) {
+    if mode != 5 {
         c[1] = c[0] - c[1];
         c[2] = c[0] - c[2];
     }
-    if (major_component == 1) {
-        set_endpoint_hdr_clamp(
-            endpoints,
-            c[1] - c[3],
-            c[0] - c[3],
-            c[2] - c[3],
-            0x780,
-            c[1],
-            c[0],
-            c[2],
-            0x780,
-        );
-    } else if (major_component == 2) {
-        set_endpoint_hdr_clamp(
-            endpoints,
-            c[2] - c[3],
-            c[1] - c[3],
-            c[0] - c[3],
-            0x780,
-            c[2],
-            c[1],
-            c[0],
-            0x780,
-        );
-    } else {
-        set_endpoint_hdr_clamp(
-            endpoints,
-            c[0] - c[3],
-            c[1] - c[3],
-            c[2] - c[3],
-            0x780,
-            c[0],
-            c[1],
-            c[2],
-            0x780,
-        );
+    match major_component {
+        1 => {
+            set_endpoint_hdr_clamp(
+                endpoints,
+                c[1] - c[3],
+                c[0] - c[3],
+                c[2] - c[3],
+                0x780,
+                c[1],
+                c[0],
+                c[2],
+                0x780,
+            );
+        },
+        2 => {
+            set_endpoint_hdr_clamp(
+                endpoints,
+                c[2] - c[3],
+                c[1] - c[3],
+                c[0] - c[3],
+                0x780,
+                c[2],
+                c[1],
+                c[0],
+                0x780,
+            );
+        },
+        _ => {
+            set_endpoint_hdr_clamp(
+                endpoints,
+                c[0] - c[3],
+                c[1] - c[3],
+                c[2] - c[3],
+                0x780,
+                c[0],
+                c[1],
+                c[2],
+                0x780,
+            );
+        }
     }
 }
 
 fn decode_endpoints_hdr11(endpoints: &mut [i32], v: &[i32], alpha1: i32, alpha2: i32) {
     let major_component = (v[4] >> 7) | (v[5] >> 6 & 2);
-    if (major_component == 3) {
+    if major_component == 3 {
         set_endpoint_hdr(
             endpoints,
             v[0] << 4,
@@ -860,40 +862,40 @@ fn decode_endpoints_hdr11(endpoints: &mut [i32], v: &[i32], alpha1: i32, alpha2:
     let mut vd0: i32;
     let mut vd1: i32;
 
-    match (mode) {
+    match mode {
         0 | 2 => {
             vd0 = v[4] & 0x7f;
-            if (vd0 & 0x40 != 0) {
+            if vd0 & 0x40 != 0 {
                 vd0 |= 0xff80;
             }
             vd1 = v[5] & 0x7f;
-            if (vd1 & 0x40 != 0) {
+            if vd1 & 0x40 != 0 {
                 vd1 |= 0xff80;
             }
         }
         1 | 3 | 5 | 7 => {
             vd0 = v[4] & 0x3f;
-            if (vd0 & 0x20 != 0) {
+            if vd0 & 0x20 != 0 {
                 vd0 |= 0xffc0;
             }
             vd1 = v[5] & 0x3f;
-            if (vd1 & 0x20 != 0) {
+            if vd1 & 0x20 != 0 {
                 vd1 |= 0xffc0;
             }
         }
         _ => {
             vd0 = v[4] & 0x1f;
-            if (vd0 & 0x10 != 0) {
+            if vd0 & 0x10 != 0 {
                 vd0 |= 0xffe0;
             }
             vd1 = v[5] & 0x1f;
-            if (vd1 & 0x10 != 0) {
+            if vd1 & 0x10 != 0 {
                 vd1 |= 0xffe0;
             }
         }
     }
 
-    match (mode) {
+    match mode {
         0 => {
             vb0 |= v[2] & 0x40;
             vb1 |= v[3] & 0x40;
@@ -954,48 +956,52 @@ fn decode_endpoints_hdr11(endpoints: &mut [i32], v: &[i32], alpha1: i32, alpha2:
     vd0 *= mult;
     vd1 *= mult;
 
-    if (major_component == 1) {
-        set_endpoint_hdr_clamp(
-            endpoints,
-            va - vb0 - vc - vd0,
-            va - vc,
-            va - vb1 - vc - vd1,
-            alpha1,
-            va - vb0,
-            va,
-            va - vb1,
-            alpha2,
-        );
-    } else if (major_component == 2) {
-        set_endpoint_hdr_clamp(
-            endpoints,
-            va - vb1 - vc - vd1,
-            va - vb0 - vc - vd0,
-            va - vc,
-            alpha1,
-            va - vb1,
-            va - vb0,
-            va,
-            alpha2,
-        );
-    } else {
-        set_endpoint_hdr_clamp(
-            endpoints,
-            va - vc,
-            va - vb0 - vc - vd0,
-            va - vb1 - vc - vd1,
-            alpha1,
-            va,
-            va - vb0,
-            va - vb1,
-            alpha2,
-        );
+    match major_component {
+        1 => {
+            set_endpoint_hdr_clamp(
+                endpoints,
+                va - vb0 - vc - vd0,
+                va - vc,
+                va - vb1 - vc - vd1,
+                alpha1,
+                va - vb0,
+                va,
+                va - vb1,
+                alpha2,
+            );
+        },
+        2 => {
+            set_endpoint_hdr_clamp(
+                endpoints,
+                va - vb1 - vc - vd1,
+                va - vb0 - vc - vd0,
+                va - vc,
+                alpha1,
+                va - vb1,
+                va - vb0,
+                va,
+                alpha2,
+            );
+        },
+        _ => {
+            set_endpoint_hdr_clamp(
+                endpoints,
+                va - vc,
+                va - vb0 - vc - vd0,
+                va - vb1 - vc - vd1,
+                alpha1,
+                va,
+                va - vb0,
+                va - vb1,
+                alpha2,
+            );
+        }
     }
 }
 
 fn decode_endpoints(buf: &[u8], data: &mut BlockData) {
-    static TritsTable: [usize; 7] = [0, 204, 93, 44, 22, 11, 5];
-    static QuintsTable: [usize; 6] = [0, 113, 54, 26, 13, 6];
+    static TRITS_TABLE: [usize; 7] = [0, 204, 93, 44, 22, 11, 5];
+    static QUINTS_TABLE: [usize; 6] = [0, 113, 54, 26, 13, 6];
     let mut seq: [IntSeqData; 32] = [IntSeqData::default(); 32];
     let mut ev: [i32; 32] = [0; 32];
     decode_intseq(
@@ -1008,14 +1014,14 @@ fn decode_endpoints(buf: &[u8], data: &mut BlockData) {
         &mut seq,
     );
 
-    match (CEM_TABLE_A[data.cem_range]) {
+    match CEM_TABLE_A[data.cem_range] {
         3 => {
             let mut b = 0;
-            let c = TritsTable[CEM_TABLE_B[data.cem_range]];
+            let c = TRITS_TABLE[CEM_TABLE_B[data.cem_range]];
             (0..data.endpoint_value_num).for_each(|i| {
                 let a = (seq[i].bits & 1) * 0x1ff;
                 let x = seq[i].bits >> 1;
-                match (CEM_TABLE_B[data.cem_range]) {
+                match CEM_TABLE_B[data.cem_range] {
                     1 => {
                         b = 0;
                     }
@@ -1041,11 +1047,11 @@ fn decode_endpoints(buf: &[u8], data: &mut BlockData) {
         }
         5 => {
             let mut b = 0;
-            let c = TritsTable[CEM_TABLE_B[data.cem_range]];
+            let c = QUINTS_TABLE[CEM_TABLE_B[data.cem_range]];
             (0..data.endpoint_value_num).for_each(|i| {
                 let a = (seq[i].bits & 1) * 0x1ff;
                 let x = seq[i].bits >> 1;
-                match (CEM_TABLE_B[data.cem_range]) {
+                match CEM_TABLE_B[data.cem_range] {
                     1 => {
                         b = 0;
                     }
@@ -1066,7 +1072,7 @@ fn decode_endpoints(buf: &[u8], data: &mut BlockData) {
                 ev[i] = ((a & 0x80) | ((seq[i].nonbits * c as u64 + b) ^ a) >> 2) as i32;
             });
         }
-        _ => match (CEM_TABLE_B[data.cem_range]) {
+        _ => match CEM_TABLE_B[data.cem_range] {
             1 => {
                 (0..data.endpoint_value_num).for_each(|i| {
                     ev[i] = (seq[i].bits * 0xff) as i32;
@@ -1113,7 +1119,7 @@ fn decode_endpoints(buf: &[u8], data: &mut BlockData) {
 
     let mut v: &mut [i32] = &mut ev;
     for cem in 0..data.part_num {
-        match (data.cem[cem]) {
+        match data.cem[cem] {
             0 => {
                 set_endpoint(
                     &mut data.endpoints[cem],
@@ -1135,7 +1141,7 @@ fn decode_endpoints(buf: &[u8], data: &mut BlockData) {
             2 => {
                 let y0;
                 let y1;
-                if (v[0] <= v[1]) {
+                if v[0] <= v[1] {
                     y0 = v[0] << 4;
                     y1 = v[1] << 4;
                 } else {
@@ -1157,7 +1163,7 @@ fn decode_endpoints(buf: &[u8], data: &mut BlockData) {
             3 => {
                 let y0;
                 let d;
-                if (v[0] & 0x80 != 0) {
+                if v[0] & 0x80 != 0 {
                     y0 = (v[1] & 0xe0) << 4 | (v[0] & 0x7f) << 2;
                     d = (v[1] & 0x1f) << 2;
                 } else {
@@ -1209,9 +1215,9 @@ fn decode_endpoints(buf: &[u8], data: &mut BlockData) {
             6 => {
                 set_endpoint(
                     &mut data.endpoints[cem],
-                    v[0] * v[3] >> 8,
-                    v[1] * v[3] >> 8,
-                    v[2] * v[3] >> 8,
+                    (v[0] * v[3]) >> 8,
+                    (v[1] * v[3]) >> 8,
+                    (v[2] * v[3]) >> 8,
                     255,
                     v[0],
                     v[1],
@@ -1223,7 +1229,7 @@ fn decode_endpoints(buf: &[u8], data: &mut BlockData) {
                 decode_endpoints_hdr7(&mut data.endpoints[cem], v);
             }
             8 => {
-                if (v[0] + v[2] + v[4] <= v[1] + v[3] + v[5]) {
+                if v[0] + v[2] + v[4] <= v[1] + v[3] + v[5] {
                     set_endpoint(
                         &mut data.endpoints[cem],
                         v[0],
@@ -1253,7 +1259,7 @@ fn decode_endpoints(buf: &[u8], data: &mut BlockData) {
                 bit_transfer_signed_alt(v, 1, 0);
                 bit_transfer_signed_alt(v, 3, 2);
                 bit_transfer_signed_alt(v, 5, 4);
-                if (v[1] + v[3] + v[5] >= 0) {
+                if v[1] + v[3] + v[5] >= 0 {
                     set_endpoint_clamp(
                         &mut data.endpoints[cem],
                         v[0],
@@ -1282,9 +1288,9 @@ fn decode_endpoints(buf: &[u8], data: &mut BlockData) {
             10 => {
                 set_endpoint(
                     &mut data.endpoints[cem],
-                    v[0] * v[3] >> 8,
-                    v[1] * v[3] >> 8,
-                    v[2] * v[3] >> 8,
+                    (v[0] * v[3]) >> 8,
+                    (v[1] * v[3]) >> 8,
+                    (v[2] * v[3]) >> 8,
                     v[4],
                     v[0],
                     v[1],
@@ -1296,7 +1302,7 @@ fn decode_endpoints(buf: &[u8], data: &mut BlockData) {
                 decode_endpoints_hdr11(&mut data.endpoints[cem], v, 0x780, 0x780);
             }
             12 => {
-                if (v[0] + v[2] + v[4] <= v[1] + v[3] + v[5]) {
+                if v[0] + v[2] + v[4] <= v[1] + v[3] + v[5] {
                     set_endpoint(
                         &mut data.endpoints[cem],
                         v[0],
@@ -1328,7 +1334,7 @@ fn decode_endpoints(buf: &[u8], data: &mut BlockData) {
                 bit_transfer_signed_alt(v, 5, 4);
                 bit_transfer_signed_alt(v, 7, 6);
 
-                if (v[1] + v[3] + v[5] >= 0) {
+                if v[1] + v[3] + v[5] >= 0 {
                     set_endpoint_clamp(
                         &mut data.endpoints[cem],
                         v[0],
@@ -1361,7 +1367,7 @@ fn decode_endpoints(buf: &[u8], data: &mut BlockData) {
                 let mode = ((v[6] >> 7) & 1) | ((v[7] >> 6) & 2);
                 v[6] &= 0x7f;
                 v[7] &= 0x7f;
-                if (mode == 3) {
+                if mode == 3 {
                     decode_endpoints_hdr11(&mut data.endpoints[cem], v, v[6] << 5, v[7] << 5);
                 } else {
                     v[6] |= (v[7] << (mode + 1)) & 0x780;
@@ -1392,16 +1398,16 @@ fn decode_weights(buf: &[u8], data: &mut BlockData) {
         128,
         WEIGHT_PREC_TABLE_A[data.weight_range] as usize,
         WEIGHT_PREC_TABLE_B[data.weight_range] as usize,
-        data.weight_num as usize,
+        data.weight_num,
         true,
         &mut seq,
     );
 
-    if (WEIGHT_PREC_TABLE_A[data.weight_range] == 0) {
-        match (WEIGHT_PREC_TABLE_B[data.weight_range]) {
+    if WEIGHT_PREC_TABLE_A[data.weight_range] == 0 {
+        match WEIGHT_PREC_TABLE_B[data.weight_range] {
             1 => {
                 (0..data.weight_num)
-                    .for_each(|i| wv[i] = (if seq[i].bits != 0 { 63 } else { 0 }) as i32);
+                    .for_each(|i| wv[i] = if seq[i].bits != 0 { 63 } else { 0 });
             }
             2 => {
                 (0..data.weight_num).for_each(|i| {
@@ -1428,7 +1434,7 @@ fn decode_weights(buf: &[u8], data: &mut BlockData) {
                 wv[i] += 1
             }
         });
-    } else if (WEIGHT_PREC_TABLE_B[data.weight_range] == 0) {
+    } else if WEIGHT_PREC_TABLE_B[data.weight_range] == 0 {
         let s = if WEIGHT_PREC_TABLE_A[data.weight_range] == 3 {
             32
         } else {
@@ -1436,15 +1442,15 @@ fn decode_weights(buf: &[u8], data: &mut BlockData) {
         };
         (0..data.weight_num).for_each(|i| wv[i] = (seq[i].nonbits * s) as i32);
     } else {
-        if (WEIGHT_PREC_TABLE_A[data.weight_range] == 3) {
-            match (WEIGHT_PREC_TABLE_B[data.weight_range]) {
+        if WEIGHT_PREC_TABLE_A[data.weight_range] == 3 {
+            match WEIGHT_PREC_TABLE_B[data.weight_range] {
                 1 => {
                     (0..data.weight_num).for_each(|i| wv[i] = (seq[i].nonbits * 50) as i32);
                 }
                 2 => {
                     (0..data.weight_num).for_each(|i| {
                         wv[i] = (seq[i].nonbits * 23) as i32;
-                        if (seq[i].bits & 2 != 0) {
+                        if seq[i].bits & 2 != 0 {
                             wv[i] += 0b1000101;
                         }
                     });
@@ -1460,15 +1466,15 @@ fn decode_weights(buf: &[u8], data: &mut BlockData) {
                     panic!("Unsupported ASTC format");
                 }
             }
-        } else if (WEIGHT_PREC_TABLE_A[data.weight_range] == 5) {
-            match (WEIGHT_PREC_TABLE_B[data.weight_range]) {
+        } else if WEIGHT_PREC_TABLE_A[data.weight_range] == 5 {
+            match WEIGHT_PREC_TABLE_B[data.weight_range] {
                 1 => {
                     (0..data.weight_num).for_each(|i| wv[i] = (seq[i].nonbits * 28) as i32);
                 }
                 2 => {
                     (0..data.weight_num).for_each(|i| {
                         wv[i] = (seq[i].nonbits * 13) as i32;
-                        if (seq[i].bits & 2 != 0) {
+                        if seq[i].bits & 2 != 0 {
                             wv[i] += 0b1000010;
                         }
                     });
@@ -1481,7 +1487,7 @@ fn decode_weights(buf: &[u8], data: &mut BlockData) {
         (0..data.weight_num).for_each(|i| {
             let a = (seq[i].bits & 1) * 0x7f;
             wv[i] = ((a & 0x20) | ((wv[i] as u64 ^ a) >> 2)) as i32;
-            if (wv[i] > 32) {
+            if wv[i] > 32 {
                 wv[i] += 1;
             }
         });
@@ -1500,8 +1506,8 @@ fn decode_weights(buf: &[u8], data: &mut BlockData) {
             let ft = gt & 0xf;
             let v = (gs >> 4) + (gt >> 4) * data.width;
             let w11: i32 = ((fs * ft + 8) >> 4) as i32;
-            let w10: i32 = (ft as i32 - w11);
-            let w01: i32 = (fs as i32 - w11);
+            let w10: i32 = ft as i32 - w11;
+            let w01: i32 = fs as i32 - w11;
             let w00: i32 = 16 - fs as i32 - ft as i32 + w11;
 
             for p in 0..pn {
@@ -1509,7 +1515,7 @@ fn decode_weights(buf: &[u8], data: &mut BlockData) {
                 let p01 = wv[(v + 1) * pn + p];
                 let p10 = wv[(v + data.width) * pn + p];
                 let p11 = wv[(v + data.width + 1) * pn + p];
-                data.weights[i][p] = ((p00 * w00 + p01 * w01 + p10 * w10 + p11 * w11 + 8) >> 4);
+                data.weights[i][p] = (p00 * w00 + p01 * w01 + p10 * w10 + p11 * w11 + 8) >> 4;
             }
 
             i += 1;
@@ -1536,23 +1542,23 @@ fn select_partition(buf: &[u8], data: &mut BlockData) {
     rnum ^= rnum >> 17;
 
     let mut seeds: [i32; 8] = [0; 8];
-    for i in 0..8 {
+    (0..8).for_each(|i| {
         let v = rnum >> (i * 4) & 0xF;
         seeds[i] = (v * v) as i32;
-    }
+    });
     let sh: [i32; 2] = [
         if seed & 2 != 0 { 4 } else { 5 },
         if data.part_num == 3 { 6 } else { 5 },
     ];
 
-    if (seed & 1 != 0) {
+    if seed & 1 != 0 {
         (0..8).for_each(|i| seeds[i] >>= sh[i % 2]);
     } else {
         (0..8).for_each(|i| seeds[i] >>= sh[1 - i % 2]);
     }
 
     let mut i = 0;
-    if (small_block) {
+    if small_block {
         for t in 0..data.bh {
             for s in 0..data.bw {
                 let x = s << 1;
@@ -1570,11 +1576,11 @@ fn select_partition(buf: &[u8], data: &mut BlockData) {
                     (seeds[6] * x as i32 + seeds[7] * y as i32 + (rnum >> 2) as i32) & 0x3f
                 };
                 data.partition[i] = {
-                    if (a >= b && a >= c && a >= d) {
+                    if a >= b && a >= c && a >= d {
                         0
-                    } else if (b >= c && b >= d) {
+                    } else if b >= c && b >= d {
                         1
-                    } else if (c >= d) {
+                    } else if c >= d {
                         2
                     } else {
                         3
@@ -1599,11 +1605,11 @@ fn select_partition(buf: &[u8], data: &mut BlockData) {
                     (seeds[6] * x as i32 + seeds[7] * y as i32 + (rnum >> 2) as i32) & 0x3f
                 };
                 data.partition[i] = {
-                    if (a >= b && a >= c && a >= d) {
+                    if a >= b && a >= c && a >= d {
                         0
-                    } else if (b >= c && b >= d) {
+                    } else if b >= c && b >= d {
                         1
-                    } else if (c >= d) {
+                    } else if c >= d {
                         2
                     } else {
                         3
@@ -1616,7 +1622,7 @@ fn select_partition(buf: &[u8], data: &mut BlockData) {
 }
 
 fn applicate_color(data: &mut BlockData, outbuf: &mut [u32]) {
-    static FuncTableC: [(fn(i32, i32, i32) -> u8); 16] = [
+    static FUNC_TABLE_C: [fn(i32, i32, i32) -> u8; 16] = [
         select_color,
         select_color,
         select_color_hdr,
@@ -1634,7 +1640,7 @@ fn applicate_color(data: &mut BlockData, outbuf: &mut [u32]) {
         select_color_hdr,
         select_color_hdr,
     ];
-    static FuncTableA: [(fn(i32, i32, i32) -> u8); 16] = [
+    static FUNC_TABLE_A: [fn(i32, i32, i32) -> u8; 16] = [
         select_color,
         select_color,
         select_color_hdr,
@@ -1652,114 +1658,114 @@ fn applicate_color(data: &mut BlockData, outbuf: &mut [u32]) {
         select_color,
         select_color_hdr,
     ];
-    if (data.dual_plane) {
+    if data.dual_plane {
         let mut ps: [usize; 4] = [0; 4];
         ps[data.plane_selector] = 1;
-        if (data.part_num > 1) {
-            for i in 0..(data.bw * data.bh) {
+        if data.part_num > 1 {
+            (0..(data.bw * data.bh)).for_each(|i| {
                 let p = data.partition[i];
-                let r: u8 = FuncTableC[data.cem[p]](
+                let r: u8 = FUNC_TABLE_C[data.cem[p]](
                     data.endpoints[p][0],
                     data.endpoints[p][4],
                     data.weights[i][ps[0]],
                 );
-                let g: u8 = FuncTableC[data.cem[p]](
+                let g: u8 = FUNC_TABLE_C[data.cem[p]](
                     data.endpoints[p][1],
                     data.endpoints[p][5],
                     data.weights[i][ps[1]],
                 );
-                let b: u8 = FuncTableC[data.cem[p]](
+                let b: u8 = FUNC_TABLE_C[data.cem[p]](
                     data.endpoints[p][2],
                     data.endpoints[p][6],
                     data.weights[i][ps[2]],
                 );
-                let a: u8 = FuncTableA[data.cem[p]](
+                let a: u8 = FUNC_TABLE_A[data.cem[p]](
                     data.endpoints[p][3],
                     data.endpoints[p][7],
                     data.weights[i][ps[3]],
                 );
                 outbuf[i] = color(r, g, b, a);
-            }
+            });
         } else {
-            for i in 0..(data.bw * data.bh) {
-                let r: u8 = FuncTableC[data.cem[0]](
+            (0..(data.bw * data.bh)).for_each(|i| {
+                let r: u8 = FUNC_TABLE_C[data.cem[0]](
                     data.endpoints[0][0],
                     data.endpoints[0][4],
                     data.weights[i][ps[0]],
                 );
-                let g: u8 = FuncTableC[data.cem[0]](
+                let g: u8 = FUNC_TABLE_C[data.cem[0]](
                     data.endpoints[0][1],
                     data.endpoints[0][5],
                     data.weights[i][ps[1]],
                 );
-                let b: u8 = FuncTableC[data.cem[0]](
+                let b: u8 = FUNC_TABLE_C[data.cem[0]](
                     data.endpoints[0][2],
                     data.endpoints[0][6],
                     data.weights[i][ps[2]],
                 );
-                let a: u8 = FuncTableA[data.cem[0]](
+                let a: u8 = FUNC_TABLE_A[data.cem[0]](
                     data.endpoints[0][3],
                     data.endpoints[0][7],
                     data.weights[i][ps[3]],
                 );
                 outbuf[i] = color(r, g, b, a);
-            }
+            });
         }
-    } else if (data.part_num > 1) {
-        for i in 0..(data.bw * data.bh) {
+    } else if data.part_num > 1 {
+        (0..(data.bw * data.bh)).for_each(|i| {
             let p = data.partition[i];
-            let r: u8 = FuncTableC[data.cem[p]](
+            let r: u8 = FUNC_TABLE_C[data.cem[p]](
                 data.endpoints[p][0],
                 data.endpoints[p][4],
                 data.weights[i][0],
             );
-            let g: u8 = FuncTableC[data.cem[p]](
+            let g: u8 = FUNC_TABLE_C[data.cem[p]](
                 data.endpoints[p][1],
                 data.endpoints[p][5],
                 data.weights[i][0],
             );
-            let b: u8 = FuncTableC[data.cem[p]](
+            let b: u8 = FUNC_TABLE_C[data.cem[p]](
                 data.endpoints[p][2],
                 data.endpoints[p][6],
                 data.weights[i][0],
             );
-            let a: u8 = FuncTableA[data.cem[p]](
+            let a: u8 = FUNC_TABLE_A[data.cem[p]](
                 data.endpoints[p][3],
                 data.endpoints[p][7],
                 data.weights[i][0],
             );
             outbuf[i] = color(r, g, b, a);
-        }
+        });
     } else {
-        for i in 0..(data.bw * data.bh) {
-            let r: u8 = FuncTableC[data.cem[0]](
+        (0..(data.bw * data.bh)).for_each(|i| {
+            let r: u8 = FUNC_TABLE_C[data.cem[0]](
                 data.endpoints[0][0],
                 data.endpoints[0][4],
                 data.weights[i][0],
             );
-            let g: u8 = FuncTableC[data.cem[0]](
+            let g: u8 = FUNC_TABLE_C[data.cem[0]](
                 data.endpoints[0][1],
                 data.endpoints[0][5],
                 data.weights[i][0],
             );
-            let b: u8 = FuncTableC[data.cem[0]](
+            let b: u8 = FUNC_TABLE_C[data.cem[0]](
                 data.endpoints[0][2],
                 data.endpoints[0][6],
                 data.weights[i][0],
             );
-            let a: u8 = FuncTableA[data.cem[0]](
+            let a: u8 = FUNC_TABLE_A[data.cem[0]](
                 data.endpoints[0][3],
                 data.endpoints[0][7],
                 data.weights[i][0],
             );
             outbuf[i] = color(r, g, b, a);
-        }
+        });
     }
 }
 
 fn decode_block(buf: &[u8], bw: usize, bh: usize, outbuf: &mut [u32]) {
-    if (buf[0] == 0xfc && (buf[1] & 1) == 1) {
-        let c: u32 = if (buf[1] & 2 != 0) {
+    if buf[0] == 0xfc && (buf[1] & 1) == 1 {
+        let c: u32 = if buf[1] & 2 != 0 {
             color(
                 f16ptr_to_u8(&buf[8..]),
                 f16ptr_to_u8(&buf[10..]),
@@ -1770,7 +1776,7 @@ fn decode_block(buf: &[u8], bw: usize, bh: usize, outbuf: &mut [u32]) {
             color(buf[9], buf[11], buf[13], buf[15])
         };
         outbuf[0..(bw * bh)].fill(c);
-    } else if (((buf[0] & 0xc3) == 0xc0 && (buf[1] & 1) == 1) || (buf[0] & 0xf) == 0) {
+    } else if ((buf[0] & 0xc3) == 0xc0 && (buf[1] & 1) == 1) || (buf[0] & 0xf) == 0 {
         let c: u32 = color(255, 0, 255, 255);
         outbuf[0..(bw * bh)].fill(c);
     } else {
