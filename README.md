@@ -14,12 +14,12 @@ A wip pure Rust (no-std) texture decoder based on [AssetStudio's Texture2DDecode
 ## Format Progress
 - [x] ATC-RGB
 - [x] ATC-RGBA
-- [ ] ASTC (not implemented)
+- [ ] ASTC (broken)
 - [x] BC1
 - [x] BC3
 - [x] BC4
 - [x] BC5
-- [ ] BC6 (bad test result)
+- [ ] BC6 (broken)
 - [x] BC7
 - [ ] EAC-R (probably fine, needs better test)
 - [ ] EAC-RG (probably fine, needs better test)

@@ -34,6 +34,46 @@ mod tests {
     }
 
     #[test]
+    fn test_ASTC_4x4() {
+        test_format("ASTC_4x4", "ktx2", decode_astc_4_4)
+    }
+
+    #[test]
+    fn test_ASTC_5x4() {
+        test_format("ASTC_5x4", "ktx2", decode_astc_5_4)
+    }
+
+    #[test]
+    fn test_ASTC_5x5() {
+        test_format("ASTC_5x5", "ktx2", decode_astc_5_5)
+    }
+
+    #[test]
+    fn test_ASTC_6x5() {
+        test_format("ASTC_6x5", "ktx2", decode_astc_6_5)
+    }
+
+    #[test]
+    fn test_ASTC_6x6() {
+        test_format("ASTC_6x6", "ktx2", decode_astc_6_6)
+    }
+
+    #[test]
+    fn test_ASTC_8x5() {
+        test_format("ASTC_8x5", "ktx2", decode_astc_8_5)
+    }
+
+    #[test]
+    fn test_ASTC_8x6() {
+        test_format("ASTC_8x6", "ktx2", decode_astc_8_6)
+    }
+
+    #[test]
+    fn test_ASTC_8x8() {
+        test_format("ASTC_8x8", "ktx2", decode_astc_8_8)
+    }
+
+    #[test]
     fn test_BC1() {
         test_format("BC1", "ktx2", decode_bc1)
     }
