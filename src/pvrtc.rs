@@ -386,7 +386,7 @@ pub fn decode_pvrtc(data: &[u8], w: usize, h: usize, image: &mut [u32], is2bpp: 
     }
 
     let mut texel_info: Vec<PVRTCTexelInfo> = Vec::with_capacity(num_blocks);
-    texel_info.fill(PVRTCTexelInfo::default());
+    texel_info.resize(num_blocks, PVRTCTexelInfo::default());
 
     let get_texel_weights_func = if is2bpp {
         get_texel_weights_2bpp
