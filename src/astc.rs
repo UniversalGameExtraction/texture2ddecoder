@@ -2,6 +2,15 @@
 use crate::color::{color, copy_block_buffer};
 use crate::f16::fp16_ieee_to_fp32_value;
 
+#[inline]
+fn floor(x: f32) -> f32 {
+    let mut i = x as i32;
+    if x < 0.0 && x != i as f32 {
+        i -= 1;
+    }
+    i as f32
+}
+
 static BIT_REVERSE_TABLE: [u8; 256] = [
     0x00, 0x80, 0x40, 0xC0, 0x20, 0xA0, 0x60, 0xE0, 0x10, 0x90, 0x50, 0xD0, 0x30, 0xB0, 0x70, 0xF0,
     0x08, 0x88, 0x48, 0xC8, 0x28, 0xA8, 0x68, 0xE8, 0x18, 0x98, 0x58, 0xD8, 0x38, 0xB8, 0x78, 0xF8,
@@ -254,7 +263,7 @@ fn select_color_hdr(v0: i32, v1: i32, weight: i32) -> u8 {
     }
     let f: f32 = fp16_ieee_to_fp32_value((c >> 1 & 0x7c00) | m >> 3);
     if f32::is_finite(f) {
-        ((f * 255.0).floor() as i32).clamp(0, 255) as u8
+        (floor(f * 255.0) as i32).clamp(0, 255) as u8
     } else {
         255
     }
@@ -262,7 +271,7 @@ fn select_color_hdr(v0: i32, v1: i32, weight: i32) -> u8 {
 
 #[inline]
 fn f32_to_u8(f: f32) -> u8 {
-    (f * 255.0).floor().clamp(0.0, 255.0) as u8
+    floor(f * 255.0).clamp(0.0, 255.0) as u8
 }
 
 #[inline]
@@ -618,18 +627,14 @@ fn decode_block_params(buf: &[u8], block_data: &mut BlockData) {
 
     let weight_bits = match WEIGHT_PREC_TABLE_A[block_data.weight_range] {
         3 => {
-            block_data.weight_num as i32
-                * WEIGHT_PREC_TABLE_B[block_data.weight_range]
-                + (block_data.weight_num as i32 * 8 + 4) / 5
-        },
-        5 => {
-            block_data.weight_num as i32
-                * WEIGHT_PREC_TABLE_B[block_data.weight_range]
-                + (block_data.weight_num as i32 * 7 + 2) / 3
-        },
-        _ => {
             block_data.weight_num as i32 * WEIGHT_PREC_TABLE_B[block_data.weight_range]
+                + (block_data.weight_num as i32 * 8 + 4) / 5
         }
+        5 => {
+            block_data.weight_num as i32 * WEIGHT_PREC_TABLE_B[block_data.weight_range]
+                + (block_data.weight_num as i32 * 7 + 2) / 3
+        }
+        _ => block_data.weight_num as i32 * WEIGHT_PREC_TABLE_B[block_data.weight_range],
     };
 
     if block_data.part_num == 1 {
@@ -808,7 +813,7 @@ fn decode_endpoints_hdr7(endpoints: &mut [i32], v: &[i32]) {
                 c[2],
                 0x780,
             );
-        },
+        }
         2 => {
             set_endpoint_hdr_clamp(
                 endpoints,
@@ -821,7 +826,7 @@ fn decode_endpoints_hdr7(endpoints: &mut [i32], v: &[i32]) {
                 c[0],
                 0x780,
             );
-        },
+        }
         _ => {
             set_endpoint_hdr_clamp(
                 endpoints,
@@ -969,7 +974,7 @@ fn decode_endpoints_hdr11(endpoints: &mut [i32], v: &[i32], alpha1: i32, alpha2:
                 va - vb1,
                 alpha2,
             );
-        },
+        }
         2 => {
             set_endpoint_hdr_clamp(
                 endpoints,
@@ -982,7 +987,7 @@ fn decode_endpoints_hdr11(endpoints: &mut [i32], v: &[i32], alpha1: i32, alpha2:
                 va,
                 alpha2,
             );
-        },
+        }
         _ => {
             set_endpoint_hdr_clamp(
                 endpoints,
@@ -1406,8 +1411,7 @@ fn decode_weights(buf: &[u8], data: &mut BlockData) {
     if WEIGHT_PREC_TABLE_A[data.weight_range] == 0 {
         match WEIGHT_PREC_TABLE_B[data.weight_range] {
             1 => {
-                (0..data.weight_num)
-                    .for_each(|i| wv[i] = if seq[i].bits != 0 { 63 } else { 0 });
+                (0..data.weight_num).for_each(|i| wv[i] = if seq[i].bits != 0 { 63 } else { 0 });
             }
             2 => {
                 (0..data.weight_num).for_each(|i| {

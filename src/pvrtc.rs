@@ -1,3 +1,6 @@
+extern crate alloc;
+use alloc::vec::Vec;
+
 use crate::color::{color, copy_block_buffer};
 
 #[derive(Clone, Copy)]
@@ -382,7 +385,8 @@ pub fn decode_pvrtc(data: &[u8], w: usize, h: usize, image: &mut [u32], is2bpp: 
         panic!("the number of blocks of each side must be a power of 2");
     }
 
-    let mut texel_info: Vec<PVRTCTexelInfo> = vec![PVRTCTexelInfo::default(); num_blocks];
+    let mut texel_info: Vec<PVRTCTexelInfo> = Vec::with_capacity(num_blocks);
+    texel_info.fill(PVRTCTexelInfo::default());
 
     let get_texel_weights_func = if is2bpp {
         get_texel_weights_2bpp

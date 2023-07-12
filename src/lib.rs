@@ -1,3 +1,5 @@
+#![no_std]
+
 mod bitreader;
 mod color;
 pub mod f16;
