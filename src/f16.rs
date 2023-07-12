@@ -27,7 +27,7 @@ fn fp32_to_bits(x: f32) -> u32 {
     u32::from_le_bytes(f32::to_le_bytes(x))
 }
 
-// Actual code
+// ported version of AMD's code: 
 /*
  * Copyright 2022-2023 Advanced Micro Devices Inc.
  *
