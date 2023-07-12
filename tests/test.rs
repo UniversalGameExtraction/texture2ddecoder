@@ -19,6 +19,22 @@ mod tests {
 
     // test functions
     #[test]
+    fn test_f16(){
+        for i in 0..=65535 {
+            let f16 = half::f16::from_bits(i).to_f32();
+            let f32 = texture2ddecoder::f16::fp16_ieee_to_fp32_value(i);
+            if f16.is_nan() {
+                assert!(f32.is_nan());
+            } else if f16.is_infinite() {
+                assert!(f32.is_infinite());
+            }
+            else {
+                assert_eq!(f16, f32);
+            }
+        }
+    }
+
+    #[test]
     fn test_ATC_RGB() {
         test_format("ATC_RGB", "dds", decode_atc_rgb4)
     }

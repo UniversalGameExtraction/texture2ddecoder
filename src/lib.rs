@@ -1,5 +1,6 @@
 mod bitreader;
 mod color;
+pub mod f16;
 
 mod astc;
 mod atc;

@@ -19,10 +19,10 @@ readme = "README.md"
 repository = "https://github.com/UnityRustEXtractor/texture2ddecoder"
 
 [dependencies]
-half = {version="2.3.1", features = []}
 
 [dev-dependencies]
 ddsfile = "^0.5.1"
 image = "^0.24"
 ktx2 = "^0.3.0"
 lazy_static = "^1.4.0"
+half = {version="2.3.1", features = []}

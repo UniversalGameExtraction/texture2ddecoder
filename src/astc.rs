@@ -1,8 +1,8 @@
 #![allow(clippy::too_many_arguments)]
 use crate::color::{color, copy_block_buffer};
-use half::f16;
+use crate::f16::fp16_ieee_to_fp32_value;
 
-static BitReverseTable: [u8; 256] = [
+static BIT_REVERSE_TABLE: [u8; 256] = [
     0x00, 0x80, 0x40, 0xC0, 0x20, 0xA0, 0x60, 0xE0, 0x10, 0x90, 0x50, 0xD0, 0x30, 0xB0, 0x70, 0xF0,
     0x08, 0x88, 0x48, 0xC8, 0x28, 0xA8, 0x68, 0xE8, 0x18, 0x98, 0x58, 0xD8, 0x38, 0xB8, 0x78, 0xF8,
     0x04, 0x84, 0x44, 0xC4, 0x24, 0xA4, 0x64, 0xE4, 0x14, 0x94, 0x54, 0xD4, 0x34, 0xB4, 0x74, 0xF4,
@@ -21,15 +21,15 @@ static BitReverseTable: [u8; 256] = [
     0x0F, 0x8F, 0x4F, 0xCF, 0x2F, 0xAF, 0x6F, 0xEF, 0x1F, 0x9F, 0x5F, 0xDF, 0x3F, 0xBF, 0x7F, 0xFF,
 ];
 
-static WeightPrecTableA: [i32; 16] = [0, 0, 0, 3, 0, 5, 3, 0, 0, 0, 5, 3, 0, 5, 3, 0];
-static WeightPrecTableB: [i32; 16] = [0, 0, 1, 0, 2, 0, 1, 3, 0, 0, 1, 2, 4, 2, 3, 5];
+static WEIGHT_PREC_TABLE_A: [i32; 16] = [0, 0, 0, 3, 0, 5, 3, 0, 0, 0, 5, 3, 0, 5, 3, 0];
+static WEIGHT_PREC_TABLE_B: [i32; 16] = [0, 0, 1, 0, 2, 0, 1, 3, 0, 0, 1, 2, 4, 2, 3, 5];
 
-static CemTableA: [usize; 19] = [0, 3, 5, 0, 3, 5, 0, 3, 5, 0, 3, 5, 0, 3, 5, 0, 3, 0, 0];
-static CemTableB: [usize; 19] = [8, 6, 5, 7, 5, 4, 6, 4, 3, 5, 3, 2, 4, 2, 1, 3, 1, 2, 1];
+static CEM_TABLE_A: [usize; 19] = [0, 3, 5, 0, 3, 5, 0, 3, 5, 0, 3, 5, 0, 3, 5, 0, 3, 0, 0];
+static CEM_TABLE_B: [usize; 19] = [8, 6, 5, 7, 5, 4, 6, 4, 3, 5, 3, 2, 4, 2, 1, 3, 1, 2, 1];
 
 #[inline]
 fn bit_reverse_u8(c: u8, bits: u8) -> u8 {
-    let x = BitReverseTable[c as usize].overflowing_shr(8 - bits as u32);
+    let x = BIT_REVERSE_TABLE[c as usize].overflowing_shr(8 - bits as u32);
     match x.1 {
         false => x.0,
         true => 0,
@@ -39,14 +39,14 @@ fn bit_reverse_u8(c: u8, bits: u8) -> u8 {
 #[inline]
 fn bit_reverse_u64(d: u64, bits: usize) -> u64 {
     let d = d as usize;
-    let ret = (BitReverseTable[d & 0xff] as u64) << 56
-        | (BitReverseTable[d >> 8 & 0xff] as u64) << 48
-        | (BitReverseTable[d >> 16 & 0xff] as u64) << 40
-        | (BitReverseTable[d >> 24 & 0xff] as u64) << 32
-        | (BitReverseTable[d >> 32 & 0xff] as u64) << 24
-        | (BitReverseTable[d >> 40 & 0xff] as u64) << 16
-        | (BitReverseTable[d >> 48 & 0xff] as u64) << 8
-        | (BitReverseTable[d >> 56 & 0xff] as u64);
+    let ret = (BIT_REVERSE_TABLE[d & 0xff] as u64) << 56
+        | (BIT_REVERSE_TABLE[d >> 8 & 0xff] as u64) << 48
+        | (BIT_REVERSE_TABLE[d >> 16 & 0xff] as u64) << 40
+        | (BIT_REVERSE_TABLE[d >> 24 & 0xff] as u64) << 32
+        | (BIT_REVERSE_TABLE[d >> 32 & 0xff] as u64) << 24
+        | (BIT_REVERSE_TABLE[d >> 40 & 0xff] as u64) << 16
+        | (BIT_REVERSE_TABLE[d >> 48 & 0xff] as u64) << 8
+        | (BIT_REVERSE_TABLE[d >> 56 & 0xff] as u64);
     ret >> (64 - bits as u64)
 }
 
@@ -65,12 +65,12 @@ fn getbits64(buf: &[u8], bit: isize, len: usize) -> u64 {
     };
     if len == 0 {
         0
-    } else if (bit >= 64) {
+    } else if bit >= 64 {
         u64::from_le_bytes(buf[8..16].try_into().unwrap()) >> (bit - 64) & mask
-    } else if (bit <= 0) {
+    } else if bit <= 0 {
         u64::from_le_bytes(buf[..8].try_into().unwrap()) << 0u64.overflowing_sub(bit as u64).0
             & mask
-    } else if (bit as usize + len <= 64) {
+    } else if bit as usize + len <= 64 {
         u64::from_le_bytes(buf[..8].try_into().unwrap()) >> bit & mask
     } else {
         u64::from_le_bytes(buf[..8].try_into().unwrap()) >> bit
@@ -83,14 +83,14 @@ const fn u8ptr_to_u16(ptr: &[u8]) -> u16 {
     u16::from_le_bytes([ptr[0], ptr[1]])
 }
 
-#[inline]
-fn bit_transfer_signed(a: &mut i32, b: &mut i32) {
-    *b = (*b >> 1) | (*a & 0x80);
-    *a = (*a >> 1) & 0x3f;
-    if *a & 0x20 != 0 {
-        *a -= 0x40;
-    }
-}
+// #[inline]
+// fn bit_transfer_signed(a: &mut i32, b: &mut i32) {
+//     *b = (*b >> 1) | (*a & 0x80);
+//     *a = (*a >> 1) & 0x3f;
+//     if *a & 0x20 != 0 {
+//         *a -= 0x40;
+//     }
+// }
 
 #[inline]
 fn bit_transfer_signed_alt(v: &mut [i32], a: usize, b: usize) {
@@ -136,13 +136,13 @@ fn set_endpoint_clamp(
     a2: i32,
 ) {
     endpoint[0] = r1.clamp(0, 255);
-    endpoint[1] = r1.clamp(0, 255);
-    endpoint[2] = r1.clamp(0, 255);
-    endpoint[3] = r1.clamp(0, 255);
-    endpoint[4] = r1.clamp(0, 255);
-    endpoint[5] = r1.clamp(0, 255);
-    endpoint[6] = r1.clamp(0, 255);
-    endpoint[7] = r1.clamp(0, 255);
+    endpoint[1] = g1.clamp(0, 255);
+    endpoint[2] = b1.clamp(0, 255);
+    endpoint[3] = a1.clamp(0, 255);
+    endpoint[4] = r2.clamp(0, 255);
+    endpoint[5] = g2.clamp(0, 255);
+    endpoint[6] = b2.clamp(0, 255);
+    endpoint[7] = a2.clamp(0, 255);
 }
 
 #[inline]
@@ -181,12 +181,12 @@ fn set_endpoint_blue_clamp(
 ) {
     endpoint[0] = ((r1 + b1) >> 1).clamp(0, 255);
     endpoint[1] = ((g1 + b1) >> 1).clamp(0, 255);
-    endpoint[2] = r1.clamp(0, 255);
-    endpoint[3] = r1.clamp(0, 255);
+    endpoint[2] = b1.clamp(0, 255);
+    endpoint[3] = a1.clamp(0, 255);
     endpoint[4] = ((r2 + b2) >> 1).clamp(0, 255);
     endpoint[5] = ((g2 + b2) >> 1).clamp(0, 255);
-    endpoint[6] = r1.clamp(0, 255);
-    endpoint[7] = r1.clamp(0, 255);
+    endpoint[6] = b2.clamp(0, 255);
+    endpoint[7] = a2.clamp(0, 255);
 }
 
 #[inline]
@@ -201,14 +201,14 @@ fn set_endpoint_hdr(
     b2: i32,
     a2: i32,
 ) {
-    endpoint[0] = r1 as i32;
-    endpoint[1] = g1 as i32;
-    endpoint[2] = b1 as i32;
-    endpoint[3] = a1 as i32;
-    endpoint[4] = r2 as i32;
-    endpoint[5] = g2 as i32;
-    endpoint[6] = b2 as i32;
-    endpoint[7] = a2 as i32;
+    endpoint[0] = r1;
+    endpoint[1] = g1;
+    endpoint[2] = b1;
+    endpoint[3] = a1;
+    endpoint[4] = r2;
+    endpoint[5] = g2;
+    endpoint[6] = b2;
+    endpoint[7] = a2;
 }
 
 #[inline]
@@ -252,7 +252,7 @@ fn select_color_hdr(v0: i32, v1: i32, weight: i32) -> u8 {
     } else {
         m = 5 * m - 2048;
     }
-    let f: f32 = f16::from_bits((c >> 1 & 0x7c00) | m >> 3).to_f32();
+    let f: f32 = fp16_ieee_to_fp32_value((c >> 1 & 0x7c00) | m >> 3);
     if f32::is_finite(f) {
         ((f * 255.0).floor() as i32).clamp(0, 255) as u8
     } else {
@@ -262,19 +262,14 @@ fn select_color_hdr(v0: i32, v1: i32, weight: i32) -> u8 {
 
 #[inline]
 fn f32_to_u8(f: f32) -> u8 {
-    let c = (f * 255.0).floor() as i32;
-    if c < 0 {
-        0
-    } else if c > 255 {
-        255
-    } else {
-        c as u8
-    }
+    (f * 255.0).floor().clamp(0.0, 255.0) as u8
 }
 
 #[inline]
 fn f16ptr_to_u8(ptr: &[u8]) -> u8 {
-    f32_to_u8(f16::from_le_bytes([ptr[0], ptr[1]]).to_f32())
+    f32_to_u8(fp16_ieee_to_fp32_value(u16::from_le_bytes([
+        ptr[0], ptr[1],
+    ])))
 }
 
 struct BlockData {
@@ -296,7 +291,7 @@ struct BlockData {
 }
 
 impl BlockData {
-    fn default() -> Self {
+    const fn default() -> Self {
         Self {
             bw: 0,
             bh: 0,
@@ -333,9 +328,9 @@ fn decode_intseq(
     out: &mut [IntSeqData],
 ) {
     // TODO: reduce code duplication
-    static mt: [usize; 5] = [0, 2, 4, 5, 7];
-    static mq: [usize; 3] = [0, 3, 5];
-    static TritsTable: [[u64; 256]; 5] = [
+    static MT: [usize; 5] = [0, 2, 4, 5, 7];
+    static MQ: [usize; 3] = [0, 3, 5];
+    static TRITS_TABLE: [[u64; 256]; 5] = [
         [
             0, 1, 2, 0, 0, 1, 2, 1, 0, 1, 2, 2, 0, 1, 2, 2, 0, 1, 2, 0, 0, 1, 2, 1, 0, 1, 2, 2, 0,
             1, 2, 0, 0, 1, 2, 0, 0, 1, 2, 1, 0, 1, 2, 2, 0, 1, 2, 2, 0, 1, 2, 0, 0, 1, 2, 1, 0, 1,
@@ -392,7 +387,7 @@ fn decode_intseq(
             2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
         ],
     ];
-    static QuintsTable: [[u64; 128]; 3] = [
+    static QUINTS_TABLE: [[u64; 128]; 3] = [
         [
             0, 1, 2, 3, 4, 0, 4, 4, 0, 1, 2, 3, 4, 1, 4, 4, 0, 1, 2, 3, 4, 2, 4, 4, 0, 1, 2, 3, 4,
             3, 4, 4, 0, 1, 2, 3, 4, 0, 4, 0, 0, 1, 2, 3, 4, 1, 4, 1, 0, 1, 2, 3, 4, 2, 4, 2, 0, 1,
@@ -431,8 +426,8 @@ fn decode_intseq(
             let last_block_size = (block_size * last_block_count + 4) / 5;
 
             if reverse {
-                (0..block_count).map(|i| {
-                    let now_size = if (i < block_count - 1) {
+                (0..block_count).for_each(|i| {
+                    let now_size = if i < block_count - 1 {
                         block_size
                     } else {
                         last_block_size
@@ -440,15 +435,15 @@ fn decode_intseq(
                     let d =
                         bit_reverse_u64(getbits64(buf, p - now_size as isize, now_size), now_size);
                     let x = ((d >> b & 3)
-                        | (d >> b * 2 & 0xc)
-                        | (d >> b * 3 & 0x10)
-                        | (d >> b * 4 & 0x60)
-                        | (d >> b * 5 & 0x80)) as usize;
+                        | (d >> (b * 2) & 0xc)
+                        | (d >> (b * 3) & 0x10)
+                        | (d >> (b * 4) & 0x60)
+                        | (d >> (b * 5) & 0x80)) as usize;
                     for j in 0..5 {
                         if n < count {
                             out[n] = IntSeqData {
-                                bits: (d >> (mt[j] + b * j)) & mask,
-                                nonbits: TritsTable[j][x],
+                                bits: (d >> (MT[j] + b * j)) & mask,
+                                nonbits: TRITS_TABLE[j][x],
                             };
                             n += 1;
                         }
@@ -456,23 +451,23 @@ fn decode_intseq(
                     p -= block_size as isize;
                 });
             } else {
-                (0..block_count).map(|i| {
-                    let now_size = if (i < block_count - 1) {
+                (0..block_count).for_each(|i| {
+                    let now_size = if i < block_count - 1 {
                         block_size
                     } else {
                         last_block_size
                     };
                     let d = getbits64(buf, p, now_size);
                     let x = ((d >> b & 3)
-                        | (d >> b * 2 & 0xc)
-                        | (d >> b * 3 & 0x10)
-                        | (d >> b * 4 & 0x60)
-                        | (d >> b * 5 & 0x80)) as usize;
+                        | (d >> (b * 2) & 0xc)
+                        | (d >> (b * 3) & 0x10)
+                        | (d >> (b * 4) & 0x60)
+                        | (d >> (b * 5) & 0x80)) as usize;
                     for j in 0..5 {
                         if n < count {
                             out[n] = IntSeqData {
-                                bits: (d >> (mt[j] + b * j)) & mask,
-                                nonbits: TritsTable[j][x],
+                                bits: (d >> (MT[j] + b * j)) & mask,
+                                nonbits: TRITS_TABLE[j][x],
                             };
                             n += 1;
                         }
@@ -488,21 +483,21 @@ fn decode_intseq(
             let block_size = 7 + 3 * b;
             let last_block_size = (block_size * last_block_count + 2) / 3;
 
-            if (reverse) {
-                (0..block_count).map(|i| {
-                    let now_size = if (i < block_count - 1) {
+            if reverse {
+                (0..block_count).for_each(|i| {
+                    let now_size = if i < block_count - 1 {
                         block_size
                     } else {
                         last_block_size
                     };
                     let d =
                         bit_reverse_u64(getbits64(buf, p - now_size as isize, now_size), now_size);
-                    let x = ((d >> b & 7) | (d >> b * 2 & 0x18) | (d >> b * 3 & 0x60)) as usize;
+                    let x = ((d >> b & 7) | (d >> (b * 2) & 0x18) | (d >> (b * 3) & 0x60)) as usize;
                     for j in 0..3 {
                         if n < count {
                             out[n] = IntSeqData {
-                                bits: (d >> (mq[j] + b * j)) & mask,
-                                nonbits: QuintsTable[j][x],
+                                bits: (d >> (MQ[j] + b * j)) & mask,
+                                nonbits: QUINTS_TABLE[j][x],
                             };
                             n += 1;
                         }
@@ -510,19 +505,19 @@ fn decode_intseq(
                     p -= block_size as isize;
                 });
             } else {
-                (0..block_count).map(|i| {
-                    let now_size = if (i < block_count - 1) {
+                (0..block_count).for_each(|i| {
+                    let now_size = if i < block_count - 1 {
                         block_size
                     } else {
                         last_block_size
                     };
                     let d = getbits64(buf, p, now_size);
-                    let x = ((d >> b & 7) | (d >> b * 2 & 0x18) | (d >> b * 3 & 0x60)) as usize;
+                    let x = ((d >> b & 7) | (d >> (b * 2) & 0x18) | (d >> (b * 3) & 0x60)) as usize;
                     for j in 0..3 {
                         if n < count {
                             out[n] = IntSeqData {
-                                bits: (d >> (mq[j] + b * j)) & mask,
-                                nonbits: QuintsTable[j][x],
+                                bits: (d >> (MQ[j] + b * j)) & mask,
+                                nonbits: QUINTS_TABLE[j][x],
                             };
                             n += 1;
                         }
@@ -532,8 +527,9 @@ fn decode_intseq(
             }
         }
         _ => {
-            if (reverse) {
-                while (n < count) {
+            if reverse {
+                p -= b as isize;
+                while n < count {
                     out[n] = IntSeqData {
                         bits: bit_reverse_u8(getbits(buf, p as i32, b) as u8, b as u8) as u64,
                         nonbits: 0,
@@ -542,9 +538,9 @@ fn decode_intseq(
                     p -= b as isize;
                 }
             } else {
-                while (n < count) {
+                while n < count {
                     out[n] = IntSeqData {
-                        nonbits: bit_reverse_u8(getbits(buf, p as i32, b) as u8, 0) as u64,
+                        nonbits: getbits(buf, p as i32, b) as u64,
                         bits: 0,
                     };
                     n += 1;
@@ -559,7 +555,7 @@ fn decode_block_params(buf: &[u8], block_data: &mut BlockData) {
     block_data.dual_plane = (buf[1] & 4) != 0;
     block_data.weight_range = ((buf[0] >> 4 & 1) | (buf[1] << 2 & 8)) as usize;
 
-    if (buf[0] & 3 != 0) {
+    if buf[0] & 3 != 0 {
         block_data.weight_range |= (buf[0] << 1 & 6) as usize;
         match buf[0] & 0xc {
             0 => {
@@ -575,7 +571,7 @@ fn decode_block_params(buf: &[u8], block_data: &mut BlockData) {
                 block_data.height = ((u8ptr_to_u16(buf) >> 7 & 3) + 8) as usize;
             }
             12 => {
-                if (buf[1] & 1 != 0) {
+                if buf[1] & 1 != 0 {
                     block_data.width = ((buf[0] >> 7 & 1) + 2) as usize;
                     block_data.height = ((buf[0] >> 5 & 3) + 2) as usize;
                 } else {
@@ -587,7 +583,7 @@ fn decode_block_params(buf: &[u8], block_data: &mut BlockData) {
         }
     } else {
         block_data.weight_range |= (buf[0] >> 1 & 6) as usize;
-        match (u8ptr_to_u16(buf) & 0x180) {
+        match u8ptr_to_u16(buf) & 0x180 {
             0 => {
                 block_data.width = 12;
                 block_data.height = ((buf[0] >> 5 & 3) + 2) as usize;
@@ -603,8 +599,8 @@ fn decode_block_params(buf: &[u8], block_data: &mut BlockData) {
                 block_data.weight_range &= 7;
             }
             0x180 => {
-                block_data.width = if (buf[0] & 0x20 != 0) { 10 } else { 6 };
-                block_data.height = if (buf[0] & 0x20 != 0) { 6 } else { 10 };
+                block_data.width = if buf[0] & 0x20 != 0 { 10 } else { 6 };
+                block_data.height = if buf[0] & 0x20 != 0 { 6 } else { 10 };
             }
             _ => {}
         }
@@ -620,17 +616,20 @@ fn decode_block_params(buf: &[u8], block_data: &mut BlockData) {
     let mut config_bits = 0;
     let mut cem_base = 0;
 
-    match (WeightPrecTableA[block_data.weight_range]) {
+    match (WEIGHT_PREC_TABLE_A[block_data.weight_range]) {
         3 => {
-            weight_bits = block_data.weight_num as i32 * WeightPrecTableB[block_data.weight_range]
+            weight_bits = block_data.weight_num as i32
+                * WEIGHT_PREC_TABLE_B[block_data.weight_range]
                 + (block_data.weight_num as i32 * 8 + 4) / 5;
         }
         5 => {
-            weight_bits = block_data.weight_num as i32 * WeightPrecTableB[block_data.weight_range]
+            weight_bits = block_data.weight_num as i32
+                * WEIGHT_PREC_TABLE_B[block_data.weight_range]
                 + (block_data.weight_num as i32 * 7 + 2) / 3;
         }
         _ => {
-            weight_bits = block_data.weight_num as i32 * WeightPrecTableB[block_data.weight_range];
+            weight_bits =
+                block_data.weight_num as i32 * WEIGHT_PREC_TABLE_B[block_data.weight_range];
         }
     }
 
@@ -692,18 +691,18 @@ fn decode_block_params(buf: &[u8], block_data: &mut BlockData) {
         .for_each(|i| block_data.endpoint_value_num += (block_data.cem[i] >> 1 & 6) + 2);
 
     let mut endpoint_bits: usize = 0;
-    for i in 0..CemTableA.len() {
-        match CemTableA[i] {
+    for i in 0..CEM_TABLE_A.len() {
+        match CEM_TABLE_A[i] {
             3 => {
-                endpoint_bits = block_data.endpoint_value_num * CemTableB[i]
+                endpoint_bits = block_data.endpoint_value_num * CEM_TABLE_B[i]
                     + (block_data.endpoint_value_num * 8 + 4) / 5;
             }
             5 => {
-                endpoint_bits = block_data.endpoint_value_num * CemTableB[i]
+                endpoint_bits = block_data.endpoint_value_num * CEM_TABLE_B[i]
                     + (block_data.endpoint_value_num * 7 + 2) / 3;
             }
             _ => {
-                endpoint_bits = block_data.endpoint_value_num * CemTableB[i];
+                endpoint_bits = block_data.endpoint_value_num * CEM_TABLE_B[i];
             }
         }
         if (endpoint_bits <= remain_bits) {
@@ -1002,21 +1001,21 @@ fn decode_endpoints(buf: &[u8], data: &mut BlockData) {
     decode_intseq(
         buf,
         if data.part_num == 1 { 17 } else { 29 },
-        CemTableA[data.cem_range],
-        CemTableB[data.cem_range],
+        CEM_TABLE_A[data.cem_range],
+        CEM_TABLE_B[data.cem_range],
         data.endpoint_value_num,
         false,
         &mut seq,
     );
 
-    match (CemTableA[data.cem_range]) {
+    match (CEM_TABLE_A[data.cem_range]) {
         3 => {
             let mut b = 0;
-            let c = TritsTable[CemTableB[data.cem_range]];
+            let c = TritsTable[CEM_TABLE_B[data.cem_range]];
             (0..data.endpoint_value_num).for_each(|i| {
                 let a = (seq[i].bits & 1) * 0x1ff;
                 let x = seq[i].bits >> 1;
-                match (CemTableB[data.cem_range]) {
+                match (CEM_TABLE_B[data.cem_range]) {
                     1 => {
                         b = 0;
                     }
@@ -1042,11 +1041,11 @@ fn decode_endpoints(buf: &[u8], data: &mut BlockData) {
         }
         5 => {
             let mut b = 0;
-            let c = TritsTable[CemTableB[data.cem_range]];
+            let c = TritsTable[CEM_TABLE_B[data.cem_range]];
             (0..data.endpoint_value_num).for_each(|i| {
                 let a = (seq[i].bits & 1) * 0x1ff;
                 let x = seq[i].bits >> 1;
-                match (CemTableB[data.cem_range]) {
+                match (CEM_TABLE_B[data.cem_range]) {
                     1 => {
                         b = 0;
                     }
@@ -1067,7 +1066,7 @@ fn decode_endpoints(buf: &[u8], data: &mut BlockData) {
                 ev[i] = ((a & 0x80) | ((seq[i].nonbits * c as u64 + b) ^ a) >> 2) as i32;
             });
         }
-        _ => match (CemTableB[data.cem_range]) {
+        _ => match (CEM_TABLE_B[data.cem_range]) {
             1 => {
                 (0..data.endpoint_value_num).for_each(|i| {
                     ev[i] = (seq[i].bits * 0xff) as i32;
@@ -1391,15 +1390,15 @@ fn decode_weights(buf: &[u8], data: &mut BlockData) {
     decode_intseq(
         buf,
         128,
-        WeightPrecTableA[data.weight_range] as usize,
-        WeightPrecTableB[data.weight_range] as usize,
+        WEIGHT_PREC_TABLE_A[data.weight_range] as usize,
+        WEIGHT_PREC_TABLE_B[data.weight_range] as usize,
         data.weight_num as usize,
         true,
         &mut seq,
     );
 
-    if (WeightPrecTableA[data.weight_range] == 0) {
-        match (WeightPrecTableB[data.weight_range]) {
+    if (WEIGHT_PREC_TABLE_A[data.weight_range] == 0) {
+        match (WEIGHT_PREC_TABLE_B[data.weight_range]) {
             1 => {
                 (0..data.weight_num)
                     .for_each(|i| wv[i] = (if seq[i].bits != 0 { 63 } else { 0 }) as i32);
@@ -1429,16 +1428,16 @@ fn decode_weights(buf: &[u8], data: &mut BlockData) {
                 wv[i] += 1
             }
         });
-    } else if (WeightPrecTableB[data.weight_range] == 0) {
-        let s = if WeightPrecTableA[data.weight_range] == 3 {
+    } else if (WEIGHT_PREC_TABLE_B[data.weight_range] == 0) {
+        let s = if WEIGHT_PREC_TABLE_A[data.weight_range] == 3 {
             32
         } else {
             16
         };
         (0..data.weight_num).for_each(|i| wv[i] = (seq[i].nonbits * s) as i32);
     } else {
-        if (WeightPrecTableA[data.weight_range] == 3) {
-            match (WeightPrecTableB[data.weight_range]) {
+        if (WEIGHT_PREC_TABLE_A[data.weight_range] == 3) {
+            match (WEIGHT_PREC_TABLE_B[data.weight_range]) {
                 1 => {
                     (0..data.weight_num).for_each(|i| wv[i] = (seq[i].nonbits * 50) as i32);
                 }
@@ -1461,8 +1460,8 @@ fn decode_weights(buf: &[u8], data: &mut BlockData) {
                     panic!("Unsupported ASTC format");
                 }
             }
-        } else if (WeightPrecTableA[data.weight_range] == 5) {
-            match (WeightPrecTableB[data.weight_range]) {
+        } else if (WEIGHT_PREC_TABLE_A[data.weight_range] == 5) {
+            match (WEIGHT_PREC_TABLE_B[data.weight_range]) {
                 1 => {
                     (0..data.weight_num).for_each(|i| wv[i] = (seq[i].nonbits * 28) as i32);
                 }
@@ -1524,7 +1523,6 @@ fn select_partition(buf: &[u8], data: &mut BlockData) {
     let seed = (i32::from_le_bytes(buf[0..4].try_into().unwrap()) >> 13 & 0x3ff)
         | (data.part_num as i32 - 1) << 10;
 
-    println!("seed: {}", seed);
     let mut rnum = seed as u32;
     rnum ^= rnum >> 15;
     rnum = rnum.overflowing_sub(rnum << 17).0;

@@ -1,7 +1,6 @@
 use crate::bitreader::BitReader;
 use crate::color::{color, copy_block_buffer, rgb565_le};
 use core::mem::swap;
-use half::f16;
 
 #[inline]
 fn decode_bc1_block(data: &[u8], outbuf: &mut [u32]) {
@@ -340,7 +339,7 @@ static S_BPTC_A3: [[usize; 64]; 2] = [
 ];
 
 struct Bc6hModeInfo {
-    transformed: usize,
+    transformed: bool,
     partition_bits: usize,
     endpoint_bits: usize,
     delta_bits: [usize; 3],
@@ -385,224 +384,224 @@ static S_BC6H_MODE_INFO: [Bc6hModeInfo; 32] = [
     // { 0, 0,  0, {  0,  0,  0 } }, // -
     // 00    2-bits
     Bc6hModeInfo {
-        transformed: 1,
+        transformed: true,
         partition_bits: 5,
         endpoint_bits: 10,
         delta_bits: [5, 5, 5],
     },
     // 01
     Bc6hModeInfo {
-        transformed: 1,
+        transformed: true,
         partition_bits: 5,
         endpoint_bits: 7,
         delta_bits: [6, 6, 6],
     },
     // 00010 5-bits
     Bc6hModeInfo {
-        transformed: 1,
+        transformed: true,
         partition_bits: 5,
         endpoint_bits: 11,
         delta_bits: [5, 4, 4],
     },
     // 00011
     Bc6hModeInfo {
-        transformed: 0,
+        transformed: false,
         partition_bits: 0,
         endpoint_bits: 10,
         delta_bits: [10, 10, 10],
     },
     // -
     Bc6hModeInfo {
-        transformed: 0,
+        transformed: false,
         partition_bits: 0,
         endpoint_bits: 0,
         delta_bits: [0, 0, 0],
     },
     // -
     Bc6hModeInfo {
-        transformed: 0,
+        transformed: false,
         partition_bits: 0,
         endpoint_bits: 0,
         delta_bits: [0, 0, 0],
     },
     // 00110
     Bc6hModeInfo {
-        transformed: 1,
+        transformed: true,
         partition_bits: 5,
         endpoint_bits: 11,
         delta_bits: [4, 5, 4],
     },
     // 00010
     Bc6hModeInfo {
-        transformed: 1,
+        transformed: true,
         partition_bits: 0,
         endpoint_bits: 11,
         delta_bits: [9, 9, 9],
     },
     // -
     Bc6hModeInfo {
-        transformed: 0,
+        transformed: false,
         partition_bits: 0,
         endpoint_bits: 0,
         delta_bits: [0, 0, 0],
     },
     // -
     Bc6hModeInfo {
-        transformed: 0,
+        transformed: false,
         partition_bits: 0,
         endpoint_bits: 0,
         delta_bits: [0, 0, 0],
     },
     // 00010
     Bc6hModeInfo {
-        transformed: 1,
+        transformed: true,
         partition_bits: 5,
         endpoint_bits: 11,
         delta_bits: [4, 4, 5],
     },
     // 00010
     Bc6hModeInfo {
-        transformed: 1,
+        transformed: true,
         partition_bits: 0,
         endpoint_bits: 12,
         delta_bits: [8, 8, 8],
     },
     // -
     Bc6hModeInfo {
-        transformed: 0,
+        transformed: false,
         partition_bits: 0,
         endpoint_bits: 0,
         delta_bits: [0, 0, 0],
     },
     // -
     Bc6hModeInfo {
-        transformed: 0,
+        transformed: false,
         partition_bits: 0,
         endpoint_bits: 0,
         delta_bits: [0, 0, 0],
     },
     // 00010
     Bc6hModeInfo {
-        transformed: 1,
+        transformed: true,
         partition_bits: 5,
         endpoint_bits: 9,
         delta_bits: [5, 5, 5],
     },
     // 00010
     Bc6hModeInfo {
-        transformed: 1,
+        transformed: true,
         partition_bits: 0,
         endpoint_bits: 16,
         delta_bits: [4, 4, 4],
     },
     // -
     Bc6hModeInfo {
-        transformed: 0,
+        transformed: false,
         partition_bits: 0,
         endpoint_bits: 0,
         delta_bits: [0, 0, 0],
     },
     // -
     Bc6hModeInfo {
-        transformed: 0,
+        transformed: false,
         partition_bits: 0,
         endpoint_bits: 0,
         delta_bits: [0, 0, 0],
     },
     // 00010
     Bc6hModeInfo {
-        transformed: 1,
+        transformed: true,
         partition_bits: 5,
         endpoint_bits: 8,
         delta_bits: [6, 5, 5],
     },
     // -
     Bc6hModeInfo {
-        transformed: 0,
+        transformed: false,
         partition_bits: 0,
         endpoint_bits: 0,
         delta_bits: [0, 0, 0],
     },
     // -
     Bc6hModeInfo {
-        transformed: 0,
+        transformed: false,
         partition_bits: 0,
         endpoint_bits: 0,
         delta_bits: [0, 0, 0],
     },
     // -
     Bc6hModeInfo {
-        transformed: 0,
+        transformed: false,
         partition_bits: 0,
         endpoint_bits: 0,
         delta_bits: [0, 0, 0],
     },
     // 00010
     Bc6hModeInfo {
-        transformed: 1,
+        transformed: true,
         partition_bits: 5,
         endpoint_bits: 8,
         delta_bits: [5, 6, 5],
     },
     // -
     Bc6hModeInfo {
-        transformed: 0,
+        transformed: false,
         partition_bits: 0,
         endpoint_bits: 0,
         delta_bits: [0, 0, 0],
     },
     // -
     Bc6hModeInfo {
-        transformed: 0,
+        transformed: false,
         partition_bits: 0,
         endpoint_bits: 0,
         delta_bits: [0, 0, 0],
     },
     // -
     Bc6hModeInfo {
-        transformed: 0,
+        transformed: false,
         partition_bits: 0,
         endpoint_bits: 0,
         delta_bits: [0, 0, 0],
     },
     // 00010
     Bc6hModeInfo {
-        transformed: 1,
+        transformed: true,
         partition_bits: 5,
         endpoint_bits: 8,
         delta_bits: [5, 5, 6],
     },
     // -
     Bc6hModeInfo {
-        transformed: 0,
+        transformed: false,
         partition_bits: 0,
         endpoint_bits: 0,
         delta_bits: [0, 0, 0],
     },
     // -
     Bc6hModeInfo {
-        transformed: 0,
+        transformed: false,
         partition_bits: 0,
         endpoint_bits: 0,
         delta_bits: [0, 0, 0],
     },
     // -
     Bc6hModeInfo {
-        transformed: 0,
+        transformed: false,
         partition_bits: 0,
         endpoint_bits: 0,
         delta_bits: [0, 0, 0],
     },
     // 00010
     Bc6hModeInfo {
-        transformed: 0,
+        transformed: false,
         partition_bits: 5,
         endpoint_bits: 6,
         delta_bits: [6, 6, 6],
     },
     // -
     Bc6hModeInfo {
-        transformed: 0,
+        transformed: false,
         partition_bits: 0,
         endpoint_bits: 0,
         delta_bits: [0, 0, 0],
@@ -610,7 +609,7 @@ static S_BC6H_MODE_INFO: [Bc6hModeInfo; 32] = [
 ];
 
 fn unquantize(_value: u16, _signed: bool, _endpoint_bits: usize) -> u16 {
-    let max_value = 1 << (_endpoint_bits - 1);
+    let max_value: u16 = 1 << (_endpoint_bits - 1);
 
     if _signed {
         if _endpoint_bits >= 16 {
@@ -664,19 +663,13 @@ fn sign_extend(_value: u16, _num_bits: usize) -> u16 {
 
 #[inline]
 fn f32_to_u8(f: f32) -> u8 {
-    let c = f * 255.0;
-    if c < 0.0 {
-        0
-    } else if c > 255.0 {
-        255
-    } else {
-        c as u8
-    }
+    (f * 255.0).clamp(0.0, 255.0) as u8
 }
 
 #[inline]
 fn f16_to_u8(h: u16) -> u8 {
-    f32_to_u8(f16::from_bits(h).to_f32())
+    f32_to_u8(crate::f16::fp16_ieee_to_fp32_value(h))
+    //f32_to_u8(f16::from_bits(h).to_f32())
 }
 
 fn decode_bc6_block(_src: &[u8], _dst: &mut [u32], _signed: bool) {
@@ -693,7 +686,7 @@ fn decode_bc6_block(_src: &[u8], _dst: &mut [u32], _signed: bool) {
         mode |= (bit.read(3) << 2) as u8;
 
         if 0 == S_BC6H_MODE_INFO[mode as usize].endpoint_bits {
-            _dst[0..64].fill(0);
+            _dst[0..16].fill(0);
             return;
         }
 
@@ -1011,13 +1004,13 @@ fn decode_bc6_block(_src: &[u8], _dst: &mut [u32], _signed: bool) {
     let num_subsets: usize = if mi.partition_bits != 0 {2} else {1};
 
     (1..num_subsets * 2).for_each(|ii| {
-        if _signed || mi.transformed != 0 {
+        if _signed || mi.transformed {
             ep_r[ii] = sign_extend(ep_r[ii], mi.delta_bits[0]);
             ep_g[ii] = sign_extend(ep_g[ii], mi.delta_bits[1]);
             ep_b[ii] = sign_extend(ep_b[ii], mi.delta_bits[2]);
         }
 
-        if mi.transformed != 0 {
+        if mi.transformed {
             let mask = (1 << mi.endpoint_bits) - 1;
 
             ep_r[ii] = ep_r[ii].overflowing_add(ep_r[0]).0 & mask;
