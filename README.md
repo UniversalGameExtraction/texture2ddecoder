@@ -14,7 +14,7 @@ A wip pure Rust (no-std) texture decoder based on [AssetStudio's Texture2DDecode
 ## Format Progress
 - [x] ATC-RGB
 - [x] ATC-RGBA
-- [ ] ASTC (broken)
+- [x] ASTC
 - [x] BC1
 - [x] BC3
 - [x] BC4
