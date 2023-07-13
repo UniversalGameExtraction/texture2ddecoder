@@ -18,6 +18,10 @@ license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/UnityRustEXtractor/texture2ddecoder"
 
+[features]
+default = ["alloc"]
+alloc = []
+
 [dev-dependencies]
 ddsfile = "^0.5.1"
 image = "^0.24"

@@ -2,6 +2,12 @@
 
 A wip pure Rust (no-std) texture decoder based on [AssetStudio's Texture2DDecoder](https://github.com/Perfare/AssetStudio/tree/master/Texture2DDecoder).
 
+## Features
+
+### alloc (optional, default)
+
+- ~35% faster pvrtc decoding
+
 ## Roadmap
 
 - implementing & testing all formats
@@ -12,6 +18,7 @@ A wip pure Rust (no-std) texture decoder based on [AssetStudio's Texture2DDecode
 - adding additional formats
 
 ## Format Progress
+
 - [x] ATC-RGB
 - [x] ATC-RGBA
 - [x] ASTC
@@ -36,4 +43,3 @@ A wip pure Rust (no-std) texture decoder based on [AssetStudio's Texture2DDecode
   - [ ] ETC2-A8
 
 ## License
-

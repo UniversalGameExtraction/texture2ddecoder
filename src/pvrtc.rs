@@ -1,6 +1,3 @@
-extern crate alloc;
-use alloc::vec::Vec;
-
 use crate::color::{color, copy_block_buffer};
 
 #[derive(Clone, Copy)]
@@ -370,7 +367,11 @@ fn applicate_color_2bpp(_data: &[u8], info: &mut [PVRTCTexelInfo; 9], buf: &mut 
     }
 }
 
+#[cfg(feature = "alloc")]
 pub fn decode_pvrtc(data: &[u8], w: usize, h: usize, image: &mut [u32], is2bpp: bool) {
+    extern crate alloc;
+    use alloc::vec::Vec;
+
     let bw: usize = if is2bpp { 8 } else { 4 };
     let num_blocks_x: usize = if is2bpp { (w + 7) / 8 } else { (w + 3) / 4 };
     let num_blocks_y: usize = (h + 3) / 4;
@@ -428,6 +429,69 @@ pub fn decode_pvrtc(data: &[u8], w: usize, h: usize, image: &mut [u32], is2bpp: 
                     c += 1;
                 }
             }
+
+            applicate_color_func(
+                &data[morton_index(bx, by, min_num_blocks) * 8..],
+                &mut local_info,
+                &mut buffer,
+            );
+            copy_block_buffer(bx, by, w, h, bw, 4, &buffer, image);
+        }
+    }
+}
+
+#[cfg(not(feature = "alloc"))]
+pub fn decode_pvrtc(data: &[u8], w: usize, h: usize, image: &mut [u32], is2bpp: bool) {
+    let bw: usize = if is2bpp { 8 } else { 4 };
+    let num_blocks_x: usize = if is2bpp { (w + 7) / 8 } else { (w + 3) / 4 };
+    let num_blocks_y: usize = (h + 3) / 4;
+    let num_blocks: usize = num_blocks_x * num_blocks_y;
+    let min_num_blocks: usize = if num_blocks_x <= num_blocks_y {
+        num_blocks_x
+    } else {
+        num_blocks_y
+    };
+
+    if ((num_blocks_x & (num_blocks_x - 1)) != 0) || ((num_blocks_y & (num_blocks_y - 1)) != 0) {
+        panic!("the number of blocks of each side must be a power of 2");
+    }
+
+    let get_texel_weights_func = if is2bpp {
+        get_texel_weights_2bpp
+    } else {
+        get_texel_weights_4bpp
+    };
+    let applicate_color_func = if is2bpp {
+        applicate_color_2bpp
+    } else {
+        applicate_color_4bpp
+    };
+
+    let mut buffer: [u32; 32] = [0; 32];
+    let mut local_info: [PVRTCTexelInfo; 9] = [PVRTCTexelInfo::default(); 9];
+    let mut pos_x: [usize; 3] = [0; 3];
+    let mut pos_y: [usize; 3] = [0; 3];
+
+    for by in 0..num_blocks_y {
+        pos_y[0] = if by == 0 { num_blocks_y - 1 } else { by - 1 };
+        pos_y[1] = by;
+        pos_y[2] = if by == num_blocks_y - 1 { 0 } else { by + 1 };
+
+        for bx in 0..num_blocks_x {
+            pos_x[0] = if bx == 0 { num_blocks_x - 1 } else { bx - 1 };
+            pos_x[1] = bx;
+            pos_x[2] = if bx == num_blocks_x - 1 { 0 } else { bx + 1 };
+
+            let mut c: usize = 0;
+            (0..3).for_each(|cy| {
+                (0..3).for_each(|cx| {
+                    let texel_info_offset: usize =
+                        morton_index(pos_x[cx], pos_y[cy], min_num_blocks) * 8;
+                    get_texel_colors(&data[texel_info_offset..], &mut local_info[c]);
+                    get_texel_weights_func(&data[texel_info_offset..], &mut local_info[c]);
+                    c += 1;
+                });
+            });
 
             applicate_color_func(
                 &data[morton_index(bx, by, min_num_blocks) * 8..],

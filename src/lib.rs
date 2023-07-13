@@ -19,6 +19,7 @@ pub use etc::{
     decode_etc2a1, decode_etc2a8,
 };
 pub use pvrtc::decode_pvrtc;
+
 // generate helper function for identical function signatures
 pub fn decode_astc_4_4(data: &[u8], m_width: usize, m_height: usize, image: &mut [u32]) {
     decode_astc(data, m_width, m_height, 4, 4, image);
