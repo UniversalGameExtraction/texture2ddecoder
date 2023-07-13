@@ -1,4 +1,5 @@
 #![allow(clippy::too_many_arguments)]
+use crate::bitreader::{getbits, getbits64};
 use crate::color::{color, copy_block_buffer};
 use crate::f16::fp16_ieee_to_fp32_value;
 
@@ -57,34 +58,6 @@ fn bit_reverse_u64(d: u64, bits: usize) -> u64 {
         | (BIT_REVERSE_TABLE[d >> 48 & 0xff] as u64) << 8
         | (BIT_REVERSE_TABLE[d >> 56 & 0xff] as u64);
     ret >> (64 - bits as u64)
-}
-
-#[inline]
-fn getbits(buf: &[u8], bit: i32, len: usize) -> i32 {
-    let offset = (bit / 8) as usize;
-    i32::from_le_bytes(buf[offset..offset + 4].try_into().unwrap()) >> (bit % 8) & ((1 << len) - 1)
-}
-
-#[inline]
-fn getbits64(buf: &[u8], bit: isize, len: usize) -> u64 {
-    let mask: u64 = if len == 64 {
-        0xffffffffffffffff
-    } else {
-        (1 << len) - 1
-    };
-    if len == 0 {
-        0
-    } else if bit >= 64 {
-        u64::from_le_bytes(buf[8..16].try_into().unwrap()) >> (bit - 64) & mask
-    } else if bit <= 0 {
-        u64::from_le_bytes(buf[..8].try_into().unwrap()) << 0u64.overflowing_sub(bit as u64).0
-            & mask
-    } else if bit as usize + len <= 64 {
-        u64::from_le_bytes(buf[..8].try_into().unwrap()) >> bit & mask
-    } else {
-        u64::from_le_bytes(buf[..8].try_into().unwrap()) >> bit
-            | u64::from_le_bytes(buf[8..16].try_into().unwrap()) << (64 - bit) & mask
-    }
 }
 
 #[inline]
@@ -540,7 +513,7 @@ fn decode_intseq(
                 p -= b as isize;
                 while n < count {
                     out[n] = IntSeqData {
-                        bits: bit_reverse_u8(getbits(buf, p as i32, b) as u8, b as u8) as u64,
+                        bits: bit_reverse_u8(getbits(buf, p as usize, b) as u8, b as u8) as u64,
                         nonbits: 0,
                     };
                     n += 1;
@@ -549,8 +522,8 @@ fn decode_intseq(
             } else {
                 while n < count {
                     out[n] = IntSeqData {
-                        nonbits: getbits(buf, p as i32, b) as u64,
-                        bits: 0,
+                        bits: getbits(buf, p as usize, b) as u64,
+                        nonbits: 0,
                     };
                     n += 1;
                     p += b as isize;
@@ -653,18 +626,18 @@ fn decode_block_params(buf: &[u8], block_data: &mut BlockData) {
             match block_data.part_num {
                 2 => {
                     block_data.cem[0] |= (buf[3] >> 3 & 3) as usize;
-                    block_data.cem[1] |= (getbits(buf, 126 - weight_bits, 2)) as usize;
+                    block_data.cem[1] |= (getbits(buf, 126 - weight_bits as usize, 2)) as usize;
                 }
                 3 => {
                     block_data.cem[0] |= (buf[3] >> 4 & 1) as usize;
-                    block_data.cem[0] |= (getbits(buf, 122 - weight_bits, 2) & 2) as usize;
-                    block_data.cem[1] |= (getbits(buf, 124 - weight_bits, 2)) as usize;
-                    block_data.cem[2] |= (getbits(buf, 126 - weight_bits, 2)) as usize;
+                    block_data.cem[0] |= (getbits(buf, 122 - weight_bits as usize, 2) & 2) as usize;
+                    block_data.cem[1] |= (getbits(buf, 124 - weight_bits as usize, 2)) as usize;
+                    block_data.cem[2] |= (getbits(buf, 126 - weight_bits as usize, 2)) as usize;
                 }
                 4 => {
                     (0..4).for_each(|i| {
                         block_data.cem[i] |=
-                            (getbits(buf, 120 + i as i32 * 2 - weight_bits, 2)) as usize;
+                            (getbits(buf, 120 + i * 2 - weight_bits as usize, 2)) as usize;
                     });
                 }
                 _ => {}
@@ -678,9 +651,9 @@ fn decode_block_params(buf: &[u8], block_data: &mut BlockData) {
         block_data.plane_selector = getbits(
             buf,
             if cem_base != 0 {
-                130 - weight_bits - (block_data.part_num as i32) * 3
+                130 - weight_bits as usize - block_data.part_num * 3
             } else {
-                126 - weight_bits
+                126 - weight_bits as usize
             },
             2,
         ) as usize;
