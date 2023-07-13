@@ -19,7 +19,7 @@ mod tests {
 
     // test functions
     #[test]
-    fn test_f16(){
+    fn test_f16() {
         for i in 0..=65535 {
             let f16 = half::f16::from_bits(i).to_f32();
             let f32 = texture2ddecoder::f16::fp16_ieee_to_fp32_value(i);
@@ -27,8 +27,7 @@ mod tests {
                 assert!(f32.is_nan());
             } else if f16.is_infinite() {
                 assert!(f32.is_infinite());
-            }
-            else {
+            } else {
                 assert_eq!(f16, f32);
             }
         }
@@ -188,8 +187,8 @@ mod tests {
         fn from_file(fp: &str) -> Texture {
             let extension = Path::new(fp).extension().unwrap().to_str().unwrap();
             match extension {
-                "ktx2" => Texture::from_ktx2_file(fp),
-                "dds" => Texture::from_dds_file(fp),
+                "ktx2" | "KTX2"=> Texture::from_ktx2_file(fp),
+                "dds" | "DDS" => Texture::from_dds_file(fp),
                 _ => panic!("Unsupported file format"),
             }
         }
