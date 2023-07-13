@@ -91,17 +91,17 @@ pub fn copy_block_buffer(
     image: &mut [u32],
 ) {
     let x: usize = bw * bx;
-    let xl: usize = if bw * (bx + 1) > w { w - bw * bx } else { bw };
+    let copy_width: usize = if bw * (bx + 1) > w { w - bw * bx } else { bw };
 
+    let y_0 = by * bh;
+    let copy_height: usize = if bh * (by + 1) > h { h - y_0 } else { bh };
     let mut buffer_offset = 0;
-    for y in by * bh..h {
+
+    for y in y_0..y_0 + copy_height {
         let image_offset = y * w + x;
-        image[image_offset..image_offset + xl]
-            .copy_from_slice(&buffer[buffer_offset..buffer_offset + xl]);
+        image[image_offset..image_offset + copy_width]
+            .copy_from_slice(&buffer[buffer_offset..buffer_offset + copy_width]);
 
         buffer_offset += bw;
-        if buffer_offset >= buffer.len() {
-            break;
-        }
     }
 }
