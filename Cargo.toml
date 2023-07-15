@@ -1,6 +1,6 @@
 [package]
 name = "texture2ddecoder"
-version = "0.0.2"
+version = "0.0.3"
 edition = "2021"
 include = [
     "src/*",
@@ -17,6 +17,9 @@ homepage = "https://crates.io/crates/texture2ddecoder"
 license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/UnityRustEXtractor/texture2ddecoder"
+
+[dependencies]
+paste = "^1.0.12"
 
 [features]
 default = ["alloc"]
