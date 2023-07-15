@@ -1,5 +1,7 @@
 #![allow(non_snake_case)]
 
+type DecodeFunction = fn(&[u8], usize, usize, &mut [u32]) -> Result<(), &'static str>;
+
 #[cfg(test)]
 mod tests {
     // benchmarking
@@ -11,6 +13,8 @@ mod tests {
     };
     // decoder function import
     use texture2ddecoder::*;
+
+    use crate::DecodeFunction;
     // image saving
     extern crate image;
     // texture file decoder
@@ -94,7 +98,7 @@ mod tests {
 
     #[test]
     fn test_BC6H() {
-        test_format("BC6H", "ktx2", decode_bc6)
+        test_format("BC6H", "ktx2", decode_bc6_unsigned)
     }
 
     #[test]
@@ -197,7 +201,7 @@ mod tests {
             Texture::new(dds.header.width, dds.header.height, dds.data)
         }
 
-        fn _decode(&self, decode_func: fn(&[u8], usize, usize, &mut [u32])) -> Vec<u32> {
+        fn _decode(&self, decode_func: DecodeFunction) -> Vec<u32> {
             let mut image: Vec<u32> = vec![0; (self.width * self.height) as usize];
             let start = Instant::now();
             decode_func(
@@ -205,12 +209,13 @@ mod tests {
                 self.width as usize,
                 self.height as usize,
                 &mut image,
-            );
+            )
+            .unwrap();
             let duration = start.elapsed();
             println!("Time elapsed in decoding is: {:?}", duration);
             image
         }
-        fn save_as_image(&self, path: &str, decode_func: fn(&[u8], usize, usize, &mut [u32])) {
+        fn save_as_image(&self, path: &str, decode_func: DecodeFunction) {
             let image = self._decode(decode_func);
             let image_buf = image
                 .iter()
@@ -246,11 +251,7 @@ mod tests {
         d.to_str().unwrap().to_string()
     }
 
-    fn test_format(
-        name: &str,
-        sample_extension: &str,
-        decode_func: fn(&[u8], usize, usize, &mut [u32]),
-    ) {
+    fn test_format(name: &str, sample_extension: &str, decode_func: DecodeFunction) {
         println!("Testing {}", name);
         let src_fp = get_texture_fp(&format!("{}.{}", name, sample_extension));
         let dst_fp = get_image_fp(&format!("{}.png", name));

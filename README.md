@@ -28,9 +28,9 @@ A wip pure Rust (no-std) texture decoder based on [AssetStudio's Texture2DDecode
 - [x] BC5
 - [x] BC6
 - [x] BC7
-- [ ] EAC-R (probably fine, needs better test)
-- [ ] EAC-RG (probably fine, needs better test)
-- [x] ETC1 (works, but missing test)
+- [x] EAC-R
+- [x] EAC-RG
+- [x] ETC1
 - [x] ETC2
 - [x] ETC2-A1
 - [x] ETC2-A8

@@ -1,4 +1,5 @@
 use crate::color::{color, copy_block_buffer};
+use core::result::Result;
 
 #[derive(Clone, Copy)]
 struct PVRTCTexelColor {
@@ -368,13 +369,23 @@ fn applicate_color_2bpp(_data: &[u8], info: &mut [PVRTCTexelInfo; 9], buf: &mut 
 }
 
 #[cfg(feature = "alloc")]
-pub fn decode_pvrtc(data: &[u8], w: usize, h: usize, image: &mut [u32], is2bpp: bool) {
+pub fn decode_pvrtc(
+    data: &[u8],
+    width: usize,
+    height: usize,
+    image: &mut [u32],
+    is2bpp: bool,
+) -> Result<(), &'static str> {
     extern crate alloc;
     use alloc::vec::Vec;
 
-    let bw: usize = if is2bpp { 8 } else { 4 };
-    let num_blocks_x: usize = if is2bpp { (w + 7) / 8 } else { (w + 3) / 4 };
-    let num_blocks_y: usize = (h + 3) / 4;
+    let block_width: usize = if is2bpp { 8 } else { 4 };
+    let num_blocks_x: usize = if is2bpp {
+        (width + 7) / 8
+    } else {
+        (width + 3) / 4
+    };
+    let num_blocks_y: usize = (height + 3) / 4;
     let num_blocks: usize = num_blocks_x * num_blocks_y;
     let min_num_blocks: usize = if num_blocks_x <= num_blocks_y {
         num_blocks_x
@@ -382,8 +393,14 @@ pub fn decode_pvrtc(data: &[u8], w: usize, h: usize, image: &mut [u32], is2bpp: 
         num_blocks_y
     };
 
+    if data.len() < num_blocks * block_width {
+        return Err("The data buffer is too small!");
+    }
+    if image.len() < width * height {
+        return Err("The image buffer is too small!");
+    }
     if ((num_blocks_x & (num_blocks_x - 1)) != 0) || ((num_blocks_y & (num_blocks_y - 1)) != 0) {
-        panic!("the number of blocks of each side must be a power of 2");
+        return Err("The number of blocks of each side must be a power of 2!");
     }
 
     let mut texel_info: Vec<PVRTCTexelInfo> = Vec::with_capacity(num_blocks);
@@ -435,13 +452,20 @@ pub fn decode_pvrtc(data: &[u8], w: usize, h: usize, image: &mut [u32], is2bpp: 
                 &mut local_info,
                 &mut buffer,
             );
-            copy_block_buffer(bx, by, w, h, bw, 4, &buffer, image);
+            copy_block_buffer(bx, by, width, height, block_width, 4, &buffer, image);
         }
     }
+    Ok(())
 }
 
 #[cfg(not(feature = "alloc"))]
-pub fn decode_pvrtc(data: &[u8], w: usize, h: usize, image: &mut [u32], is2bpp: bool) {
+pub fn decode_pvrtc(
+    data: &[u8],
+    w: usize,
+    h: usize,
+    image: &mut [u32],
+    is2bpp: bool,
+) -> Result<(), &'static str> {
     let bw: usize = if is2bpp { 8 } else { 4 };
     let num_blocks_x: usize = if is2bpp { (w + 7) / 8 } else { (w + 3) / 4 };
     let num_blocks_y: usize = (h + 3) / 4;
@@ -452,8 +476,14 @@ pub fn decode_pvrtc(data: &[u8], w: usize, h: usize, image: &mut [u32], is2bpp: 
         num_blocks_y
     };
 
+    if data.len() < num_blocks * block_width {
+        return Err("The data buffer is too small!");
+    }
+    if image.len() < width * height {
+        return Err("The image buffer is too small!");
+    }
     if ((num_blocks_x & (num_blocks_x - 1)) != 0) || ((num_blocks_y & (num_blocks_y - 1)) != 0) {
-        panic!("the number of blocks of each side must be a power of 2");
+        return Err("The number of blocks of each side must be a power of 2!");
     }
 
     let get_texel_weights_func = if is2bpp {
@@ -501,4 +531,21 @@ pub fn decode_pvrtc(data: &[u8], w: usize, h: usize, image: &mut [u32], is2bpp: 
             copy_block_buffer(bx, by, w, h, bw, 4, &buffer, image);
         }
     }
+}
+
+pub fn decode_pvrtc_2bpp(
+    data: &[u8],
+    m_width: usize,
+    m_height: usize,
+    image: &mut [u32],
+) -> Result<(), &'static str> {
+    decode_pvrtc(data, m_width, m_height, image, true)
+}
+pub fn decode_pvrtc_4bpp(
+    data: &[u8],
+    m_width: usize,
+    m_height: usize,
+    image: &mut [u32],
+) -> Result<(), &'static str> {
+    decode_pvrtc(data, m_width, m_height, image, false)
 }

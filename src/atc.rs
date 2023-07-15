@@ -1,7 +1,9 @@
 #![allow(clippy::identity_op)]
-use crate::bcn::decode_bc3_alpha;
-use crate::color::{color, copy_block_buffer};
+use crate::bcn::bc3::decode_bc3_alpha;
+use crate::color::color;
+use crate::macros::macros::block_decoder;
 use core::cmp::max;
+use core::result::Result;
 
 #[inline]
 const fn expand_quantized(v: u8, bits: u8) -> u8 {
@@ -9,10 +11,11 @@ const fn expand_quantized(v: u8, bits: u8) -> u8 {
     v | (v >> bits)
 }
 
-fn decode_atc_block(_src: &[u8], _dst: &mut [u32]) {
+#[inline]
+pub fn decode_atc_rgb4_block(data: &[u8], outbuf: &mut [u32]) {
     let mut colors: [u8; 16] = [0; 16];
-    let c0: u32 = u16::from_le_bytes([_src[0], _src[1]]) as u32;
-    let c1: u32 = u16::from_le_bytes([_src[2], _src[3]]) as u32;
+    let c0: u32 = u16::from_le_bytes([data[0], data[1]]) as u32;
+    let c1: u32 = u16::from_le_bytes([data[2], data[3]]) as u32;
 
     if 0 == (c0 & 0x8000) {
         colors[0] = expand_quantized(((c0 >> 0) & 0x1f) as u8, 5);
@@ -24,7 +27,7 @@ fn decode_atc_block(_src: &[u8], _dst: &mut [u32]) {
         colors[14] = expand_quantized(((c1 >> 11) & 0x1f) as u8, 5);
 
         #[inline]
-        fn interop_colors(c0: u8, c1: u8) -> u8 {
+        const fn interop_colors(c0: u8, c1: u8) -> u8 {
             ((5 * c0 as u16 + 3 * c1 as u16) / 8) as u8
         }
         // colors[4] = (5 * colors[0] + 3 * colors[12]) / 8;
@@ -71,61 +74,17 @@ fn decode_atc_block(_src: &[u8], _dst: &mut [u32]) {
 
     let mut next = 8 * 4;
     (0..16).for_each(|i| {
-        let idx = (((_src[next >> 3] >> (next & 7)) & 3) * 4) as usize;
-        _dst[i] = color(colors[idx + 2], colors[idx + 1], colors[idx + 0], 255);
+        let idx = (((data[next >> 3] >> (next & 7)) & 3) * 4) as usize;
+        outbuf[i] = color(colors[idx + 2], colors[idx + 1], colors[idx + 0], 255);
         next += 2;
     });
 }
 
-pub fn decode_atc_rgb4(data: &[u8], m_width: usize, m_height: usize, image: &mut [u32]) {
-    let m_block_width: usize = 4;
-    let m_block_height: usize = 4;
-    let m_blocks_x: usize = (m_width + m_block_width - 1) / m_block_width;
-    let m_blocks_y: usize = (m_height + m_block_height - 1) / m_block_height;
-    let mut buffer: [u32; 16] = [0; 16];
-
-    let mut data_offset = 0;
-    (0..m_blocks_y).for_each(|by| {
-        (0..m_blocks_x).for_each(|bx| {
-            decode_atc_block(&data[data_offset..], &mut buffer);
-            copy_block_buffer(
-                bx,
-                by,
-                m_width,
-                m_height,
-                m_block_width,
-                m_block_height,
-                &buffer,
-                image,
-            );
-            data_offset += 8;
-        });
-    });
+#[inline]
+pub fn decode_atc_rgba8_block(data: &[u8], outbuf: &mut [u32]) {
+    decode_atc_rgb4_block(&data[8..], outbuf);
+    decode_bc3_alpha(data, outbuf, 3);
 }
 
-pub fn decode_atc_rgba8(data: &[u8], m_width: usize, m_height: usize, image: &mut [u32]) {
-    let m_block_width: usize = 4;
-    let m_block_height: usize = 4;
-    let m_blocks_x: usize = (m_width + m_block_width - 1) / m_block_width;
-    let m_blocks_y: usize = (m_height + m_block_height - 1) / m_block_height;
-    let mut buffer: [u32; 16] = [0; 16];
-
-    let mut data_offset = 0;
-    (0..m_blocks_y).for_each(|by| {
-        (0..m_blocks_x).for_each(|bx| {
-            decode_atc_block(&data[data_offset + 8..], &mut buffer);
-            decode_bc3_alpha(&data[data_offset..], &mut buffer, 3);
-            copy_block_buffer(
-                bx,
-                by,
-                m_width,
-                m_height,
-                m_block_width,
-                m_block_height,
-                &buffer,
-                image,
-            );
-            data_offset += 16;
-        });
-    });
-}
+block_decoder!("atc_rgb4", 4, 4, 8, decode_atc_rgb4_block);
+block_decoder!("atc_rgba8", 4, 4, 16, decode_atc_rgba8_block);

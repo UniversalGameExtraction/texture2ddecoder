@@ -2,6 +2,7 @@
 use crate::bitreader::{getbits, getbits64};
 use crate::color::{color, copy_block_buffer};
 use crate::f16::fp16_ieee_to_fp32_value;
+use core::result::Result;
 
 #[inline]
 fn floor(x: f32) -> f32 {
@@ -1740,7 +1741,8 @@ fn applicate_color(data: &mut BlockData, outbuf: &mut [u32]) {
     }
 }
 
-fn decode_block(buf: &[u8], bw: usize, bh: usize, outbuf: &mut [u32]) {
+#[inline]
+pub fn decode_block(buf: &[u8], block_width: usize, block_height: usize, outbuf: &mut [u32]) {
     if buf[0] == 0xfc && (buf[1] & 1) == 1 {
         let c: u32 = if buf[1] & 2 != 0 {
             color(
@@ -1752,14 +1754,14 @@ fn decode_block(buf: &[u8], bw: usize, bh: usize, outbuf: &mut [u32]) {
         } else {
             color(buf[9], buf[11], buf[13], buf[15])
         };
-        outbuf[0..(bw * bh)].fill(c);
+        outbuf[0..(block_width * block_height)].fill(c);
     } else if ((buf[0] & 0xc3) == 0xc0 && (buf[1] & 1) == 1) || (buf[0] & 0xf) == 0 {
         let c: u32 = color(255, 0, 255, 255);
-        outbuf[0..(bw * bh)].fill(c);
+        outbuf[0..(block_width * block_height)].fill(c);
     } else {
         let mut block_data = BlockData::default();
-        block_data.bw = bw;
-        block_data.bh = bh;
+        block_data.bw = block_width;
+        block_data.bh = block_height;
         decode_block_params(buf, &mut block_data);
         decode_endpoints(buf, &mut block_data);
         decode_weights(buf, &mut block_data);
@@ -1770,17 +1772,79 @@ fn decode_block(buf: &[u8], bw: usize, bh: usize, outbuf: &mut [u32]) {
     }
 }
 
-pub fn decode_astc(data: &[u8], w: usize, h: usize, bw: usize, bh: usize, image: &mut [u32]) {
-    let num_blocks_x = (w + bw - 1) / bw;
-    let num_blocks_y = (h + bh - 1) / bh;
+pub fn decode_astc(
+    data: &[u8],
+    width: usize,
+    height: usize,
+    block_width: usize,
+    block_height: usize,
+    image: &mut [u32],
+) -> Result<(), &'static str> {
+    let num_blocks_x = (width + block_width - 1) / block_width;
+    let num_blocks_y = (height + block_height - 1) / block_height;
     let mut buffer: [u32; 144] = [0; 144];
     let mut data_offset = 0;
 
+    if data.len() < num_blocks_x * num_blocks_y * 16 {
+        return Err("Not enough data to decode image!");
+    }
+
+    let expected_image_size = width * height;
+    if image.len() < expected_image_size {
+        return Err("Image buffer is too small!");
+    }
+
+    if block_width * block_height > 144 {
+        return Err("Block size is too big!");
+    }
+
     (0..num_blocks_y).for_each(|by| {
         (0..num_blocks_x).for_each(|bx| {
-            decode_block(&data[data_offset..], bw, bh, &mut buffer);
-            copy_block_buffer(bx, by, w, h, bw, bh, &buffer, image);
+            decode_block(&data[data_offset..], block_width, block_height, &mut buffer);
+            copy_block_buffer(
+                bx,
+                by,
+                width,
+                height,
+                block_width,
+                block_height,
+                &buffer,
+                image,
+            );
             data_offset += 16;
         });
     });
+
+    Ok(())
 }
+
+// generate some sized astc block decode functions
+macro_rules! astc_decode_func {
+    ($x: expr, $y: expr) => {
+        paste::item! {
+            pub fn [<decode_astc_ $x _ $y>](
+                data: &[u8],
+                m_width: usize,
+                m_height: usize,
+                image: &mut [u32],
+            ) -> Result<(), &'static str> {
+                decode_astc(data, m_width, m_height, $x, $y, image)
+            }
+        }
+    };
+}
+
+astc_decode_func!(4, 4);
+astc_decode_func!(5, 4);
+astc_decode_func!(5, 5);
+astc_decode_func!(6, 5);
+astc_decode_func!(6, 6);
+astc_decode_func!(8, 5);
+astc_decode_func!(8, 6);
+astc_decode_func!(8, 8);
+astc_decode_func!(10, 5);
+astc_decode_func!(10, 6);
+astc_decode_func!(10, 8);
+astc_decode_func!(10, 10);
+astc_decode_func!(12, 10);
+astc_decode_func!(12, 12);
