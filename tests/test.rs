@@ -113,17 +113,17 @@ mod tests {
 
     #[test]
     fn test_ETC2_RGB() {
-        test_format("ETC2_RGB", "ktx2", decode_etc2)
+        test_format("ETC2_RGB", "ktx2", decode_etc2_rgb)
     }
 
     #[test]
     fn test_ETC2_RGBA() {
-        test_format("ETC2_RGBA", "ktx2", decode_etc2a8)
+        test_format("ETC2_RGBA", "ktx2", decode_etc2_rgba8)
     }
 
     #[test]
     fn test_ETC2_RGB_A1() {
-        test_format("ETC2_RGB_A1", "ktx2", decode_etc2a1)
+        test_format("ETC2_RGB_A1", "ktx2", decode_etc2_rgba1)
     }
 
     #[test]
