@@ -44,16 +44,19 @@ pub struct BitReader<'a> {
 }
 
 impl BitReader<'_> {
-    pub fn new(data: &[u8], bit_pos: usize) -> BitReader {
+    #[inline]
+    pub const fn new(data: &[u8], bit_pos: usize) -> BitReader {
         BitReader { data, bit_pos }
     }
 
+    #[inline]
     pub fn read(&mut self, num_bits: usize) -> u16 {
         let ret = self.peek(0, num_bits);
         self.bit_pos += num_bits;
         ret
     }
 
+    #[inline]
     pub fn peek(&self, offset: usize, num_bits: usize) -> u16 {
         let bit_pos = self.bit_pos + offset;
         let shift = bit_pos & 7;
