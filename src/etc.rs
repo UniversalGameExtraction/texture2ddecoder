@@ -1,4 +1,4 @@
-use crate::macros::macros::block_decoder;
+use crate::macros::block_decoder;
 
 pub(crate) mod consts;
 pub(crate) mod eac;

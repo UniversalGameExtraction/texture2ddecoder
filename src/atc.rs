@@ -1,7 +1,7 @@
 #![allow(clippy::identity_op)]
 use crate::bcn::bc3::decode_bc3_alpha;
 use crate::color::color;
-use crate::macros::macros::block_decoder;
+use crate::macros::block_decoder;
 use core::cmp::max;
 use core::result::Result;
 

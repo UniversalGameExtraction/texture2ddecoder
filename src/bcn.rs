@@ -1,4 +1,4 @@
-use crate::macros::macros::block_decoder;
+use crate::macros::block_decoder;
 
 pub(crate) mod bc1;
 pub(crate) mod bc3;
