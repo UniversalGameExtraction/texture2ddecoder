@@ -71,27 +71,6 @@
 //!   - [`decode_pvrtc_2bpp()`]
 //!   - [`decode_pvrtc_4bpp()`]
 //!
-//!
-//! ## Block & Raw Block Sizes
-//!
-//!
-//! ## License & Credits
-//!
-//! This crate itself is dual-licensed under MIT + Apache2.
-//!
-//! The texture compression codecs themselves have following licenses:
-//! | Codec          | License       | Source                                                                                                                                |
-//! |----------------|---------------|---------------------------------------------------------------------------------------------------------------------------------------|
-//! | ATC            | MIT           | [Perfare/AssetStudio - Texture2DDecoderNative/atc.cpp](https://github.com/Perfare/AssetStudio/tree/master/atc.cpp)                    |
-//! | ASTC           | MIT\*         | [Ishotihadus/mikunyan - ext/decoders/native/etc.c](https://github.com/Ishotihadus/mikunyan/tree/master/ext/decoders/native/etc.c)     |
-//! | BCn            | MIT\*         | [Ishotihadus/mikunyan - ext/decoders/native/etc.c](https://github.com/Ishotihadus/mikunyan/tree/master/ext/decoders/native/etc.c)     |
-//! | ETC            | MIT\*         | [Ishotihadus/mikunyan - ext/decoders/native/etc.c](https://github.com/Ishotihadus/mikunyan/tree/master/ext/decoders/native/etc.c)     |
-//! | f16            | MIT           | [Maratyszcza/FP16](https://github.com/Maratyszcza/FP16)                                                                               |
-//! | PVRTC          | MIT\*         | [Ishotihadus/mikunyan - ext/decoders/native/pvrtc.c](https://github.com/Ishotihadus/mikunyan/tree/master/ext/decoders/native/pvrtc.c) |
-//! | Crunch         | PUBLIC DOMAIN | [BinomialLLC/crunch](https://github.com/BinomialLLC/crunch)                                                                           |
-//! | Crunch (Unity) | ZLIB          | [Unity-Technologies/crunch](https://github.com/Unity-Technologies/crunch)                                                             |
-//! \* in doubt if these are the original source and have not just taken/adopted the code from somewhere else
-//!
 #![no_std]
 
 mod bitreader;
