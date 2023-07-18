@@ -55,7 +55,7 @@ pub fn decode_eacr_block(data: &[u8], outbuf: &mut [u32]) {
 }
 
 #[inline]
-pub fn decode_earc_signed_block(data: &[u8], outbuf: &mut [u32]) {
+pub fn decode_eacr_signed_block(data: &[u8], outbuf: &mut [u32]) {
     outbuf[0..16].fill(color(0, 0, 0, 255));
     decode_eac_signed_block(data, 2, outbuf);
 }
