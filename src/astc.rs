@@ -1742,7 +1742,7 @@ fn applicate_color(data: &mut BlockData, outbuf: &mut [u32]) {
 }
 
 #[inline]
-pub fn decode_block(buf: &[u8], block_width: usize, block_height: usize, outbuf: &mut [u32]) {
+pub fn decode_astc_block(buf: &[u8], block_width: usize, block_height: usize, outbuf: &mut [u32]) {
     if buf[0] == 0xfc && (buf[1] & 1) == 1 {
         let c: u32 = if buf[1] & 2 != 0 {
             color(
@@ -1800,7 +1800,7 @@ pub fn decode_astc(
 
     (0..num_blocks_y).for_each(|by| {
         (0..num_blocks_x).for_each(|bx| {
-            decode_block(&data[data_offset..], block_width, block_height, &mut buffer);
+            decode_astc_block(&data[data_offset..], block_width, block_height, &mut buffer);
             copy_block_buffer(
                 bx,
                 by,
