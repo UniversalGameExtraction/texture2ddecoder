@@ -72,7 +72,7 @@
 //!   - [`decode_pvrtc_4bpp()`]
 //!
 #![no_std]
-
+extern crate alloc;
 mod bitreader;
 mod color;
 mod f16;
@@ -83,6 +83,7 @@ mod atc;
 mod bcn;
 mod etc;
 mod pvrtc;
+mod crunch;
 
 // import decode functions
 pub use astc::*;
@@ -90,3 +91,4 @@ pub use atc::*;
 pub use bcn::*;
 pub use etc::*;
 pub use pvrtc::*;
+pub use crunch::*;
