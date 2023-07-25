@@ -1,6 +1,6 @@
 # texture2ddecoder [![Build Status]][actions] [![Latest Version]][crates.io] [![Docs]][docs.rs] [![License_MIT]][license_mit] [![License_APACHE]][license_apache] 
 
-[Build Status]: https://img.shields.io/github/actions/workflow/status/UniversalGameExtraction/texture2ddecoder/ci.yml?branch=main
+[Build Status]: https://img.shields.io/github/actions/workflow/status/UniversalGameExtraction/texture2ddecoder/ci.yml?branch=master
 [actions]: https://github.com/UniversalGameExtraction/texture2ddecoder/actions?query=branch%3Amain
 [Latest Version]: https://img.shields.io/crates/v/texture2ddecoder.svg
 [crates.io]: https://crates.io/crates/texture2ddecoder
