@@ -9,7 +9,7 @@
 //! ## Functions
 //! Provides a decode function for each format, as well as a block decode function all formats besides PVRTC.
 //! Besides some exceptions, the signature of the decode functions is as follows:
-//! ```rust
+//! ```ignore
 //!     fn decode_format(data: &[u8], width: usize, height: usize, image: &mut [u32]) -> Result<(), &'static str>
 //!     // data: the compressed data, expected to be width * height / block_size in size
 //!     // width: the width of the image
