@@ -140,7 +140,8 @@ pub fn decode_bc7_block(data: &[u8], outbuf: &mut [u32]) {
     };
 
     if mode == 8 {
-        outbuf[0..16 * 4].fill(0);
+        outbuf[0..16].fill(0);
+        return;
     }
 
     let mi: &Bc7ModeInfo = &S_BP7_MODE_INFO[mode];
@@ -170,8 +171,8 @@ pub fn decode_bc7_block(data: &[u8], outbuf: &mut [u32]) {
     });
 
     (0..mi.num_subsets).for_each(|ii| {
-        ep_g[ii * 2] = (bit.read(mi.color_bits) << mode_pbits) as u8;
-        ep_g[ii * 2 + 1] = (bit.read(mi.color_bits) << mode_pbits) as u8;
+        ep_b[ii * 2] = (bit.read(mi.color_bits) << mode_pbits) as u8;
+        ep_b[ii * 2 + 1] = (bit.read(mi.color_bits) << mode_pbits) as u8;
     });
 
     if mi.alpha_bits > 0 {
