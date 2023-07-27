@@ -17,7 +17,7 @@ A pure Rust no-std texture decoder for the following formats:
  - [BCn - Block Compression](https://en.wikipedia.org/wiki/S3_Texture_Compression)
  - [ETC - Ericsson Texture Compression](https://en.wikipedia.org/wiki/Ericsson_Texture_Compression)
  - [PVRTC - PowerVR Texture Compression](https://en.wikipedia.org/wiki/PVRTC)
- - (WIP) [Crunch](https://github.com/BinomialLLC/crunch) & [Unity's Crunch](https://github.com/Unity-Technologies/crunch)
+ - [Crunch](https://github.com/BinomialLLC/crunch) & [Unity's Crunch](https://github.com/Unity-Technologies/crunch)
 
 ## Features
 
@@ -42,6 +42,7 @@ The exceptions are:
 - ASTC: the (block) decode function takes the block size as an additional parameter
 - BC6: there are two additional decode functions for the signed and unsigned variants
 - PVRTC: the decode function takes the block size as an additional parameter, and there are two additional decode functions for the 2bpp and 4bpp variants
+- Crunch & Unity's Crunch: The texture's dimensions and metadata are stored in the file itself, one's must parse the header with crnd_get_texture_info() from crn_texture_info struct first, then pass the metadata to the decoder as in the format. There's no block decomp. function.
 To make these excetions easier to use, there are helper functions to enable decode functions with identical arguments and returns.
 Here is a list of the formats and their corresponding functions:
 - ATC
@@ -89,7 +90,10 @@ Here is a list of the formats and their corresponding functions:
   - decode_pvrtc
   - decode_pvrtc_2bpp
   - decode_pvrtc_4bpp
-
+- Crunch
+  - [`decode_crunch()`]
+- Unity Crunch
+  - [`decode_unity_crunch()`]
 ## Roadmap
 - implementing & testing all formats
 - documentation
@@ -117,11 +121,11 @@ Here is a list of the formats and their corresponding functions:
 - [x] ETC2-A8
 - [x] PVRTCI-2bpp
 - [x] PVRTCI-4bpp
-- [ ] Crunched (not implemented)
-  - [ ] DXT1
-  - [ ] DXT5
-  - [ ] ETC1
-  - [ ] ETC2-A8
+- [x] Crunched (not implemented)
+  - [x] DXT1
+  - [x] DXT5
+  - [x] ETC1
+  - [x] ETC2-A8
 
 ## License & Credits
 
