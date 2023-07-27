@@ -166,14 +166,49 @@ mod tests {
         test_format("CRUNCH_DXT5", "crn", decode_crunch)
     }
 
-    // #[test]
-    // fn test_CRUNCH_DXT5A() {
-    //     test_format("CRUNCH_DXT5A", "crn", decode_crunch)
-    // }
-
     #[test]
     fn test_CRUNCH_DXN() {
         test_format("CRUNCH_DXN", "crn", decode_crunch)
+    }
+
+    #[test]
+    fn test_UNITYCRUNCH_DXT1() {
+        test_format("UNITYCRUNCH_DXT1", "crn", decode_unity_crunch)
+    }
+
+    #[test]
+    fn test_UNITYCRUNCH_DXT5() {
+        test_format("UNITYCRUNCH_DXT5", "crn", decode_unity_crunch)
+    }
+
+    #[test]
+    fn test_UNITYCRUNCH_DXN() {
+        test_format("UNITYCRUNCH_DXN", "crn", decode_unity_crunch)
+    }
+
+    #[test]
+    fn test_UNITYCRUNCH_ETC1() {
+        test_format("UNITYCRUNCH_ETC1", "crn", decode_unity_crunch)
+    }
+
+    #[test]
+    fn test_UNITYCRUNCH_ETC1S() {
+        test_format("UNITYCRUNCH_ETC1S", "crn", decode_unity_crunch)
+    }
+
+    #[test]
+    fn test_UNITYCRUNCH_ETC2() {
+        test_format("UNITYCRUNCH_ETC2", "crn", decode_unity_crunch)
+    }
+
+    #[test]
+    fn test_UNITYCRUNCH_ETC2A() {
+        test_format("UNITYCRUNCH_ETC2A", "crn", decode_unity_crunch)
+    }
+
+    #[test]
+    fn test_UNITYCRUNCH_ETC2AS() {
+        test_format("UNITYCRUNCH_ETC2AS", "crn", decode_unity_crunch)
     }
 
     // helper structs and functions
@@ -224,7 +259,7 @@ mod tests {
 
         fn from_crn_file(fp: &str) -> Texture{
             let crn_data = fs::read(fp).unwrap();
-            let mut tex_info = crn_decomp::crn_texture_info::default();
+            let mut tex_info = crn_texture_info::default();
             tex_info.crnd_get_texture_info(&crn_data, crn_data.len() as u32);
             Texture::new(core::cmp::max(1, tex_info.m_width), core::cmp::max(1, tex_info.m_height), crn_data)
         }

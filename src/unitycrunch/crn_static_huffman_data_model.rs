@@ -95,7 +95,7 @@ impl decoder_tables{
             let table_size: u32 = 1 << table_bits;
             if table_size > self.m_cur_lookup_size {
                 self.m_cur_lookup_size = table_size;
-                self.m_lookup = alloc::vec![0; table_size as usize];
+                self.m_lookup = alloc::vec![u32::MAX; table_size as usize];
             }
             for codesize in 1..=table_bits{
                 if num_codes[codesize as usize] == 0 { continue; }
@@ -115,6 +115,9 @@ impl decoder_tables{
                     for j in 0..fillnum{
                         let t: u32 = j + (code << fillsize);
                         if (t < (1 << table_bits)) == false{
+                            return false;
+                        }
+                        if (self.m_lookup[t as usize] == u32::MAX) == false{
                             return false;
                         }
                         self.m_lookup[t as usize] = sym_index | (codesize << 16);
@@ -160,7 +163,7 @@ impl decoder_tables{
     fn get_unshifted_max_code(&mut self, len: u32) -> Result<u32, bool>{
         if (len >= 1 && len <= cMaxExpectedCodeSize) == false{
             return Err(false);
-        }
+    }
         let k: u32 = self.m_max_codes[(len - 1) as usize];
         if k == 0 {
             return Ok(u32::MAX);

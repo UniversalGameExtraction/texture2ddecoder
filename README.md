@@ -1,15 +1,15 @@
-# texture2ddecoder-rs [![Build Status]][actions] [![Latest Version]][crates.io] [![Docs]][docs.rs] [![License_MIT]][license_mit] [![License_APACHE]][license_apache] 
+# texture2ddecoder [![Build Status]][actions] [![Latest Version]][crates.io] [![Docs]][docs.rs] [![License_MIT]][license_mit] [![License_APACHE]][license_apache] 
 
-[Build Status]: https://img.shields.io/github/actions/workflow/status/UnityRustEXtractor/texture2ddecoder/ci.yml?branch=main
-[actions]: https://github.com/UnityRustEXtractor/texture2ddecoder/actions?query=branch%3Amain
+[Build Status]: https://img.shields.io/github/actions/workflow/status/UniversalGameExtraction/texture2ddecoder/ci.yml?branch=master
+[actions]: https://github.com/UniversalGameExtraction/texture2ddecoder/actions?query=branch%3Amain
 [Latest Version]: https://img.shields.io/crates/v/texture2ddecoder.svg
 [crates.io]: https://crates.io/crates/texture2ddecoder
 [Docs]: https://docs.rs/texture2ddecoder/badge.svg
 [docs.rs]: https://docs.rs/crate/texture2ddecoder/
 [License_MIT]: https://img.shields.io/badge/License-MIT-yellow.svg
-[license_mit]: https://raw.githubusercontent.com/UnityRustEXtractor/texture2ddecoder/main/LICENSE-MIT
+[license_mit]: https://raw.githubusercontent.com/UniversalGameExtraction/texture2ddecoder/main/LICENSE-MIT
 [License_APACHE]: https://img.shields.io/badge/License-Apache%202.0-blue.svg
-[license_apache]: https://raw.githubusercontent.com/UnityRustEXtractor/texture2ddecoder/main/LICENSE-APACHE
+[license_apache]: https://raw.githubusercontent.com/UniversalGameExtraction/texture2ddecoder/main/LICENSE-APACHE
 
 A pure Rust no-std texture decoder for the following formats:
  - [ATC - Adreno Texture Compression](https://registry.khronos.org/OpenGL/extensions/AMD/AMD_compressed_ATC_texture.txt) ([detailed paper](http://www.guildsoftware.com/papers/2012.Converting.DXTC.to.ATC.pdf))

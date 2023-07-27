@@ -46,10 +46,11 @@ impl<'slice> symbol_codec<'slice>{
         };
         if total_used_syms == 0 {
             model.clear();
+            return true;
         }
         model.m_code_sizes.resize(total_used_syms as usize, 0);
         let num_codelength_codes_to_send = match self.decode_bits(5){
-            Ok(num_codelength_codes_to_send) => num_codelength_codes_to_send, 
+            Ok(s) => s,
             Err(_) => return false
         };
         if  (num_codelength_codes_to_send < 1) || (num_codelength_codes_to_send > cMaxCodelengthCodes) {
@@ -59,9 +60,9 @@ impl<'slice> symbol_codec<'slice>{
         dm.m_code_sizes.resize(cMaxCodelengthCodes as usize, 0);
         for i in 0..num_codelength_codes_to_send as usize{
             dm.m_code_sizes[g_most_probable_codelength_codes[i] as usize] = match self.decode_bits(3){
-                Ok(s) => s,
+                Ok(s) => s as u8,
                 Err(_) => return false
-            } as u8;
+            };
         }
         if dm.prepare_decoder_tables() == false {
             return false;
@@ -69,15 +70,12 @@ impl<'slice> symbol_codec<'slice>{
         let mut ofs: u32 = 0;
         while ofs < total_used_syms {
             let num_remaining: u32 = total_used_syms - ofs;
-            let code: u32 = match self.decode(&dm){
-                Ok(s) => s,
-                Err(_) => return false
-            };
+            let code: u32 = self.decode(&dm).unwrap();
             if code <= 16 {
                 model.m_code_sizes[ofs as usize] = code as u8;
                 ofs += 1;
             }else if code == cSmallZeroRunCode {
-                let len = match self.decode_bits(cSmallZeroRunExtraBits) {
+                let len = match self.decode_bits(cSmallZeroRunExtraBits){
                     Ok(s) => s,
                     Err(_) => return false
                 } + cMinSmallZeroRunSize;
@@ -86,7 +84,7 @@ impl<'slice> symbol_codec<'slice>{
                 }
                 ofs += len;
             }else if code == cLargeZeroRunCode {
-                let len = match self.decode_bits(cLargeZeroRunExtraBits) {
+                let len = match self.decode_bits(cLargeZeroRunExtraBits){
                     Ok(s) => s,
                     Err(_) => return false
                 } + cMinLargeZeroRunSize;
@@ -97,12 +95,12 @@ impl<'slice> symbol_codec<'slice>{
             }else if (code == cSmallRepeatCode) || (code == cLargeRepeatCode) {
                 let len: u32;
                 if code == cSmallRepeatCode {
-                    len = match self.decode_bits(cSmallNonZeroRunExtraBits) {
+                    len = match self.decode_bits(cSmallNonZeroRunExtraBits){
                         Ok(s) => s,
                         Err(_) => return false
-                    } + cSmallMinNonZeroRunSize;
+                    } + cSmallMinNonZeroRunSize
                 }else{
-                    len = match self.decode_bits(cLargeNonZeroRunExtraBits) {
+                    len = match self.decode_bits(cLargeNonZeroRunExtraBits){
                         Ok(s) => s,
                         Err(_) => return false
                     } + cLargeMinNonZeroRunSize;
@@ -125,18 +123,18 @@ impl<'slice> symbol_codec<'slice>{
         }
         return model.prepare_decoder_tables();
     }
-    pub fn decode_bits(&mut self, num_bits: u32) -> Result<u32, bool>{
+    pub fn decode_bits(&mut self, num_bits: u32) -> Result<u32, &'static str>{
         if num_bits == 0 as u32 {
             return Ok(0 as u32);
         }
         if num_bits > 16 as u32 {
             let a = match self.get_bits(num_bits - 16){
-                Ok(s) => s,
-                Err(_) => return Err(false)
+                Ok(a) => a,
+                Err(e) => return Err(e)
             };
             let b = match self.get_bits(16){
-                Ok(s) => s,
-                Err(_) => return Err(false)
+                Ok(b) => b,
+                Err(e) => return Err(e)
             };
             return Ok(((a << 16) | b) as u32);
         }else{
@@ -173,7 +171,7 @@ impl<'slice> symbol_codec<'slice>{
         let mut len: u32;
         if k <= pTables.m_table_max_code {
             let t = pTables.m_lookup[(self.m_bit_buf >> (32 - pTables.m_table_bits)) as usize];
-            if t == u32::MAX{
+            if t == u32::MAX {
                 return Err(false);
             }
             sym = t & (u16::MAX as u32);
@@ -209,9 +207,9 @@ impl<'slice> symbol_codec<'slice>{
         self.m_bit_buf = 0;
         self.m_bit_count = 0;
     }
-    fn get_bits(&mut self, num_bits: u32) -> Result<u32, bool>{
-        if (num_bits <= 32) == false{
-            return Err(false);
+    fn get_bits(&mut self, num_bits: u32) -> Result<u32, &'static str>{
+        if (num_bits <= 32) == false {
+            return Err("Num bits should not exceed 32, this should not happen normally.");
         }
         while self.m_bit_count < num_bits as i32 {
             let mut c: u32 = 0;
@@ -221,7 +219,7 @@ impl<'slice> symbol_codec<'slice>{
             }
             self.m_bit_count += 8;
             if (self.m_bit_count <= cBitBufSize as i32) == false{
-                return Err(false);
+                return Err("Bit count exceeded max allowed (cBitBufSize).");
             }
             self.m_bit_buf |= c << (cBitBufSize - self.m_bit_count as u32);
         }

@@ -8,10 +8,14 @@ use super::crn_consts::*;
 use super::crn_static_huffman_data_model::*;
 use super::crn_decomp::crn_header;
 use super::crn_symbol_codec::symbol_codec;
+extern crate alloc;
 
 macro_rules! CRND_HUFF_DECODE{
     ($codec: expr, $model: expr, $symbol: expr) => {
-        $symbol = $codec.decode($model)
+        $symbol = match $codec.decode($model){
+            Ok(s) => s,
+            Err(_) => return false
+        }
     };
 }
 
@@ -225,8 +229,14 @@ impl<'slice> crn_unpacker<'slice>{
         let mut a: u32 = 0;
         let mut b: u32 = 0;
         for i in 0..num_alpha_endpoints as usize{
-            let sa = self.m_codec.decode(&dm);
-            let sb = self.m_codec.decode(&dm);
+            let sa = match self.m_codec.decode(&dm){
+                Ok(s) => s,
+                Err(_) => return false
+            };
+            let sb = match self.m_codec.decode(&dm){
+                Ok(s) => s,
+                Err(_) => return false
+            };
             a = (sa + a) & 0xFF;
             b = (sb + b) & 0xFF;
             pDst[i] = (a | (b << 8)) as u16;
@@ -269,7 +279,10 @@ impl<'slice> crn_unpacker<'slice>{
         for _ in 0..num_alpha_selectors as usize{
             for j in 0..8 as usize{
                 let sym: i32;
-                sym = self.m_codec.decode(&dm) as i32;
+                sym = match self.m_codec.decode(&dm){
+                    Ok(s) => s,
+                    Err(_) => return false
+                } as i32;
                 cur[j*2+0] = ((delta0[sym as usize] + cur[j*2+0] as i32) & 7) as u32;
                 cur[j*2+1] = ((delta1[sym as usize] + cur[j*2+1] as i32) & 7) as u32;
             }

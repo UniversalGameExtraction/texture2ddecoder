@@ -8,39 +8,6 @@ use super::crn_unpacker::*;
 extern crate alloc;
 
 #[repr(C)]
-pub struct crn_file_info{
-    m_struct_size: u32,
-    m_actual_data_size: u32,
-    m_header_size: u32,
-    m_total_palette_size: u32,
-    m_tables_size: u32,
-    m_levels: u32,
-    m_level_compressed_size: [u32; cCRNMaxLevels as usize],
-    m_color_endpoint_palette_entries: u32,
-    m_color_selector_palette_entries: u32,
-    m_alpha_endpoint_palette_entries: u32,
-    m_alpha_selector_palette_entries: u32
-}
-
-impl crn_file_info{
-    pub fn default() -> crn_file_info{
-        return crn_file_info { 
-            m_struct_size: core::mem::size_of::<crn_file_info>() as u32,
-            m_actual_data_size: 0,
-            m_header_size: 0,
-            m_total_palette_size: 0,
-            m_tables_size: 0,
-            m_levels: 0,
-            m_level_compressed_size: [0; cCRNMaxLevels as usize],
-            m_color_endpoint_palette_entries: 0,
-            m_color_selector_palette_entries: 0,
-            m_alpha_endpoint_palette_entries: 0,
-            m_alpha_selector_palette_entries: 0
-        }
-    }
-}
-
-#[repr(C)]
 pub struct crn_texture_info {
     pub m_struct_size: u32,
     pub m_width: u32,
@@ -113,8 +80,12 @@ impl crn_texture_info{
             9 => crn_format::cCRNFmtDXT5A,
         
             10 => crn_format::cCRNFmtETC1,
+            11 => crn_format::cCRNFmtETC2,
+            12 => crn_format::cCRNFmtETC2A,
+            13 => crn_format::cCRNFmtETC1S,
+            14 => crn_format::cCRNFmtETC2AS,
         
-            11 => crn_format::cCRNFmtTotal,
+            15 => crn_format::cCRNFmtTotal,
         
             0xFFFFFFFF => crn_format::cCRNFmtForceDWORD,
 
@@ -123,7 +94,11 @@ impl crn_texture_info{
         if self.m_format == crn_format::cCRNFmtInvalid {
             return false;
         }
-        if (pHeader.m_format.cast_to_uint() == crn_format::cCRNFmtDXT1 as u32) || (pHeader.m_format.cast_to_uint() == crn_format::cCRNFmtDXT5A as u32) {
+        if  (pHeader.m_format.cast_to_uint() == crn_format::cCRNFmtDXT1 as u32) ||
+            (pHeader.m_format.cast_to_uint() == crn_format::cCRNFmtDXT5A as u32) ||
+            (pHeader.m_format.cast_to_uint() == crn_format::cCRNFmtETC1 as u32) ||
+            (pHeader.m_format.cast_to_uint() == crn_format::cCRNFmtETC2 as u32) ||
+            (pHeader.m_format.cast_to_uint() == crn_format::cCRNFmtETC1S as u32) {
             self.m_bytes_per_block = 8;
         }else{
             self.m_bytes_per_block = 16;
@@ -195,12 +170,6 @@ impl crn_palette{
         self.m_size.assign_from_buffer(&other[3..]);
         self.m_num.assign_from_buffer(&other[6..]);
     }
-}
-
-#[repr(C)]
-pub enum crn_header_flags{
-   // If set, the compressed mipmap level data is not located after the file's base data - it will be separately managed by the user instead.
-   cCRNHeaderFlagSegmented = 1
 }
 
 #[derive(Default)]
@@ -282,33 +251,6 @@ impl crn_header{
     }
 }
 
-#[repr(C)]
-pub struct crn_level_info{
-    m_struct_size: u32,
-    m_width: u32,
-    m_height: u32,
-    m_faces: u32,
-    m_blocks_x: u32,
-    m_blocks_y: u32,
-    m_bytes_per_block: u32,
-    m_format: crn_format,
-}
-
-impl crn_level_info{
-    pub fn default() -> crn_level_info{
-        return crn_level_info {
-            m_struct_size: core::mem::size_of::<crn_level_info>() as u32,
-			m_width: 0,
-			m_height: 0,
-			m_faces: 0,
-			m_blocks_x: 0,
-			m_blocks_y: 0,
-			m_bytes_per_block: 0,
-			m_format: crn_format::cCRNFmtInvalid // Init as invalid?
-        }
-    }
-}
-
 pub fn crnd_unpack_begin(pData: &[u8], data_size: u32) -> Result<crn_unpacker, &'static str>{
     if data_size < cCRNHeaderMinSize{
         return Err("Data size is below the minimum allowed.");
@@ -324,7 +266,9 @@ pub fn crnd_get_crn_format_bits_per_texel(fmt: &mut crn_format) -> Result<u32, &
     return match fmt {
         crn_format::cCRNFmtDXT1 |
         crn_format::cCRNFmtDXT5A |
-        crn_format::cCRNFmtETC1 => Ok(4),
+        crn_format::cCRNFmtETC1 |
+        crn_format::cCRNFmtETC2 |
+        crn_format::cCRNFmtETC1S => Ok(4),
 
         crn_format::cCRNFmtDXT3 |
         crn_format::cCRNFmtDXT5 |
@@ -333,7 +277,9 @@ pub fn crnd_get_crn_format_bits_per_texel(fmt: &mut crn_format) -> Result<u32, &
         crn_format::cCRNFmtDXT5_CCxY |
         crn_format::cCRNFmtDXT5_xGxR |
         crn_format::cCRNFmtDXT5_xGBR |
-        crn_format::cCRNFmtDXT5_AGBR => Ok(8),
+        crn_format::cCRNFmtDXT5_AGBR |
+        crn_format::cCRNFmtETC2A |
+        crn_format::cCRNFmtETC2AS => Ok(8),
 
         _ => Err("Texture format is not supported.")
     };
