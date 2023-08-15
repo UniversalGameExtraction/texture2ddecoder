@@ -167,6 +167,11 @@ mod tests {
     }
 
     #[test]
+    fn test_CRUNCH_DXT5A() {
+        test_format("CRUNCH_DXT5A", "crn", decode_crunch)
+    }
+
+    #[test]
     fn test_CRUNCH_DXN() {
         test_format("CRUNCH_DXN", "crn", decode_crunch)
     }
@@ -179,6 +184,11 @@ mod tests {
     #[test]
     fn test_UNITYCRUNCH_DXT5() {
         test_format("UNITYCRUNCH_DXT5", "crn", decode_unity_crunch)
+    }
+
+    #[test]
+    fn test_UNITYCRUNCH_DXT5A() {
+        test_format("UNITYCRUNCH_DXT5A", "crn", decode_unity_crunch)
     }
 
     #[test]
