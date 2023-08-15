@@ -88,8 +88,11 @@ mod atc;
 mod bcn;
 mod etc;
 mod pvrtc;
+#[cfg(feature = "alloc")]
 mod crunch;
+#[cfg(feature = "alloc")]
 mod unitycrunch;
+mod crnlib;
 
 // import decode functions
 pub use astc::*;
@@ -97,6 +100,6 @@ pub use atc::*;
 pub use bcn::*;
 pub use etc::*;
 pub use pvrtc::*;
+pub use crnlib::crn_texture_info;
 pub use crunch::decode_crunch;
-
-pub use unitycrunch::{decode_unity_crunch, crn_decomp::crn_texture_info};
+pub use unitycrunch::decode_unity_crunch;

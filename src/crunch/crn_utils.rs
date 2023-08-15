@@ -1,10 +1,9 @@
-#![allow(unused_parens)]
 #[inline]
 pub fn is_power_of_2(x: usize) -> bool{
-    if(x == 0){
+    if x == 0{
         return false;
     }
-    return ((x & (x - 1)) == 0);
+    return (x & (x - 1)) == 0;
 }
 
 #[inline]
@@ -22,7 +21,7 @@ pub fn next_pow2(mut val: usize) -> usize{
 #[inline]
 pub fn floor_log2i(mut v: u32) -> u32{
     let mut l: u32 = 0;
-    while(v > 1){
+    while v > 1{
         v >>= 1;
         l += 1;
     }
@@ -32,7 +31,7 @@ pub fn floor_log2i(mut v: u32) -> u32{
 #[inline]
 pub fn ceil_log2i(v: u32) -> u32{
     let mut l: u32 = floor_log2i(v);
-    if ((l != 32) && (v > (1 << l))){
+    if (l != 32) && (v > (1 << l)){
         l += 1;
     }
     return l;
@@ -42,7 +41,7 @@ pub fn ceil_log2i(v: u32) -> u32{
 #[inline]
 pub fn total_bits(mut v: u32) -> u32{
     let mut l: u32 = 0;
-    while (v > 0){
+    while v > 0{
         v >>= 1;
         l += 1;
     }
@@ -52,6 +51,6 @@ pub fn total_bits(mut v: u32) -> u32{
 #[inline]
 pub fn limit(x: &mut u32, n: u32){
    let v: i32 = (*x as i32) - n as i32;
-   let msk: i32 = (v >> 31);
+   let msk: i32 = v >> 31;
    *x = (((*x as i32) & msk) | (v & !msk)) as u32;
 }

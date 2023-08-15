@@ -1,26 +1,24 @@
-pub(crate) mod crnlib;
-pub(crate) mod crn_utils;
-pub(crate) mod crn_consts;
-pub(crate) mod crn_static_huffman_data_model;
-pub(crate) mod crn_symbol_codec;
 pub(crate) mod crn_unpacker;
-pub mod crn_decomp;
-
+pub(crate) mod crn_decomp;
+use super::crnlib::{crn_texture_info, crn_format};
 use crate::{decode_etc1, decode_etc2_rgb, decode_etc2_rgba8};
 use crate::bcn;
 extern crate alloc;
 
 struct CrunchDecodeHandler{
-    format: crnlib::crn_format,
+    format: crn_format,
     dxt_data: alloc::vec::Vec<u8>
 }
 
 fn unity_crunch_unpack_level<'vec>(data: &[u8], data_size: u32, level_index: u32) -> Result<CrunchDecodeHandler, &'static str> {
-    let mut tex_info: crn_decomp::crn_texture_info = crn_decomp::crn_texture_info::default();
+    let mut tex_info: crn_texture_info = crn_texture_info::default();
     if tex_info.crnd_get_texture_info(data, data_size) == false {
         return Err("Invalid crunch texture encoding.");
     }
-    let mut p_context: crn_unpacker::crn_unpacker<'_> = match crn_decomp::crnd_unpack_begin(&data, data_size){
+    if tex_info.m_faces != 1 {
+        return Err("Texture2D must only have 1 number of faces.");
+    }
+    let mut p_context: crn_unpacker::CrnUnpacker<'_> = match crn_decomp::crnd_unpack_begin(&data, data_size){
         Ok(p_context) => p_context,
         Err(res) => return Err(res)
     };
@@ -48,26 +46,26 @@ pub fn decode_unity_crunch(data: &[u8], width: usize, height: usize, image: &mut
         Err(s) => return Err(s)
     };
     match handler.format{
-        crnlib::crn_format::cCRNFmtDXT1 => bcn::decode_bc1(&handler.dxt_data, width, height, image),
+        crn_format::cCRNFmtDXT1 => bcn::decode_bc1(&handler.dxt_data, width, height, image),
 
-        crnlib::crn_format::cCRNFmtETC1 |
-        crnlib::crn_format::cCRNFmtETC1S => decode_etc1(&handler.dxt_data, width, height, image),
+        crn_format::cCRNFmtETC1 |
+        crn_format::cCRNFmtETC1S => decode_etc1(&handler.dxt_data, width, height, image),
 
-        crnlib::crn_format::cCRNFmtDXT5 |
-        crnlib::crn_format::cCRNFmtDXT5_CCxY |
-        crnlib::crn_format::cCRNFmtDXT5_xGBR |
-        crnlib::crn_format::cCRNFmtDXT5_AGBR |
-        crnlib::crn_format::cCRNFmtDXT5_xGxR => bcn::decode_bc3(&handler.dxt_data, width, height, image),
+        crn_format::cCRNFmtDXT5 |
+        crn_format::cCRNFmtDXT5_CCxY |
+        crn_format::cCRNFmtDXT5_xGBR |
+        crn_format::cCRNFmtDXT5_AGBR |
+        crn_format::cCRNFmtDXT5_xGxR => bcn::decode_bc3(&handler.dxt_data, width, height, image),
 
-        // crnlib::crn_format::cCRNFmtDXT5A => ???,
+        crn_format::cCRNFmtDXT5A => bcn::decode_bc4(&handler.dxt_data, width, height, image),
         
-        crnlib::crn_format::cCRNFmtDXN_XY |
-        crnlib::crn_format::cCRNFmtDXN_YX => bcn::decode_bc5(&handler.dxt_data, width, height, image),
+        crn_format::cCRNFmtDXN_XY |
+        crn_format::cCRNFmtDXN_YX => bcn::decode_bc5(&handler.dxt_data, width, height, image),
 
-        crnlib::crn_format::cCRNFmtETC2 => decode_etc2_rgb(&handler.dxt_data, width, height, image),
+        crn_format::cCRNFmtETC2 => decode_etc2_rgb(&handler.dxt_data, width, height, image),
 
-        crnlib::crn_format::cCRNFmtETC2A |
-        crnlib::crn_format::cCRNFmtETC2AS => decode_etc2_rgba8(&handler.dxt_data, width, height, image),
+        crn_format::cCRNFmtETC2A |
+        crn_format::cCRNFmtETC2AS => decode_etc2_rgba8(&handler.dxt_data, width, height, image),
 
         _ => Err("Invalid crunch format.")
     }
