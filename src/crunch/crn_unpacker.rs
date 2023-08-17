@@ -1,4 +1,4 @@
-use super::crn_format;
+use super::CrnFormat;
 use super::crn_utils::*;
 use super::crn_consts::*;
 use super::crn_static_huffman_data_model::*;
@@ -299,7 +299,7 @@ impl<'slice> CrnUnpacker<'slice>{
         let height: u32 = core::cmp::max(self.m_p_header.m_height.cast_to_uint() >> level_index, 1);
         let blocks_x: u32 = (width + 3) >> 2;
         let blocks_y: u32 = (height + 3) >> 2;
-        let block_size: u32 = if  self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtDXT1 as u32 || self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtDXT5A as u32 {
+        let block_size: u32 = if  self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtDxt1 as u32 || self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtDxt5a as u32 {
             8
         }else{
             16
@@ -321,34 +321,34 @@ impl<'slice> CrnUnpacker<'slice>{
             return Err("Failed to initialize the decoding process.");
         }
         let format = match self.m_p_header.m_format.cast_to_uint() {
-            0          => crn_format::cCRNFmtDXT1,
-            1          => crn_format::cCRNFmtDXT3,
-            2          => crn_format::cCRNFmtDXT5,
-            3          => crn_format::cCRNFmtDXT5_CCxY,
-            4          => crn_format::cCRNFmtDXT5_xGxR,
-            5          => crn_format::cCRNFmtDXT5_xGBR,
-            6          => crn_format::cCRNFmtDXT5_AGBR,
-            7          => crn_format::cCRNFmtDXN_XY,
-            8          => crn_format::cCRNFmtDXN_YX,
-            9          => crn_format::cCRNFmtDXT5A,
-            10         => crn_format::cCRNFmtETC1,
-            11         => crn_format::cCRNFmtTotal,
-            0xFFFFFFFF => crn_format::cCRNFmtForceDWORD,
-            _          => crn_format::cCRNFmtInvalid
+            0          => CrnFormat::CCrnfmtDxt1,
+            1          => CrnFormat::CCrnfmtDxt3,
+            2          => CrnFormat::CCrnfmtDxt5,
+            3          => CrnFormat::CCrnfmtDxt5CcxY,
+            4          => CrnFormat::CCrnfmtDxt5XGxR,
+            5          => CrnFormat::CCrnfmtDxt5XGbr,
+            6          => CrnFormat::CCrnfmtDxt5Agbr,
+            7          => CrnFormat::CCrnfmtDxnXy,
+            8          => CrnFormat::CCrnfmtDxnYx,
+            9          => CrnFormat::CCrnfmtDxt5a,
+            10         => CrnFormat::CCrnfmtEtc1,
+            11         => CrnFormat::CCrnfmtTotal,
+            0xFFFFFFFF => CrnFormat::CCrnfmtForceDword,
+            _          => CrnFormat::CCrnfmtInvalid
         };
         let unpack_res = match format {
-            crn_format::cCRNFmtDXT1 => self.unpack_dxt1(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y, chunks_x, chunks_y),
+            CrnFormat::CCrnfmtDxt1 => self.unpack_dxt1(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y, chunks_x, chunks_y),
 
-            crn_format::cCRNFmtDXT5 |
-            crn_format::cCRNFmtDXT5_CCxY |
-            crn_format::cCRNFmtDXT5_xGBR |
-            crn_format::cCRNFmtDXT5_AGBR |
-            crn_format::cCRNFmtDXT5_xGxR => self.unpack_dxt5(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y, chunks_x, chunks_y),
+            CrnFormat::CCrnfmtDxt5 |
+            CrnFormat::CCrnfmtDxt5CcxY |
+            CrnFormat::CCrnfmtDxt5XGbr |
+            CrnFormat::CCrnfmtDxt5Agbr |
+            CrnFormat::CCrnfmtDxt5XGxR => self.unpack_dxt5(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y, chunks_x, chunks_y),
             
-            crn_format::cCRNFmtDXT5A => self.unpack_dxt5a(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y, chunks_x, chunks_y),
+            CrnFormat::CCrnfmtDxt5a => self.unpack_dxt5a(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y, chunks_x, chunks_y),
 
-            crn_format::cCRNFmtDXN_XY |
-            crn_format::cCRNFmtDXN_YX => self.unpack_dxn(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y, chunks_x, chunks_y),
+            CrnFormat::CCrnfmtDxnXy |
+            CrnFormat::CCrnfmtDxnYx => self.unpack_dxn(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y, chunks_x, chunks_y),
 
             _ => return Err("Invalid format for unpacking.")
         };

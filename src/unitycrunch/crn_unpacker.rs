@@ -1,4 +1,4 @@
-use crate::crnlib::crn_format;
+use crate::crnlib::CrnFormat;
 use crate::crunch::crn_consts::*;
 use crate::crunch::crn_static_huffman_data_model::*;
 use crate::crunch::crn_symbol_codec::symbol_codec;
@@ -100,9 +100,9 @@ impl<'slice> CrnUnpacker<'slice>{
         if self.m_p_header.m_alpha_endpoints.m_num.cast_to_uint() != 0 {
             if self.decode_alpha_endpoints() == false {return false;}
 
-            if self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtETC2AS as u32 {
+            if self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc2as as u32 {
                 if self.decode_alpha_selectors_etcs() == false {return false;}
-            }else if self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtETC2A as u32{
+            }else if self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc2a as u32{
                 if self.decode_alpha_selectors_etc() == false {return false;}
             }else{
                 if self.decode_alpha_selectors() == false {return false;}
@@ -113,15 +113,15 @@ impl<'slice> CrnUnpacker<'slice>{
     }
     pub fn decode_color_endpoints(&mut self) -> bool{
         let num_color_endpoints = self.m_p_header.m_color_endpoints.m_num.cast_to_uint();
-        let has_etc_color_blocks: bool =    self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtETC1 as u32 ||
-                                            self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtETC2 as u32 ||
-                                            self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtETC2A as u32 ||
-                                            self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtETC1S as u32 ||
-                                            self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtETC2AS as u32;
+        let has_etc_color_blocks: bool =    self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc1 as u32 ||
+                                            self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc2 as u32 ||
+                                            self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc2a as u32 ||
+                                            self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc1s as u32 ||
+                                            self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc2as as u32;
 
-        let has_subblocks: bool =   self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtETC1 as u32 ||
-                                    self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtETC2 as u32 ||
-                                    self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtETC2A as u32;
+        let has_subblocks: bool =   self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc1 as u32 ||
+                                    self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc2 as u32 ||
+                                    self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc2a as u32;
         self.m_color_endpoints.resize(num_color_endpoints as usize, 0);
         let mut res: bool;
         res = self.m_codec.start_decoding(&self.m_p_data[self.m_p_header.m_color_endpoints.m_ofs.cast_to_uint() as usize..], self.m_p_header.m_color_endpoints.m_size.cast_to_uint());
@@ -169,15 +169,15 @@ impl<'slice> CrnUnpacker<'slice>{
         return true;
     }
     pub fn decode_color_selectors(&mut self) -> bool{
-        let has_etc_color_blocks: bool =    self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtETC1 as u32 ||
-                                            self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtETC2 as u32 ||
-                                            self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtETC2A as u32 ||
-                                            self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtETC1S as u32 ||
-                                            self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtETC2AS as u32;
+        let has_etc_color_blocks: bool =    self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc1 as u32 ||
+                                            self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc2 as u32 ||
+                                            self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc2a as u32 ||
+                                            self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc1s as u32 ||
+                                            self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc2as as u32;
 
-        let has_subblocks: bool =   self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtETC1 as u32 ||
-                                    self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtETC2 as u32 ||
-                                    self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtETC2A as u32;
+        let has_subblocks: bool =   self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc1 as u32 ||
+                                    self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc2 as u32 ||
+                                    self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc2a as u32;
         let mut res: bool;
         // Return value here is ignored in the original code.
         res = self.m_codec.start_decoding(&self.m_p_data[(self.m_p_header.m_color_selectors.m_ofs.cast_to_uint() as usize)..], self.m_p_header.m_color_selectors.m_size.cast_to_uint());
@@ -420,11 +420,11 @@ impl<'slice> CrnUnpacker<'slice>{
         let height: u32 = core::cmp::max(self.m_p_header.m_height.cast_to_uint() >> level_index, 1);
         let blocks_x: u32 = (width + 3) >> 2;
         let blocks_y: u32 = (height + 3) >> 2;
-        let block_size: u32 = if    self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtDXT1  as u32 ||
-                                    self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtDXT5A as u32 ||
-                                    self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtETC1  as u32 ||
-                                    self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtETC2  as u32 ||
-                                    self.m_p_header.m_format.cast_to_uint() == crn_format::cCRNFmtETC1S as u32 {
+        let block_size: u32 = if    self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtDxt1  as u32 ||
+                                    self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtDxt5a as u32 ||
+                                    self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc1  as u32 ||
+                                    self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc2  as u32 ||
+                                    self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc1s as u32 {
             8
         }else{
             16
@@ -444,45 +444,45 @@ impl<'slice> CrnUnpacker<'slice>{
             return Err("Failed to initialize the decoding process.");
         }
         let format = match self.m_p_header.m_format.cast_to_uint() {
-            0          => crn_format::cCRNFmtDXT1,
-            1          => crn_format::cCRNFmtDXT3,
-            2          => crn_format::cCRNFmtDXT5,
-            3          => crn_format::cCRNFmtDXT5_CCxY,
-            4          => crn_format::cCRNFmtDXT5_xGxR,
-            5          => crn_format::cCRNFmtDXT5_xGBR,
-            6          => crn_format::cCRNFmtDXT5_AGBR,
-            7          => crn_format::cCRNFmtDXN_XY,
-            8          => crn_format::cCRNFmtDXN_YX,
-            9          => crn_format::cCRNFmtDXT5A,
-            10         => crn_format::cCRNFmtETC1,
-            11         => crn_format::cCRNFmtETC2,
-            12         => crn_format::cCRNFmtETC2A,
-            13         => crn_format::cCRNFmtETC1S,            
-            14         => crn_format::cCRNFmtETC2AS,
-            15         => crn_format::cCRNFmtTotal,
-            0xFFFFFFFF => crn_format::cCRNFmtForceDWORD,
-            _          => crn_format::cCRNFmtInvalid
+            0          => CrnFormat::CCrnfmtDxt1,
+            1          => CrnFormat::CCrnfmtDxt3,
+            2          => CrnFormat::CCrnfmtDxt5,
+            3          => CrnFormat::CCrnfmtDxt5CcxY,
+            4          => CrnFormat::CCrnfmtDxt5XGxR,
+            5          => CrnFormat::CCrnfmtDxt5XGbr,
+            6          => CrnFormat::CCrnfmtDxt5Agbr,
+            7          => CrnFormat::CCrnfmtDxnXy,
+            8          => CrnFormat::CCrnfmtDxnYx,
+            9          => CrnFormat::CCrnfmtDxt5a,
+            10         => CrnFormat::CCrnfmtEtc1,
+            11         => CrnFormat::CCrnfmtEtc2,
+            12         => CrnFormat::CCrnfmtEtc2a,
+            13         => CrnFormat::CCrnfmtEtc1s,            
+            14         => CrnFormat::CCrnfmtEtc2as,
+            15         => CrnFormat::CCrnfmtTotal,
+            0xFFFFFFFF => CrnFormat::CCrnfmtForceDword,
+            _          => CrnFormat::CCrnfmtInvalid
         };
         let unpack_res = match format {
-            crn_format::cCRNFmtDXT1 |
-            crn_format::cCRNFmtETC1S => self.unpack_dxt1(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y),
+            CrnFormat::CCrnfmtDxt1 |
+            CrnFormat::CCrnfmtEtc1s => self.unpack_dxt1(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y),
 
-            crn_format::cCRNFmtDXT5 |
-            crn_format::cCRNFmtDXT5_CCxY |
-            crn_format::cCRNFmtDXT5_xGBR |
-            crn_format::cCRNFmtDXT5_AGBR |
-            crn_format::cCRNFmtDXT5_xGxR |
-            crn_format::cCRNFmtETC2AS => self.unpack_dxt5(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y),
+            CrnFormat::CCrnfmtDxt5 |
+            CrnFormat::CCrnfmtDxt5CcxY |
+            CrnFormat::CCrnfmtDxt5XGbr |
+            CrnFormat::CCrnfmtDxt5Agbr |
+            CrnFormat::CCrnfmtDxt5XGxR |
+            CrnFormat::CCrnfmtEtc2as => self.unpack_dxt5(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y),
             
-            crn_format::cCRNFmtDXT5A => self.unpack_dxt5a(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y),
+            CrnFormat::CCrnfmtDxt5a => self.unpack_dxt5a(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y),
             
-            crn_format::cCRNFmtDXN_XY |
-            crn_format::cCRNFmtDXN_YX => self.unpack_dxn(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y),
+            CrnFormat::CCrnfmtDxnXy |
+            CrnFormat::CCrnfmtDxnYx => self.unpack_dxn(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y),
             
-            crn_format::cCRNFmtETC1 |
-            crn_format::cCRNFmtETC2 => self.unpack_etc1(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y),
+            CrnFormat::CCrnfmtEtc1 |
+            CrnFormat::CCrnfmtEtc2 => self.unpack_etc1(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y),
 
-            crn_format::cCRNFmtETC2A => self.unpack_etc2a(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y),
+            CrnFormat::CCrnfmtEtc2a => self.unpack_etc2a(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y),
 
             _ => return Err("Invalid format for unpacking.")
         };

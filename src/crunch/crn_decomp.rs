@@ -1,4 +1,4 @@
-use super::crn_format;
+use super::CrnFormat;
 use super::crn_consts::*;
 use super::crn_unpacker::*;
 extern crate alloc;
@@ -197,26 +197,26 @@ pub fn crnd_unpack_begin(p_data: &[u8], data_size: u32) -> Result<CrnUnpacker, &
     return Ok(p);
 }
 
-pub fn crnd_get_crn_format_bits_per_texel(fmt: &mut crn_format) -> Result<u32, &'static str>{
+pub fn crnd_get_crn_format_bits_per_texel(fmt: &mut CrnFormat) -> Result<u32, &'static str>{
     return match fmt {
-        crn_format::cCRNFmtDXT1 |
-        crn_format::cCRNFmtDXT5A |
-        crn_format::cCRNFmtETC1 => Ok(4),
+        CrnFormat::CCrnfmtDxt1 |
+        CrnFormat::CCrnfmtDxt5a |
+        CrnFormat::CCrnfmtEtc1 => Ok(4),
 
-        crn_format::cCRNFmtDXT3 |
-        crn_format::cCRNFmtDXT5 |
-        crn_format::cCRNFmtDXN_XY |
-        crn_format::cCRNFmtDXN_YX |
-        crn_format::cCRNFmtDXT5_CCxY |
-        crn_format::cCRNFmtDXT5_xGxR |
-        crn_format::cCRNFmtDXT5_xGBR |
-        crn_format::cCRNFmtDXT5_AGBR => Ok(8),
+        CrnFormat::CCrnfmtDxt3 |
+        CrnFormat::CCrnfmtDxt5 |
+        CrnFormat::CCrnfmtDxnXy |
+        CrnFormat::CCrnfmtDxnYx |
+        CrnFormat::CCrnfmtDxt5CcxY |
+        CrnFormat::CCrnfmtDxt5XGxR |
+        CrnFormat::CCrnfmtDxt5XGbr |
+        CrnFormat::CCrnfmtDxt5Agbr => Ok(8),
 
         _ => Err("Texture format is not supported.")
     };
 }
 
-pub fn crnd_get_bytes_per_dxt_block(fmt: &mut crn_format) -> Result<u32, &'static str>{
+pub fn crnd_get_bytes_per_dxt_block(fmt: &mut CrnFormat) -> Result<u32, &'static str>{
     return Ok((match crnd_get_crn_format_bits_per_texel(fmt){
         Ok(s) => s,
         Err(e) => return Err(e)

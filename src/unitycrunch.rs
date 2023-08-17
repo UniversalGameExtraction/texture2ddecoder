@@ -1,17 +1,17 @@
 pub(crate) mod crn_unpacker;
 pub(crate) mod crn_decomp;
-use super::crnlib::{crn_texture_info, crn_format};
+use super::crnlib::{CrnTextureInfo, CrnFormat};
 use crate::{decode_etc1, decode_etc2_rgb, decode_etc2_rgba8};
 use crate::bcn;
 extern crate alloc;
 
 struct CrunchDecodeHandler{
-    format: crn_format,
+    format: CrnFormat,
     dxt_data: alloc::vec::Vec<u8>
 }
 
 fn unity_crunch_unpack_level<'vec>(data: &[u8], data_size: u32, level_index: u32) -> Result<CrunchDecodeHandler, &'static str> {
-    let mut tex_info: crn_texture_info = crn_texture_info::default();
+    let mut tex_info: CrnTextureInfo = CrnTextureInfo::default();
     if tex_info.crnd_get_texture_info(data, data_size) == false {
         return Err("Invalid crunch texture encoding.");
     }
@@ -46,26 +46,26 @@ pub fn decode_unity_crunch(data: &[u8], width: usize, height: usize, image: &mut
         Err(s) => return Err(s)
     };
     match handler.format{
-        crn_format::cCRNFmtDXT1 => bcn::decode_bc1(&handler.dxt_data, width, height, image),
+        CrnFormat::CCrnfmtDxt1 => bcn::decode_bc1(&handler.dxt_data, width, height, image),
 
-        crn_format::cCRNFmtETC1 |
-        crn_format::cCRNFmtETC1S => decode_etc1(&handler.dxt_data, width, height, image),
+        CrnFormat::CCrnfmtEtc1 |
+        CrnFormat::CCrnfmtEtc1s => decode_etc1(&handler.dxt_data, width, height, image),
 
-        crn_format::cCRNFmtDXT5 |
-        crn_format::cCRNFmtDXT5_CCxY |
-        crn_format::cCRNFmtDXT5_xGBR |
-        crn_format::cCRNFmtDXT5_AGBR |
-        crn_format::cCRNFmtDXT5_xGxR => bcn::decode_bc3(&handler.dxt_data, width, height, image),
+        CrnFormat::CCrnfmtDxt5 |
+        CrnFormat::CCrnfmtDxt5CcxY |
+        CrnFormat::CCrnfmtDxt5XGbr |
+        CrnFormat::CCrnfmtDxt5Agbr |
+        CrnFormat::CCrnfmtDxt5XGxR => bcn::decode_bc3(&handler.dxt_data, width, height, image),
 
-        crn_format::cCRNFmtDXT5A => bcn::decode_bc4(&handler.dxt_data, width, height, image),
+        CrnFormat::CCrnfmtDxt5a => bcn::decode_bc4(&handler.dxt_data, width, height, image),
         
-        crn_format::cCRNFmtDXN_XY |
-        crn_format::cCRNFmtDXN_YX => bcn::decode_bc5(&handler.dxt_data, width, height, image),
+        CrnFormat::CCrnfmtDxnXy |
+        CrnFormat::CCrnfmtDxnYx => bcn::decode_bc5(&handler.dxt_data, width, height, image),
 
-        crn_format::cCRNFmtETC2 => decode_etc2_rgb(&handler.dxt_data, width, height, image),
+        CrnFormat::CCrnfmtEtc2 => decode_etc2_rgb(&handler.dxt_data, width, height, image),
 
-        crn_format::cCRNFmtETC2A |
-        crn_format::cCRNFmtETC2AS => decode_etc2_rgba8(&handler.dxt_data, width, height, image),
+        CrnFormat::CCrnfmtEtc2a |
+        CrnFormat::CCrnfmtEtc2as => decode_etc2_rgba8(&handler.dxt_data, width, height, image),
 
         _ => Err("Invalid crunch format.")
     }
