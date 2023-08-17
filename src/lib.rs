@@ -100,6 +100,6 @@ pub use atc::*;
 pub use bcn::*;
 pub use etc::*;
 pub use pvrtc::*;
-pub use crnlib::crn_texture_info;
+pub use crnlib::CrnTextureInfo;
 pub use crunch::decode_crunch;
 pub use unitycrunch::decode_unity_crunch;
