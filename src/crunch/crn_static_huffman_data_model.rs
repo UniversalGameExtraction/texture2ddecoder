@@ -186,7 +186,7 @@ impl DecoderTables{
         self.m_val_ptrs[C_MAX_EXPECTED_CODE_SIZE as usize] = 0xFFFFF;
 
         self.m_table_shift = 32 - self.m_table_bits;
-        return true;
+        true
     }
 
     #[inline]
@@ -198,7 +198,7 @@ impl DecoderTables{
         if k == 0 {
             return Ok(u32::MAX);
         }
-        return Ok(((k - 1) >> (16 - len)) as u32);
+        Ok(((k - 1) >> (16 - len)) as u32)
     }
 }
 
@@ -243,7 +243,7 @@ impl StaticHuffmanDataModel{
         if self.m_total_syms > 16 {
             decoder_table_bits = min(1 + ceil_log2i(self.m_total_syms), C_MAX_TABLE_BITS as u32);
         }
-        return decoder_table_bits;
+        decoder_table_bits
     }
 
     pub fn prepare_decoder_tables(&mut self) -> bool{
@@ -253,6 +253,6 @@ impl StaticHuffmanDataModel{
         }
         self.m_total_syms = total_syms as u32;
         let table_bits = self.compute_decoder_table_bits();
-        return self.m_p_decode_tables.init(self.m_total_syms, &self.m_code_sizes, table_bits);
+        self.m_p_decode_tables.init(self.m_total_syms, &self.m_code_sizes, table_bits)
     }
 }

@@ -56,7 +56,7 @@ pub struct CrnTextureInfo {
 
 impl CrnTextureInfo{
     pub fn default() -> CrnTextureInfo{
-        return CrnTextureInfo {
+        CrnTextureInfo {
             m_struct_size: core::mem::size_of::<CrnTextureInfo>() as u32,
 			m_width: 0,
 			m_height: 0,
@@ -139,6 +139,6 @@ impl CrnTextureInfo{
         }
         self.m_userdata0 = p_header.m_userdata0.cast_to_uint();
         self.m_userdata1 = p_header.m_userdata1.cast_to_uint();
-        return true;
+        true
     }
 }

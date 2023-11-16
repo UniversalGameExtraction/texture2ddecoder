@@ -3,7 +3,7 @@ pub fn is_power_of_2(x: usize) -> bool{
     if x == 0{
         return false;
     }
-    return (x & (x - 1)) == 0;
+    (x & (x - 1)) == 0
 }
 
 #[inline]
@@ -15,7 +15,7 @@ pub fn next_pow2(mut val: usize) -> usize{
     val |= val >> 4;
     val |= val >> 2;
     val |= val >> 1;
-    return val + 1;
+    val + 1
 }
 
 #[inline]
@@ -25,7 +25,7 @@ pub fn floor_log2i(mut v: u32) -> u32{
         v >>= 1;
         l += 1;
     }
-    return l;
+    l
 }
 
 #[inline]
@@ -34,7 +34,7 @@ pub fn ceil_log2i(v: u32) -> u32{
     if (l != 32) && (v > (1 << l)){
         l += 1;
     }
-    return l;
+    l
 }
 
 // Returns the total number of bits needed to encode v.
@@ -45,7 +45,7 @@ pub fn total_bits(mut v: u32) -> u32{
         v >>= 1;
         l += 1;
     }
-    return l;
+    l
 }
 
 #[inline]

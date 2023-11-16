@@ -25,7 +25,7 @@ pub struct CrnUnpacker<'slice>{
 
 impl<'slice> Default for CrnUnpacker<'slice>{
     fn default() -> Self {
-        return CrnUnpacker {
+        CrnUnpacker {
             m_magic: C_MAGIC_VALUE,
             m_p_data: <&[u8]>::default(),
             m_data_size: <u32>::default(),
@@ -57,7 +57,7 @@ impl<'slice> CrnUnpacker<'slice>{
         if self.decode_palettes() == false {
             return false;
         }
-        return true;
+        true
     }
     pub fn init_tables(&mut self) -> bool{
         let mut res: bool;
@@ -81,7 +81,7 @@ impl<'slice> CrnUnpacker<'slice>{
             if  self.m_codec.decode_receive_static_data_model(&mut self.m_selector_delta_dm[1]) == false {return false;}
         }
         self.m_codec.stop_decoding();
-        return true;
+        true
     }
     pub fn decode_palettes(&mut self) -> bool{
         if  self.m_p_header.m_color_endpoints.m_num.cast_to_uint() != 0 {
@@ -94,7 +94,7 @@ impl<'slice> CrnUnpacker<'slice>{
            if  self.decode_alpha_selectors() == false {return false;}
         }
 
-        return true;
+        true
     }
     pub fn decode_color_endpoints(&mut self) -> bool{
         let num_color_endpoints = self.m_p_header.m_color_endpoints.m_num.cast_to_uint();
@@ -130,7 +130,7 @@ impl<'slice> CrnUnpacker<'slice>{
             }
         }
         self.m_codec.stop_decoding();
-        return true;
+        true
     }
     pub fn decode_color_selectors(&mut self) -> bool{
         const C_MAX_SELECTOR_VALUE: u32 = 3;
@@ -189,7 +189,7 @@ impl<'slice> CrnUnpacker<'slice>{
             }
         }
         self.m_codec.stop_decoding();
-        return true;
+        true
     }
     pub fn decode_alpha_endpoints(&mut self) -> bool{
         let num_alpha_endpoints = self.m_p_header.m_alpha_endpoints.m_num.cast_to_uint();
@@ -221,7 +221,7 @@ impl<'slice> CrnUnpacker<'slice>{
             p_dst[i] = (a | (b << 8)) as u16;
         }
         self.m_codec.stop_decoding();
-        return true;
+        true
     }
     pub fn decode_alpha_selectors(&mut self) -> bool{
         const C_MAX_SELECTOR_VALUE: u32 = 7;
@@ -275,13 +275,13 @@ impl<'slice> CrnUnpacker<'slice>{
             p_dst = &mut p_dst[3..];
         }
         self.m_codec.stop_decoding();
-        return true;
+        true
     }
     pub fn crnd_unpack_level(&mut self, dst_size_in_bytes: u32, row_pitch_in_bytes: u32, level_index: u32) -> Result<alloc::vec::Vec<u8>, &'static str>{
         if (dst_size_in_bytes < 8) || (level_index >= C_CRNMAX_LEVELS as u32) {
             return Err("Destination buffer size is too small.");
         }
-        return self.unpack_level(dst_size_in_bytes, row_pitch_in_bytes, level_index);
+        self.unpack_level(dst_size_in_bytes, row_pitch_in_bytes, level_index)
     }
     pub fn unpack_level(&mut self, dst_size_in_bytes: u32, row_pitch_in_bytes: u32, level_index: u32) -> Result<alloc::vec::Vec<u8>, &'static str>{
         let cur_level_ofs = self.m_p_header.m_level_ofs[level_index as usize].cast_to_uint();
@@ -292,7 +292,7 @@ impl<'slice> CrnUnpacker<'slice>{
         if next_level_ofs <= cur_level_ofs {
             return Err("Level offset mismatch.");
         }
-        return self.unpack_level_2(&self.m_p_data[cur_level_ofs as usize..], next_level_ofs - cur_level_ofs, dst_size_in_bytes, row_pitch_in_bytes, level_index);
+        self.unpack_level_2(&self.m_p_data[cur_level_ofs as usize..], next_level_ofs - cur_level_ofs, dst_size_in_bytes, row_pitch_in_bytes, level_index)
     }
     pub fn unpack_level_2(&mut self, p_src: &'slice [u8], src_size_in_bytes: u32, dst_size_in_bytes: u32, mut row_pitch_in_bytes: u32, level_index: u32) -> Result<alloc::vec::Vec<u8>, &'static str>{
         let width: u32 = core::cmp::max(self.m_p_header.m_width.cast_to_uint() >> level_index, 1);
@@ -357,7 +357,7 @@ impl<'slice> CrnUnpacker<'slice>{
             Err(unpack_res) => return Err(unpack_res)
         };
         self.m_codec.stop_decoding();
-        return Ok(ret);
+        Ok(ret)
     }
     pub fn unpack_dxt1(&mut self, p_dst: &mut [u8], row_pitch_in_bytes: u32, blocks_x: u32, blocks_y: u32, chunks_x: u32, chunks_y: u32) -> Result<bool, &'static str>{
         let mut chunk_encoding_bits: u32 = 1;
@@ -474,7 +474,7 @@ impl<'slice> CrnUnpacker<'slice>{
                 row_dst += (row_pitch_in_bytes * 2) as usize;
             }
         }
-        return Ok(true);
+        Ok(true)
     }
     pub fn unpack_dxt5(&mut self, p_dst: &mut [u8], row_pitch_in_bytes: u32, blocks_x: u32, blocks_y: u32, chunks_x: u32, chunks_y: u32) -> Result<bool, &'static str>{
         let mut chunk_encoding_bits: u32 = 1;
@@ -585,7 +585,7 @@ impl<'slice> CrnUnpacker<'slice>{
                 row_dst += (row_pitch_in_bytes * 2) as usize;
             }
         }
-        return Ok(true);
+        Ok(true)
     }
     pub fn unpack_dxt5a(&mut self, p_dst: &mut [u8], row_pitch_in_bytes: u32, blocks_x: u32, blocks_y: u32, chunks_x: u32, chunks_y: u32) -> Result<bool, &'static str>{
         let mut chunk_encoding_bits: u32 = 1;
@@ -668,7 +668,7 @@ impl<'slice> CrnUnpacker<'slice>{
                 row_dst += (row_pitch_in_bytes * 2) as usize;
             }
         }
-        return Ok(true);
+        Ok(true)
     }
     pub fn unpack_dxn(&mut self, p_dst: &mut [u8], row_pitch_in_bytes: u32, blocks_x: u32, blocks_y: u32, chunks_x: u32, chunks_y: u32) -> Result<bool, &'static str>{
         let mut chunk_encoding_bits: u32 = 1;
@@ -776,6 +776,6 @@ impl<'slice> CrnUnpacker<'slice>{
                 row_dst += (row_pitch_in_bytes * 2) as usize;
             }
         }
-        return Ok(true);
+        Ok(true)
     }
 }

@@ -31,13 +31,13 @@ fn unity_crunch_unpack_level<'vec>(data: &[u8], data_size: u32, level_index: u32
         Err(e) => return Err(e)
     };
     let total_face_size: u32 = row_pitch * blocks_y;
-    return match p_context.crnd_unpack_level(total_face_size, row_pitch, level_index){
+    match p_context.crnd_unpack_level(total_face_size, row_pitch, level_index){
         Ok(res) => Ok(CrunchDecodeHandler{
             format: tex_info.m_format,
             dxt_data: res
         }),
         Err(err) => Err(err)
-    };
+    }
 }
 
 pub fn decode_unity_crunch(data: &[u8], width: usize, height: usize, image: &mut [u32]) -> Result<(), &'static str>{

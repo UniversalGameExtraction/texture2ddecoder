@@ -14,14 +14,14 @@ pub struct symbol_codec<'slice>{
 
 impl<'slice> Default for symbol_codec<'slice>{
     fn default() -> Self {
-        return symbol_codec{
+        symbol_codec{
             m_p_decode_buf: &[0; 0],
             m_p_decode_buf_next: &[0; 0],
             m_p_decode_buf_end: core::ptr::null(),
             m_decode_buf_size: 0,
             m_bit_buf: 0,
             m_bit_count: 0
-        };
+        }
     }
 }
 
@@ -35,7 +35,7 @@ impl<'slice> symbol_codec<'slice>{
         self.m_decode_buf_size = buf_size;
         self.m_p_decode_buf_end = (&p_buf[buf_size as usize]) as *const u8;
         self.get_bits_init();
-        return true;
+        true
     }
 
     pub fn decode_receive_static_data_model(&mut self, model: &mut StaticHuffmanDataModel) -> bool{
@@ -140,7 +140,7 @@ impl<'slice> symbol_codec<'slice>{
                 return false;
             }
         }
-        return model.prepare_decoder_tables();
+        model.prepare_decoder_tables()
     }
 
     pub fn decode_bits(&mut self, num_bits: u32) -> Result<u32, bool>{
@@ -156,9 +156,9 @@ impl<'slice> symbol_codec<'slice>{
                 Ok(s) => s,
                 Err(_) => return Err(false)
             };
-            return Ok(((a << 16) | b) as u32);
+            Ok(((a << 16) | b) as u32)
         }else{
-            return self.get_bits(num_bits);
+            self.get_bits(num_bits)
         }
     }
     
@@ -219,11 +219,10 @@ impl<'slice> symbol_codec<'slice>{
         }
         self.m_bit_buf <<= len;
         self.m_bit_count -= len as i32;
-        return Ok(sym);
+        Ok(sym)
     }
     
     pub fn stop_decoding(&mut self){
-        return;
     }
     
     fn get_bits_init(&mut self){
@@ -250,6 +249,6 @@ impl<'slice> symbol_codec<'slice>{
         let result: u32 = self.m_bit_buf >> (C_BIT_BUF_SIZE - num_bits as usize);
         self.m_bit_buf <<= num_bits;
         self.m_bit_count -= num_bits as i32;
-        return Ok(result);
+        Ok(result)
     }
 }

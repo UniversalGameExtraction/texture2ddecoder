@@ -11,11 +11,11 @@ pub fn crnd_unpack_begin(p_data: &[u8], data_size: u32) -> Result<CrnUnpacker, &
     if p.init(p_data, data_size) == false{
         return Err("Failed to initialize Crunch decompressor.");
     }
-    return Ok(p);
+    Ok(p)
 }
 
 pub fn crnd_get_crn_format_bits_per_texel(fmt: &mut CrnFormat) -> Result<u32, &'static str>{
-    return match fmt {
+    match fmt {
         CrnFormat::CCrnfmtDxt1 |
         CrnFormat::CCrnfmtDxt5a |
         CrnFormat::CCrnfmtEtc1 |
@@ -34,12 +34,12 @@ pub fn crnd_get_crn_format_bits_per_texel(fmt: &mut CrnFormat) -> Result<u32, &'
         CrnFormat::CCrnfmtEtc2as => Ok(8),
 
         _ => Err("Texture format is not supported.")
-    };
+    }
 }
 
 pub fn crnd_get_bytes_per_dxt_block(fmt: &mut CrnFormat) -> Result<u32, &'static str>{
-    return Ok((match crnd_get_crn_format_bits_per_texel(fmt){
+    Ok((match crnd_get_crn_format_bits_per_texel(fmt){
         Ok(s) => s,
         Err(e) => return Err(e)
-    } << 4) >> 3);
+    } << 4) >> 3)
 }

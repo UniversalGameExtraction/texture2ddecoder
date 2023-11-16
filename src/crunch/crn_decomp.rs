@@ -48,7 +48,7 @@ impl<const N: usize> CrnPackedUint<N>{
     }
 
     pub fn cast_to_uint(&mut self) -> u32{
-        return match N {
+        match N {
             1 => self.m_buf[0] as u32,
             2 => u16::from_be_bytes([self.m_buf[0], self.m_buf[1]]) as u32,
             3 => (self.m_buf[0] as u32) << 16 | u16::from_be_bytes([self.m_buf[1], self.m_buf[2]]) as u32,
@@ -61,7 +61,7 @@ impl<const N: usize> CrnPackedUint<N>{
 
 impl<const N: usize> Default for CrnPackedUint<N>{
     fn default() -> Self {
-        return CrnPackedUint{
+        CrnPackedUint{
             m_buf: [0; N]
         }
     }
@@ -155,7 +155,7 @@ impl CrnHeader{
         if self.m_header_size.cast_to_uint() < core::mem::size_of::<CrnHeader>() as u32 || data_size < self.m_data_size.cast_to_uint(){
             return false;
         }
-        return true;
+        true
     }
 }
 
@@ -194,11 +194,11 @@ pub fn crnd_unpack_begin(p_data: &[u8], data_size: u32) -> Result<CrnUnpacker, &
     if p.init(p_data, data_size) == false{
         return Err("Failed to initialize Crunch decompressor.");
     }
-    return Ok(p);
+    Ok(p)
 }
 
 pub fn crnd_get_crn_format_bits_per_texel(fmt: &mut CrnFormat) -> Result<u32, &'static str>{
-    return match fmt {
+    match fmt {
         CrnFormat::CCrnfmtDxt1 |
         CrnFormat::CCrnfmtDxt5a |
         CrnFormat::CCrnfmtEtc1 => Ok(4),
@@ -213,12 +213,12 @@ pub fn crnd_get_crn_format_bits_per_texel(fmt: &mut CrnFormat) -> Result<u32, &'
         CrnFormat::CCrnfmtDxt5Agbr => Ok(8),
 
         _ => Err("Texture format is not supported.")
-    };
+    }
 }
 
 pub fn crnd_get_bytes_per_dxt_block(fmt: &mut CrnFormat) -> Result<u32, &'static str>{
-    return Ok((match crnd_get_crn_format_bits_per_texel(fmt){
+    Ok((match crnd_get_crn_format_bits_per_texel(fmt){
         Ok(s) => s,
         Err(e) => return Err(e)
-    } << 4) >> 3);
+    } << 4) >> 3)
 }
