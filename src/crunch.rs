@@ -16,7 +16,7 @@ struct CrunchDecodeHandler{
 
 fn crunch_unpack_level<'vec>(data: &[u8], data_size: u32, level_index: u32) -> Result<CrunchDecodeHandler, &'static str> {
     let mut tex_info: CrnTextureInfo = CrnTextureInfo::default();
-    if tex_info.crnd_get_texture_info(data, data_size) == false {
+    if !tex_info.crnd_get_texture_info(data, data_size) {
         return Err("Invalid crunch texture encoding.");
     }
     if tex_info.m_faces != 1 {

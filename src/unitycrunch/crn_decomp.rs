@@ -8,7 +8,7 @@ pub fn crnd_unpack_begin(p_data: &[u8], data_size: u32) -> Result<CrnUnpacker, &
         return Err("Data size is below the minimum allowed.");
     }
     let mut p = CrnUnpacker::default();
-    if p.init(p_data, data_size) == false{
+    if !p.init(p_data, data_size){
         return Err("Failed to initialize Crunch decompressor.");
     }
     Ok(p)

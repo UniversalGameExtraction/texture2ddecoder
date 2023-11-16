@@ -54,15 +54,15 @@ impl<'slice> Default for CrnUnpacker<'slice>{
 impl<'slice> CrnUnpacker<'slice>{
     pub fn init(&mut self, p_data: &'slice[u8], data_size: u32) -> bool{
         let res = self.m_p_header.crnd_get_header(p_data, data_size);
-        if res == false {
+        if !res {
             return res;
         }
         self.m_p_data = p_data;
         self.m_data_size = data_size;
-        if self.init_tables() == false {
+        if !self.init_tables() {
             return false;
         }
-        if self.decode_palettes() == false {
+        if !self.decode_palettes() {
             return false;
         }
         true
@@ -70,41 +70,41 @@ impl<'slice> CrnUnpacker<'slice>{
     pub fn init_tables(&mut self) -> bool{
         let mut res: bool;
         res = self.m_codec.start_decoding(&self.m_p_data[self.m_p_header.m_tables_ofs.cast_to_uint() as usize..], self.m_p_header.m_tables_size.cast_to_uint());
-        if res == false {
+        if !res {
             return res;
         }
         res = self.m_codec.decode_receive_static_data_model(&mut self.m_reference_encoding_dm);
-        if res == false {
+        if !res {
             return res;
         }
         if (self.m_p_header.m_color_endpoints.m_num.cast_to_uint() == 0) && (self.m_p_header.m_alpha_endpoints.m_num.cast_to_uint() == 0) {
             return false;
         }
         if self.m_p_header.m_color_endpoints.m_num.cast_to_uint() != 0 {
-            if  self.m_codec.decode_receive_static_data_model(&mut self.m_endpoint_delta_dm[0]) == false {return false;}
-            if  self.m_codec.decode_receive_static_data_model(&mut self.m_selector_delta_dm[0]) == false {return false;}
+            if  !self.m_codec.decode_receive_static_data_model(&mut self.m_endpoint_delta_dm[0]) {return false;}
+            if  !self.m_codec.decode_receive_static_data_model(&mut self.m_selector_delta_dm[0]) {return false;}
         }
         if self.m_p_header.m_alpha_endpoints.m_num.cast_to_uint() != 0 {
-            if  self.m_codec.decode_receive_static_data_model(&mut self.m_endpoint_delta_dm[1]) == false {return false;}
-            if  self.m_codec.decode_receive_static_data_model(&mut self.m_selector_delta_dm[1]) == false {return false;}
+            if  !self.m_codec.decode_receive_static_data_model(&mut self.m_endpoint_delta_dm[1]) {return false;}
+            if  !self.m_codec.decode_receive_static_data_model(&mut self.m_selector_delta_dm[1]) {return false;}
         }
         self.m_codec.stop_decoding();
         true
     }
     pub fn decode_palettes(&mut self) -> bool{
         if self.m_p_header.m_color_endpoints.m_num.cast_to_uint() != 0 {
-           if self.decode_color_endpoints() == false {return false;}
-           if self.decode_color_selectors() == false {return false;}
+           if !self.decode_color_endpoints() {return false;}
+           if !self.decode_color_selectors() {return false;}
         }
 
         if self.m_p_header.m_alpha_endpoints.m_num.cast_to_uint() != 0 {
-            if self.decode_alpha_endpoints() == false {return false;}
+            if !self.decode_alpha_endpoints() {return false;}
 
             if self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc2as as u32 {
-                if self.decode_alpha_selectors_etcs() == false {return false;}
+                if !self.decode_alpha_selectors_etcs() {return false;}
             }else if self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc2a as u32{
-                if self.decode_alpha_selectors_etc() == false {return false;}
-            }else if self.decode_alpha_selectors() == false {return false;}
+                if !self.decode_alpha_selectors_etc() {return false;}
+            }else if !self.decode_alpha_selectors() {return false;}
         }
 
         true
@@ -123,14 +123,14 @@ impl<'slice> CrnUnpacker<'slice>{
         self.m_color_endpoints.resize(num_color_endpoints as usize, 0);
         let mut res: bool;
         res = self.m_codec.start_decoding(&self.m_p_data[self.m_p_header.m_color_endpoints.m_ofs.cast_to_uint() as usize..], self.m_p_header.m_color_endpoints.m_size.cast_to_uint());
-        if res == false {
+        if !res {
             return res;
         }
         let mut dm = [StaticHuffmanDataModel::default(), StaticHuffmanDataModel::default()];
         let range: usize = if has_etc_color_blocks {1} else {2};
         for i in 0..range{
             res = self.m_codec.decode_receive_static_data_model(&mut (dm[i]));
-            if res == false {
+            if !res {
                 return res;
             }
         }
@@ -179,12 +179,12 @@ impl<'slice> CrnUnpacker<'slice>{
         let mut res: bool;
         // Return value here is ignored in the original code.
         res = self.m_codec.start_decoding(&self.m_p_data[(self.m_p_header.m_color_selectors.m_ofs.cast_to_uint() as usize)..], self.m_p_header.m_color_selectors.m_size.cast_to_uint());
-        if res == false {
+        if !res {
             return res;
         }
         let mut dm: StaticHuffmanDataModel = StaticHuffmanDataModel::default();
         res = self.m_codec.decode_receive_static_data_model(&mut dm);
-        if res == false {
+        if !res {
             return res;
         }
         if has_subblocks{
@@ -230,12 +230,12 @@ impl<'slice> CrnUnpacker<'slice>{
         let num_alpha_endpoints = self.m_p_header.m_alpha_endpoints.m_num.cast_to_uint();
         let mut res: bool;
         res = self.m_codec.start_decoding(&self.m_p_data[self.m_p_header.m_alpha_endpoints.m_ofs.cast_to_uint() as usize..], self.m_p_header.m_alpha_endpoints.m_size.cast_to_uint());
-        if res == false {
+        if !res {
             return res;
         }
         let mut dm = StaticHuffmanDataModel::default();
         res = self.m_codec.decode_receive_static_data_model(&mut dm);
-        if res == false {
+        if !res {
             return res;
         }
         self.m_alpha_endpoints.resize(num_alpha_endpoints as usize, 0);
@@ -260,12 +260,12 @@ impl<'slice> CrnUnpacker<'slice>{
     }
     pub fn decode_alpha_selectors(&mut self) -> bool{
         let mut res = self.m_codec.start_decoding(&self.m_p_data[self.m_p_header.m_alpha_selectors.m_ofs.cast_to_uint() as usize..], self.m_p_header.m_alpha_selectors.m_size.cast_to_uint());
-        if res == false {
+        if !res {
             return res;
         }
         let mut dm = StaticHuffmanDataModel::default();
         res = self.m_codec.decode_receive_static_data_model(&mut dm);
-        if res == false {
+        if !res {
             return res;
         }
         self.m_alpha_selectors.resize((self.m_p_header.m_alpha_selectors.m_num.cast_to_uint() as usize) * 3, 0);
@@ -305,12 +305,12 @@ impl<'slice> CrnUnpacker<'slice>{
     }
     pub fn decode_alpha_selectors_etc(&mut self) -> bool{
         let mut res = self.m_codec.start_decoding(&self.m_p_data[self.m_p_header.m_alpha_selectors.m_ofs.cast_to_uint() as usize..], self.m_p_header.m_alpha_selectors.m_size.cast_to_uint());
-        if res == false {
+        if !res {
             return res;
         }
         let mut dm = StaticHuffmanDataModel::default();
         res = self.m_codec.decode_receive_static_data_model(&mut dm);
-        if res == false {
+        if !res {
             return res;
         }
         // + 1 here because in the C++ code it goes out of bounds by 1 byte at max.
@@ -357,12 +357,12 @@ impl<'slice> CrnUnpacker<'slice>{
     }
     pub fn decode_alpha_selectors_etcs(&mut self) -> bool {
         let mut res = self.m_codec.start_decoding(&self.m_p_data[self.m_p_header.m_alpha_selectors.m_ofs.cast_to_uint() as usize..], self.m_p_header.m_alpha_selectors.m_size.cast_to_uint());
-        if res == false {
+        if !res {
             return res;
         }
         let mut dm = StaticHuffmanDataModel::default();
         res = self.m_codec.decode_receive_static_data_model(&mut dm);
-        if res == false {
+        if !res {
             return res;
         }
         self.m_alpha_selectors.resize(((self.m_p_header.m_alpha_selectors.m_num.cast_to_uint() as usize) * 3) + 1, 0);
@@ -438,7 +438,7 @@ impl<'slice> CrnUnpacker<'slice>{
             return Err("Destination buffer size is smaller than what expected to decompress.");
         }
         let res: bool = self.m_codec.start_decoding(&p_src, src_size_in_bytes);
-        if res == false{
+        if !res{
             return Err("Failed to initialize the decoding process.");
         }
         let format = match self.m_p_header.m_format.cast_to_uint() {

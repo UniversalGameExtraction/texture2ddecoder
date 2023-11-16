@@ -75,7 +75,7 @@ impl DecoderTables{
         if total_used_syms > self.m_cur_sorted_symbol_order_size {
             self.m_cur_sorted_symbol_order_size = total_used_syms;
 
-            if is_power_of_2(total_used_syms as usize) == false {
+            if !is_power_of_2(total_used_syms as usize) {
                 self.m_cur_sorted_symbol_order_size = min(num_syms, next_pow2(total_used_syms as usize) as u32);
             }
 
@@ -96,7 +96,7 @@ impl DecoderTables{
                 let sorted_pos: u32 = sorted_positions[c as usize];
                 sorted_positions[c as usize] += 1;
 
-                if (sorted_pos < total_used_syms) == false{
+                if sorted_pos >= total_used_syms{
                     return false;
                 }
 
@@ -134,13 +134,13 @@ impl DecoderTables{
                 for code in min_code..=max_code{
                     let sym_index: u32 = self.m_sorted_symbol_order[(val_ptr + code - min_code) as usize] as u32;
 
-                    if (p_codesizes[sym_index as usize] as u32 == codesize) == false{
+                    if p_codesizes[sym_index as usize] as u32 != codesize{
                         return false;
                     }
 
                     for j in 0..fillnum{
                         let t: u32 = j + (code << fillsize);
-                        if (t < (1 << table_bits)) == false{
+                        if t >= (1 << table_bits){
                             return false;
                         }
                         self.m_lookup[t as usize] = sym_index | (codesize << 16);
@@ -191,7 +191,7 @@ impl DecoderTables{
 
     #[inline]
     fn get_unshifted_max_code(&mut self, len: u32) -> Result<u32, bool>{
-        if (len >= 1 && len <= C_MAX_EXPECTED_CODE_SIZE as u32) == false{
+        if !(len >= 1 && len <= C_MAX_EXPECTED_CODE_SIZE as u32){
             return Err(false);
         }
         let k: u32 = self.m_max_codes[(len - 1) as usize];
@@ -248,7 +248,7 @@ impl StaticHuffmanDataModel{
 
     pub fn prepare_decoder_tables(&mut self) -> bool{
         let total_syms = self.m_code_sizes.len();
-        if (total_syms >= 1 && total_syms as u32 <= C_MAX_SUPPORTED_SYMS as u32) == false{
+        if !(total_syms >= 1 && total_syms as u32 <= C_MAX_SUPPORTED_SYMS as u32){
             return false;
         }
         self.m_total_syms = total_syms as u32;

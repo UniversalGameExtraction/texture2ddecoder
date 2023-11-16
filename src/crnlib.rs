@@ -80,7 +80,7 @@ impl CrnTextureInfo{
 
         let mut p_header: CrnHeader = CrnHeader::default();
         let res: bool = p_header.crnd_get_header(p_data, data_size); 
-        if res == false {
+        if !res {
             return res;
         }
 

@@ -46,15 +46,15 @@ impl<'slice> Default for CrnUnpacker<'slice>{
 impl<'slice> CrnUnpacker<'slice>{
     pub fn init(&mut self, p_data: &'slice[u8], data_size: u32) -> bool{
         let res = self.m_p_header.crnd_get_header(p_data, data_size);
-        if res == false {
+        if !res {
             return res;
         }
         self.m_p_data = p_data;
         self.m_data_size = data_size;
-        if self.init_tables() == false {
+        if !self.init_tables() {
             return false;
         }
-        if self.decode_palettes() == false {
+        if !self.decode_palettes() {
             return false;
         }
         true
@@ -62,36 +62,36 @@ impl<'slice> CrnUnpacker<'slice>{
     pub fn init_tables(&mut self) -> bool{
         let mut res: bool;
         res = self.m_codec.start_decoding(&self.m_p_data[self.m_p_header.m_tables_ofs.cast_to_uint() as usize..], self.m_p_header.m_tables_size.cast_to_uint());
-        if res == false {
+        if !res {
             return res;
         }
         res = self.m_codec.decode_receive_static_data_model(&mut self.m_chunk_encoding_dm);
-        if res == false {
+        if !res {
             return res;
         }
         if (self.m_p_header.m_color_endpoints.m_num.cast_to_uint() == 0) && (self.m_p_header.m_alpha_endpoints.m_num.cast_to_uint() == 0) {
             return false;
         }
         if self.m_p_header.m_color_endpoints.m_num.cast_to_uint() != 0 {
-            if  self.m_codec.decode_receive_static_data_model(&mut self.m_endpoint_delta_dm[0]) == false {return false;}
-            if  self.m_codec.decode_receive_static_data_model(&mut self.m_selector_delta_dm[0]) == false {return false;}
+            if  !self.m_codec.decode_receive_static_data_model(&mut self.m_endpoint_delta_dm[0]) {return false;}
+            if  !self.m_codec.decode_receive_static_data_model(&mut self.m_selector_delta_dm[0]) {return false;}
         }
         if self.m_p_header.m_alpha_endpoints.m_num.cast_to_uint() != 0 {
-            if  self.m_codec.decode_receive_static_data_model(&mut self.m_endpoint_delta_dm[1]) == false {return false;}
-            if  self.m_codec.decode_receive_static_data_model(&mut self.m_selector_delta_dm[1]) == false {return false;}
+            if  !self.m_codec.decode_receive_static_data_model(&mut self.m_endpoint_delta_dm[1]) {return false;}
+            if  !self.m_codec.decode_receive_static_data_model(&mut self.m_selector_delta_dm[1]) {return false;}
         }
         self.m_codec.stop_decoding();
         true
     }
     pub fn decode_palettes(&mut self) -> bool{
         if  self.m_p_header.m_color_endpoints.m_num.cast_to_uint() != 0 {
-           if  self.decode_color_endpoints() == false {return false;}
-           if  self.decode_color_selectors() == false {return false;}
+           if  !self.decode_color_endpoints() {return false;}
+           if  !self.decode_color_selectors() {return false;}
         }
 
         if  self.m_p_header.m_alpha_endpoints.m_num.cast_to_uint() != 0 {
-           if  self.decode_alpha_endpoints() == false {return false;}
-           if  self.decode_alpha_selectors() == false {return false;}
+           if  !self.decode_alpha_endpoints() {return false;}
+           if  !self.decode_alpha_selectors() {return false;}
         }
 
         true
@@ -101,13 +101,13 @@ impl<'slice> CrnUnpacker<'slice>{
         self.m_color_endpoints.resize(num_color_endpoints as usize, 0);
         let mut res: bool;
         res = self.m_codec.start_decoding(&self.m_p_data[self.m_p_header.m_color_endpoints.m_ofs.cast_to_uint() as usize..], self.m_p_header.m_color_endpoints.m_size.cast_to_uint());
-        if res == false {
+        if !res {
             return res;
         }
         let mut dm = [StaticHuffmanDataModel::default(), StaticHuffmanDataModel::default()];
         for i in 0..2{
             res = self.m_codec.decode_receive_static_data_model(&mut dm[i]);
-            if res == false {
+            if !res {
                 return res;
             }
         }
@@ -138,12 +138,12 @@ impl<'slice> CrnUnpacker<'slice>{
         let num_color_selectors = self.m_p_header.m_color_selectors.m_num.cast_to_uint();
         let mut res: bool;
         res = self.m_codec.start_decoding(&self.m_p_data[(self.m_p_header.m_color_selectors.m_ofs.cast_to_uint() as usize)..], self.m_p_header.m_color_selectors.m_size.cast_to_uint());
-        if res == false {
+        if !res {
             return res;
         }
         let mut dm: StaticHuffmanDataModel = StaticHuffmanDataModel::default();
         res = self.m_codec.decode_receive_static_data_model(&mut dm);
-        if res == false {
+        if !res {
             return res;
         }
         let mut delta0 = [0; (C_MAX_UNIQUE_SELECTOR_DELTAS * C_MAX_UNIQUE_SELECTOR_DELTAS)];
@@ -174,14 +174,14 @@ impl<'slice> CrnUnpacker<'slice>{
             }
             if C_CRND_LITTLE_ENDIAN_PLATFORM {
                 p_dst[0] =
-                    (p_from_linear[cur[0 ] as usize] as u32) | ((p_from_linear[cur[1 ] as usize] as u32) <<  2) | ((p_from_linear[cur[2 ] as usize] as u32) <<  4) | ((p_from_linear[cur[3 ] as usize] as u32) <<  6) |
+                    ((p_from_linear[cur[0 ] as usize] as u32)      ) | ((p_from_linear[cur[1 ] as usize] as u32) <<  2) | ((p_from_linear[cur[2 ] as usize] as u32) <<  4) | ((p_from_linear[cur[3 ] as usize] as u32) <<  6) |
                     ((p_from_linear[cur[4 ] as usize] as u32) <<  8) | ((p_from_linear[cur[5 ] as usize] as u32) << 10) | ((p_from_linear[cur[6 ] as usize] as u32) << 12) | ((p_from_linear[cur[7 ] as usize] as u32) << 14) |
                     ((p_from_linear[cur[8 ] as usize] as u32) << 16) | ((p_from_linear[cur[9 ] as usize] as u32) << 18) | ((p_from_linear[cur[10] as usize] as u32) << 20) | ((p_from_linear[cur[11] as usize] as u32) << 22) |
                     ((p_from_linear[cur[12] as usize] as u32) << 24) | ((p_from_linear[cur[13] as usize] as u32) << 26) | ((p_from_linear[cur[14] as usize] as u32) << 28) | ((p_from_linear[cur[15] as usize] as u32) << 30);
                 p_dst = &mut p_dst[1..];
             }else{
                 p_dst[0] =
-                (p_from_linear[cur[8 ] as usize] as u32) | ((p_from_linear[cur[9 ] as usize] as u32) <<  2) | ((p_from_linear[cur[10] as usize] as u32) <<  4) | ((p_from_linear[cur[11] as usize] as u32) <<  6) |
+                ((p_from_linear[cur[8 ] as usize] as u32)      ) | ((p_from_linear[cur[9 ] as usize] as u32) <<  2) | ((p_from_linear[cur[10] as usize] as u32) <<  4) | ((p_from_linear[cur[11] as usize] as u32) <<  6) |
                 ((p_from_linear[cur[12] as usize] as u32) <<  8) | ((p_from_linear[cur[13] as usize] as u32) << 10) | ((p_from_linear[cur[14] as usize] as u32) << 12) | ((p_from_linear[cur[15] as usize] as u32) << 14) |
                 ((p_from_linear[cur[0 ] as usize] as u32) << 16) | ((p_from_linear[cur[1 ] as usize] as u32) << 18) | ((p_from_linear[cur[2 ] as usize] as u32) << 20) | ((p_from_linear[cur[3 ] as usize] as u32) << 22) |
                 ((p_from_linear[cur[4 ] as usize] as u32) << 24) | ((p_from_linear[cur[5 ] as usize] as u32) << 26) | ((p_from_linear[cur[6 ] as usize] as u32) << 28) | ((p_from_linear[cur[7 ] as usize] as u32) << 30);
@@ -195,12 +195,12 @@ impl<'slice> CrnUnpacker<'slice>{
         let num_alpha_endpoints = self.m_p_header.m_alpha_endpoints.m_num.cast_to_uint();
         let mut res: bool;
         res = self.m_codec.start_decoding(&self.m_p_data[self.m_p_header.m_alpha_endpoints.m_ofs.cast_to_uint() as usize..], self.m_p_header.m_alpha_endpoints.m_size.cast_to_uint());
-        if res == false {
+        if !res {
             return res;
         }
         let mut dm = StaticHuffmanDataModel::default();
         res = self.m_codec.decode_receive_static_data_model(&mut dm);
-        if res == false {
+        if !res {
             return res;
         }
         self.m_alpha_endpoints.resize(num_alpha_endpoints as usize, 0);
@@ -229,12 +229,12 @@ impl<'slice> CrnUnpacker<'slice>{
         let num_alpha_selectors = self.m_p_header.m_alpha_selectors.m_num.cast_to_uint();
         let mut res: bool;
         res = self.m_codec.start_decoding(&self.m_p_data[self.m_p_header.m_alpha_selectors.m_ofs.cast_to_uint() as usize..], self.m_p_header.m_alpha_selectors.m_size.cast_to_uint());
-        if res == false {
+        if !res {
             return res;
         }
         let mut dm = StaticHuffmanDataModel::default();
         res = self.m_codec.decode_receive_static_data_model(&mut dm);
-        if res == false {
+        if !res {
             return res;
         }
         let mut delta0 = [0; (C_MAX_UNIQUE_SELECTOR_DELTAS * C_MAX_UNIQUE_SELECTOR_DELTAS)];
@@ -264,7 +264,7 @@ impl<'slice> CrnUnpacker<'slice>{
                 cur[j*2+0] = ((delta0[sym as usize] + cur[j*2+0] as i32) & 7) as u32;
                 cur[j*2+1] = ((delta1[sym as usize] + cur[j*2+1] as i32) & 7) as u32;
             }
-            p_dst[0] = ((p_from_linear[cur[0 ] as usize] as u32) | ((p_from_linear[cur[1 ] as usize] as u32) << 3) | ((p_from_linear[cur[2 ] as usize] as u32) << 6) | 
+            p_dst[0] = (((p_from_linear[cur[0 ] as usize] as u32)     ) | ((p_from_linear[cur[1 ] as usize] as u32) << 3) | ((p_from_linear[cur[2 ] as usize] as u32) << 6) | 
                 ((p_from_linear[cur[3 ] as usize] as u32) << 9) | ((p_from_linear[cur[4 ] as usize] as u32) << 12) | ((p_from_linear[cur[5 ] as usize] as u32) << 15)) as u16;
 
             p_dst[1] = (((p_from_linear[cur[5 ] as usize] as u32) >> 1) | ((p_from_linear[cur[6 ] as usize] as u32) << 2) | ((p_from_linear[cur[7 ] as usize] as u32) << 5) |
@@ -317,7 +317,7 @@ impl<'slice> CrnUnpacker<'slice>{
         let chunks_x: u32 = (blocks_x + 1) >> 1;
         let chunks_y: u32 = (blocks_y + 1) >> 1;
         let res: bool = self.m_codec.start_decoding(&p_src, src_size_in_bytes);
-        if res == false{
+        if !res{
             return Err("Failed to initialize the decoding process.");
         }
         let format = match self.m_p_header.m_format.cast_to_uint() {
@@ -408,7 +408,7 @@ impl<'slice> CrnUnpacker<'slice>{
                     let p_tile_indices = G_CRND_CHUNK_ENCODING_TILES[chunk_encoding_index as usize].m_tiles;
                     let skip_right_col = ((blocks_x & 1) == 1) && (x == (chunks_x as i32 - 1));
                     let mut pd_dst = block_dst >> 2;
-                    if skip_bottom_row == false && skip_right_col == false {
+                    if !skip_bottom_row && !skip_right_col {
                         WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 0, color_endpoints[p_tile_indices[0] as usize]);
 
                         let delta0: u32;
@@ -461,7 +461,7 @@ impl<'slice> CrnUnpacker<'slice>{
                                 };
                                 prev_color_selector_index += delta;
                                 limit(&mut prev_color_selector_index, num_color_selectors);
-                                if (((bx != 0) && skip_right_col) || ((by != 0) && skip_bottom_row)) == false {
+                                if !(((bx != 0) && skip_right_col) || ((by != 0) && skip_bottom_row)) {
                                     WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 0, color_endpoints[p_tile_indices[(bx + by * 2) as usize] as usize]);
                                     WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 1, self.m_color_selectors[prev_color_selector_index as usize]);
                                 }
@@ -505,7 +505,7 @@ impl<'slice> CrnUnpacker<'slice>{
                 let skip_bottom_row = (y == (chunks_y - 1)) && ((blocks_y & 1) == 1);
                 for x in iter{
                     let mut color_endpoints = [0_u32; 4];
-                    let mut alpha_endpoints = [0_u32; 4];
+                    let mut alpha_endpoints = [0 as u32; 4];
                     if  chunk_encoding_bits == 1 {
                         chunk_encoding_bits = match self.m_codec.decode(&self.m_chunk_encoding_dm){
                             Ok(chunk_encoding_bits) => chunk_encoding_bits,
@@ -558,7 +558,7 @@ impl<'slice> CrnUnpacker<'slice>{
                             };
                             prev_color_selector_index += delta1;
                             limit(&mut prev_color_selector_index, num_color_selectors);
-                            if  (((bx != 0) && skip_right_col) || ((by != 0) && skip_bottom_row)) == false {
+                            if  !(((bx != 0) && skip_right_col) || ((by != 0) && skip_bottom_row)) {
                                 let tile_index: u32 = p_tile_indices[bx + by * 2] as u32;
                                 let p_alpha_selectors = &self.m_alpha_selectors[(prev_alpha_selector_index * 3) as usize..];
                                 #[cfg(target_endian = "big")]{
@@ -611,7 +611,7 @@ impl<'slice> CrnUnpacker<'slice>{
                 }
                 let skip_bottom_row = (y == (chunks_y - 1)) && ((blocks_y & 1) == 1);
                 for x in iter{
-                    let mut alpha0_endpoints = [0_u32; 4];
+                    let mut alpha0_endpoints = [0 as u32; 4];
                     if  chunk_encoding_bits == 1 {
                         chunk_encoding_bits = match self.m_codec.decode(&self.m_chunk_encoding_dm){
                             Ok(chunk_encoding_bits) => chunk_encoding_bits,
@@ -645,7 +645,7 @@ impl<'slice> CrnUnpacker<'slice>{
                             };
                             prev_alpha0_selector_index += delta;
                             limit(&mut prev_alpha0_selector_index, num_alpha_selectors);
-                            if  (((bx != 0) && skip_right_col) || ((by != 0) && skip_bottom_row)) == false {
+                            if  !(((bx != 0) && skip_right_col) || ((by != 0) && skip_bottom_row)) {
                                 let tile_index: u32 = p_tile_indices[bx + by * 2] as u32;
                                 let p_alpha0_selectors = &self.m_alpha_selectors[(prev_alpha0_selector_index * 3) as usize..];
                                 #[cfg(target_endian = "big")]{
@@ -696,8 +696,8 @@ impl<'slice> CrnUnpacker<'slice>{
                 }
                 let skip_bottom_row = (y == (chunks_y - 1)) && ((blocks_y & 1) == 1);
                 for x in iter{
-                    let mut alpha0_endpoints = [0_u32; 4];
-                    let mut alpha1_endpoints = [0_u32; 4];
+                    let mut alpha0_endpoints = [0 as u32; 4];
+                    let mut alpha1_endpoints = [0 as u32; 4];
                     if  chunk_encoding_bits == 1 {
                         chunk_encoding_bits = match self.m_codec.decode(&self.m_chunk_encoding_dm){
                             Ok(chunk_encoding_bits) => chunk_encoding_bits,
@@ -748,7 +748,7 @@ impl<'slice> CrnUnpacker<'slice>{
                             };
                             prev_alpha1_selector_index += delta1;
                             limit(&mut prev_alpha1_selector_index, num_alpha_selectors);
-                            if (((bx != 0) && skip_right_col) || ((by != 0) && skip_bottom_row)) == false {
+                            if !(((bx != 0) && skip_right_col) || ((by != 0) && skip_bottom_row)) {
                                 let tile_index: u32 = p_tile_indices[bx + by * 2] as u32;
                                 let p_alpha0_selectors = &self.m_alpha_selectors[(prev_alpha0_selector_index * 3) as usize..];
                                 let p_alpha1_selectors = &self.m_alpha_selectors[(prev_alpha1_selector_index * 3) as usize..];

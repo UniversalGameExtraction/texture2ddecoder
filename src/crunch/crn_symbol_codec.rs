@@ -69,7 +69,7 @@ impl<'slice> symbol_codec<'slice>{
             } as u8;
         }
         
-        if dm.prepare_decoder_tables() == false {
+        if !dm.prepare_decoder_tables() {
             return false;
         }
         
@@ -231,7 +231,7 @@ impl<'slice> symbol_codec<'slice>{
     }
     
     fn get_bits(&mut self, num_bits: u32) -> Result<u32, bool>{
-        if (num_bits <= 32) == false{
+        if num_bits > 32{
             return Err(false);
         }
         while self.m_bit_count < num_bits as i32 {
@@ -241,7 +241,7 @@ impl<'slice> symbol_codec<'slice>{
                 self.m_p_decode_buf_next = &self.m_p_decode_buf_next[1..];
             }
             self.m_bit_count += 8;
-            if (self.m_bit_count <= C_BIT_BUF_SIZE as i32) == false{
+            if self.m_bit_count > C_BIT_BUF_SIZE as i32{
                 return Err(false);
             }
             self.m_bit_buf |= c << (C_BIT_BUF_SIZE - self.m_bit_count as usize);
