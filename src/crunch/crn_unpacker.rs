@@ -174,14 +174,14 @@ impl<'slice> CrnUnpacker<'slice>{
             }
             if C_CRND_LITTLE_ENDIAN_PLATFORM {
                 p_dst[0] =
-                    ((p_from_linear[cur[0 ] as usize] as u32)      ) | ((p_from_linear[cur[1 ] as usize] as u32) <<  2) | ((p_from_linear[cur[2 ] as usize] as u32) <<  4) | ((p_from_linear[cur[3 ] as usize] as u32) <<  6) |
+                    (p_from_linear[cur[0 ] as usize] as u32) | ((p_from_linear[cur[1 ] as usize] as u32) <<  2) | ((p_from_linear[cur[2 ] as usize] as u32) <<  4) | ((p_from_linear[cur[3 ] as usize] as u32) <<  6) |
                     ((p_from_linear[cur[4 ] as usize] as u32) <<  8) | ((p_from_linear[cur[5 ] as usize] as u32) << 10) | ((p_from_linear[cur[6 ] as usize] as u32) << 12) | ((p_from_linear[cur[7 ] as usize] as u32) << 14) |
                     ((p_from_linear[cur[8 ] as usize] as u32) << 16) | ((p_from_linear[cur[9 ] as usize] as u32) << 18) | ((p_from_linear[cur[10] as usize] as u32) << 20) | ((p_from_linear[cur[11] as usize] as u32) << 22) |
                     ((p_from_linear[cur[12] as usize] as u32) << 24) | ((p_from_linear[cur[13] as usize] as u32) << 26) | ((p_from_linear[cur[14] as usize] as u32) << 28) | ((p_from_linear[cur[15] as usize] as u32) << 30);
                 p_dst = &mut p_dst[1..];
             }else{
                 p_dst[0] =
-                ((p_from_linear[cur[8 ] as usize] as u32)      ) | ((p_from_linear[cur[9 ] as usize] as u32) <<  2) | ((p_from_linear[cur[10] as usize] as u32) <<  4) | ((p_from_linear[cur[11] as usize] as u32) <<  6) |
+                (p_from_linear[cur[8 ] as usize] as u32) | ((p_from_linear[cur[9 ] as usize] as u32) <<  2) | ((p_from_linear[cur[10] as usize] as u32) <<  4) | ((p_from_linear[cur[11] as usize] as u32) <<  6) |
                 ((p_from_linear[cur[12] as usize] as u32) <<  8) | ((p_from_linear[cur[13] as usize] as u32) << 10) | ((p_from_linear[cur[14] as usize] as u32) << 12) | ((p_from_linear[cur[15] as usize] as u32) << 14) |
                 ((p_from_linear[cur[0 ] as usize] as u32) << 16) | ((p_from_linear[cur[1 ] as usize] as u32) << 18) | ((p_from_linear[cur[2 ] as usize] as u32) << 20) | ((p_from_linear[cur[3 ] as usize] as u32) << 22) |
                 ((p_from_linear[cur[4 ] as usize] as u32) << 24) | ((p_from_linear[cur[5 ] as usize] as u32) << 26) | ((p_from_linear[cur[6 ] as usize] as u32) << 28) | ((p_from_linear[cur[7 ] as usize] as u32) << 30);
@@ -264,7 +264,7 @@ impl<'slice> CrnUnpacker<'slice>{
                 cur[j*2+0] = ((delta0[sym as usize] + cur[j*2+0] as i32) & 7) as u32;
                 cur[j*2+1] = ((delta1[sym as usize] + cur[j*2+1] as i32) & 7) as u32;
             }
-            p_dst[0] = (((p_from_linear[cur[0 ] as usize] as u32)     ) | ((p_from_linear[cur[1 ] as usize] as u32) << 3) | ((p_from_linear[cur[2 ] as usize] as u32) << 6) | 
+            p_dst[0] = ((p_from_linear[cur[0 ] as usize] as u32) | ((p_from_linear[cur[1 ] as usize] as u32) << 3) | ((p_from_linear[cur[2 ] as usize] as u32) << 6) | 
                 ((p_from_linear[cur[3 ] as usize] as u32) << 9) | ((p_from_linear[cur[4 ] as usize] as u32) << 12) | ((p_from_linear[cur[5 ] as usize] as u32) << 15)) as u16;
 
             p_dst[1] = (((p_from_linear[cur[5 ] as usize] as u32) >> 1) | ((p_from_linear[cur[6 ] as usize] as u32) << 2) | ((p_from_linear[cur[7 ] as usize] as u32) << 5) |
