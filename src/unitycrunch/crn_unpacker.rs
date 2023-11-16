@@ -856,12 +856,12 @@ impl<'slice> CrnUnpacker<'slice>{
                         }
                         for c in 0..3_usize{
                             if diff != 0 {
-                                block_endpoint[c] = (e0[c] << 3 | (((e1[c] as i32) - (e0[c] as i32)) & 7) as u8);
+                                block_endpoint[c] = e0[c] << 3 | (((e1[c] as i32) - (e0[c] as i32)) & 7) as u8;
                             }else{
-                                block_endpoint[c] = ((e0[c] << 3 & 0xF0) | e1[c] >> 1);
+                                block_endpoint[c] = (e0[c] << 3 & 0xF0) | e1[c] >> 1;
                             }
                         }
-                        block_endpoint[3] = (e0[3] << 5 | e1[3] << 2 | diff << 1 | flip);
+                        block_endpoint[3] = e0[3] << 5 | e1[3] << 2 | diff << 1 | flip;
                         p_dst[data_pos * 4 + 0] = block_endpoint[0];
                         p_dst[data_pos * 4 + 1] = block_endpoint[1];
                         p_dst[data_pos * 4 + 2] = block_endpoint[2];
@@ -976,12 +976,12 @@ impl<'slice> CrnUnpacker<'slice>{
                         }
                         for c in 0..3_usize{
                             if diff != 0 {
-                                block_endpoint[c] = (e0[c] << 3 | (((e1[c] as i32) - (e0[c] as i32)) & 7) as u8);
+                                block_endpoint[c] = e0[c] << 3 | (((e1[c] as i32) - (e0[c] as i32)) & 7) as u8;
                             }else{
-                                block_endpoint[c] = ((e0[c] << 3 & 0xF0) | e1[c] >> 1);
+                                block_endpoint[c] = (e0[c] << 3 & 0xF0) | e1[c] >> 1;
                             }
                         }
-                        block_endpoint[3] = (e0[3] << 5 | e1[3] << 2 | diff << 1 | flip);
+                        block_endpoint[3] = e0[3] << 5 | e1[3] << 2 | diff << 1 | flip;
                         let p_alpha0_selectors: &[u16];
                         if flip != 0 {
                             p_alpha0_selectors = &self.m_alpha_selectors[alpha0_selector_index * 6 + 3..];

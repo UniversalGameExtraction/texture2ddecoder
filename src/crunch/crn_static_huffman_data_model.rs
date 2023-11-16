@@ -198,7 +198,7 @@ impl DecoderTables{
         if k == 0 {
             return Ok(u32::MAX);
         }
-        Ok(((k - 1) >> (16 - len)))
+        Ok((k - 1) >> (16 - len))
     }
 }
 

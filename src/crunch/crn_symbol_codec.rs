@@ -156,7 +156,7 @@ impl<'slice> symbol_codec<'slice>{
                 Ok(s) => s,
                 Err(_) => return Err(false)
             };
-            Ok(((a << 16) | b))
+            Ok((a << 16) | b)
         }else{
             self.get_bits(num_bits)
         }
