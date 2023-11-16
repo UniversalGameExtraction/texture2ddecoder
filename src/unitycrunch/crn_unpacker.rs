@@ -269,7 +269,7 @@ impl<'slice> CrnUnpacker<'slice>{
             return res;
         }
         self.m_alpha_selectors.resize((self.m_p_header.m_alpha_selectors.m_num.cast_to_uint() as usize) * 3, 0);
-        let mut dxt5_from_linear = [0 as u8; 64];
+        let mut dxt5_from_linear = [0_u8; 64];
         for i in 0..64{
             dxt5_from_linear[i] = G_DXT5_FROM_LINEAR[i & 7] | G_DXT5_FROM_LINEAR[i >> 3] << 3;
         }
@@ -315,7 +315,7 @@ impl<'slice> CrnUnpacker<'slice>{
         }
         // + 1 here because in the C++ code it goes out of bounds by 1 byte at max.
         self.m_alpha_selectors.resize((self.m_p_header.m_alpha_selectors.m_num.cast_to_uint() as usize) * 6 + 1, 0);
-        let mut s_linear = [0 as u8; 8];
+        let mut s_linear = [0_u8; 8];
         let mut data_pos: usize = 0;
         let mut i: usize = 0;
         // - 1 because we added one before.
@@ -366,7 +366,7 @@ impl<'slice> CrnUnpacker<'slice>{
             return res;
         }
         self.m_alpha_selectors.resize(((self.m_p_header.m_alpha_selectors.m_num.cast_to_uint() as usize) * 3) + 1, 0);
-        let mut s_linear = [0 as u8; 8];
+        let mut s_linear = [0_u8; 8];
         let mut i: usize = 0;
         while i < ((self.m_alpha_selectors.len() - 1) << 1){
             let mut s_group: u32 = 0;
@@ -433,7 +433,7 @@ impl<'slice> CrnUnpacker<'slice>{
         }else if row_pitch_in_bytes < minimal_row_pitch || (row_pitch_in_bytes & 3) != 0 {
             return Err("Crunch Row size is below the minimum allowed.");
         }
-        let mut ret = alloc::vec![0 as u8; dst_size_in_bytes as usize];
+        let mut ret = alloc::vec![0_u8; dst_size_in_bytes as usize];
         if dst_size_in_bytes < (row_pitch_in_bytes * blocks_y) {
             return Err("Destination buffer size is smaller than what expected to decompress.");
         }
@@ -795,7 +795,7 @@ impl<'slice> CrnUnpacker<'slice>{
                     visible = visible && x < output_width as usize;
                     let buffer = &mut self.m_block_buffer[x << 1];
                     let mut endpoint_reference: u8;
-                    let mut block_endpoint = [0 as u8; 4];
+                    let mut block_endpoint = [0_u8; 4];
                     if y&1 == 1{
                         endpoint_reference = buffer.endpoint_reference as u8;
                     }else{
@@ -844,7 +844,7 @@ impl<'slice> CrnUnpacker<'slice>{
                     if visible {
                         let flip: u8 = endpoint_reference >> 1 ^ 1;
                         let mut diff: u8 = 1;
-                        for c in 0..3 as usize{
+                        for c in 0..3_usize{
                             if diff == 0 {
                                 break;
                             }
@@ -854,7 +854,7 @@ impl<'slice> CrnUnpacker<'slice>{
                                 diff = 0;
                             }
                         }
-                        for c in 0..3 as usize{
+                        for c in 0..3_usize{
                             if diff != 0 {
                                 block_endpoint[c] = (e0[c] << 3 | (((e1[c] as i32) - (e0[c] as i32)) & 7) as u8);
                             }else{
@@ -897,7 +897,7 @@ impl<'slice> CrnUnpacker<'slice>{
                     visible = visible && x < output_width as usize;
                     let buffer = &mut self.m_block_buffer[x << 1];
                     let mut endpoint_reference: u8;
-                    let mut block_endpoint = [0 as u8; 4];
+                    let mut block_endpoint = [0_u8; 4];
                     if y&1 == 1{
                         endpoint_reference = buffer.endpoint_reference as u8;
                     }else{
@@ -963,8 +963,8 @@ impl<'slice> CrnUnpacker<'slice>{
                     self.m_block_buffer[x << 1 | 1].alpha0_endpoint_index = alpha0_endpoint_index as u16;
                     if visible {
                         let flip = endpoint_reference >> 1 ^ 1;
-                        let mut diff = 1 as u8;
-                        for c in 0..3 as usize{
+                        let mut diff = 1_u8;
+                        for c in 0..3_usize{
                             if diff == 0 {
                                 break;
                             }
@@ -974,7 +974,7 @@ impl<'slice> CrnUnpacker<'slice>{
                                 diff = 0;
                             }
                         }
-                        for c in 0..3 as usize{
+                        for c in 0..3_usize{
                             if diff != 0 {
                                 block_endpoint[c] = (e0[c] << 3 | (((e1[c] as i32) - (e0[c] as i32)) & 7) as u8);
                             }else{

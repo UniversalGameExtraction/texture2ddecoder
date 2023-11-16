@@ -27,14 +27,14 @@ pub struct DecoderTables{
 
 impl DecoderTables{
     pub fn init(&mut self, num_syms: u32, p_codesizes: &[u8], mut table_bits: u32) -> bool{
-        let mut min_codes = [0 as u32; C_MAX_EXPECTED_CODE_SIZE];
+        let mut min_codes = [0_u32; C_MAX_EXPECTED_CODE_SIZE];
         
-        if num_syms == (0 as u32) || table_bits > C_MAX_TABLE_BITS as u32 {
+        if num_syms == 0_u32 || table_bits > C_MAX_TABLE_BITS as u32 {
             return false;
         
         }
         self.m_num_syms = num_syms;
-        let mut num_codes = [0 as u32; (C_MAX_EXPECTED_CODE_SIZE + 1)];
+        let mut num_codes = [0_u32; (C_MAX_EXPECTED_CODE_SIZE + 1)];
         
         for i in 0..num_syms as usize{
             let c = p_codesizes[i];
@@ -43,7 +43,7 @@ impl DecoderTables{
             }
         
         }
-        let mut sorted_positions = [0 as u32; (C_MAX_EXPECTED_CODE_SIZE + 1)];
+        let mut sorted_positions = [0_u32; (C_MAX_EXPECTED_CODE_SIZE + 1)];
         let mut cur_code: u32 = 0;
         let mut total_used_syms: u32 = 0;
         let mut max_code_size: u32 = 0;

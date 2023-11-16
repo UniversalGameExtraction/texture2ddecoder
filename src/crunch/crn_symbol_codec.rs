@@ -144,10 +144,10 @@ impl<'slice> symbol_codec<'slice>{
     }
 
     pub fn decode_bits(&mut self, num_bits: u32) -> Result<u32, bool>{
-        if num_bits == 0 as u32 {
-            return Ok(0 as u32);
+        if num_bits == 0_u32 {
+            return Ok(0_u32);
         }
-        if num_bits > 16 as u32 {
+        if num_bits > 16_u32 {
             let a = match self.get_bits(num_bits - 16){
                 Ok(s) => s,
                 Err(_) => return Err(false)

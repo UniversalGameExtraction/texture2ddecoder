@@ -159,12 +159,12 @@ impl<'slice> CrnUnpacker<'slice>{
                 m += 1;
             }
         }
-        let mut cur = [0 as u32; 16];
+        let mut cur = [0_u32; 16];
         self.m_color_selectors.resize(num_color_selectors as usize, 0);
         let mut p_dst = &mut self.m_color_selectors[0..];
         let p_from_linear = &G_DXT1_FROM_LINEAR[0..];
         for _ in 0..num_color_selectors as usize{
-            for j in 0..8 as usize{
+            for j in 0..8_usize{
                 let sym: u32 = match self.m_codec.decode(&dm){
                     Ok(s) => s,
                     Err(_) => return false
@@ -250,12 +250,12 @@ impl<'slice> CrnUnpacker<'slice>{
                 m += 1;
             }
         }
-        let mut cur = [0 as u32; 16];
+        let mut cur = [0_u32; 16];
         self.m_alpha_selectors.resize(num_alpha_selectors as usize * 3, 0);
         let mut p_dst = &mut self.m_alpha_selectors[0..];
         let p_from_linear = &G_DXT5_FROM_LINEAR[0..];
         for _ in 0..num_alpha_selectors as usize{
-            for j in 0..8 as usize{
+            for j in 0..8_usize{
                 let sym: i32;
                 sym = match self.m_codec.decode(&dm){
                     Ok(s) => s,
@@ -310,7 +310,7 @@ impl<'slice> CrnUnpacker<'slice>{
         }else if row_pitch_in_bytes < minimal_row_pitch || (row_pitch_in_bytes & 3) != 0 {
             return Err("Crunch Row size is below the minimum allowed.");
         }
-        let mut ret = alloc::vec![0 as u8; dst_size_in_bytes as usize];
+        let mut ret = alloc::vec![0_u8; dst_size_in_bytes as usize];
         if dst_size_in_bytes < (row_pitch_in_bytes * blocks_y) {
             return Err("Destination buffer size is smaller than what expected to decompress.");
         }
@@ -384,7 +384,7 @@ impl<'slice> CrnUnpacker<'slice>{
                 }
                 let skip_bottom_row = (y == (chunks_y - 1)) && ((blocks_y & 1) == 1);
                 for x in iter{
-                    let mut color_endpoints = [0 as u32; 4];
+                    let mut color_endpoints = [0_u32; 4];
                     if chunk_encoding_bits == 1 {
                         chunk_encoding_bits = match self.m_codec.decode(&self.m_chunk_encoding_dm){
                             Ok(chunk_encoding_bits) => chunk_encoding_bits,
@@ -504,8 +504,8 @@ impl<'slice> CrnUnpacker<'slice>{
                 }
                 let skip_bottom_row = (y == (chunks_y - 1)) && ((blocks_y & 1) == 1);
                 for x in iter{
-                    let mut color_endpoints = [0 as u32; 4];
-                    let mut alpha_endpoints = [0 as u32; 4];
+                    let mut color_endpoints = [0_u32; 4];
+                    let mut alpha_endpoints = [0_u32; 4];
                     if  chunk_encoding_bits == 1 {
                         chunk_encoding_bits = match self.m_codec.decode(&self.m_chunk_encoding_dm){
                             Ok(chunk_encoding_bits) => chunk_encoding_bits,
@@ -611,7 +611,7 @@ impl<'slice> CrnUnpacker<'slice>{
                 }
                 let skip_bottom_row = (y == (chunks_y - 1)) && ((blocks_y & 1) == 1);
                 for x in iter{
-                    let mut alpha0_endpoints = [0 as u32; 4];
+                    let mut alpha0_endpoints = [0_u32; 4];
                     if  chunk_encoding_bits == 1 {
                         chunk_encoding_bits = match self.m_codec.decode(&self.m_chunk_encoding_dm){
                             Ok(chunk_encoding_bits) => chunk_encoding_bits,
@@ -696,8 +696,8 @@ impl<'slice> CrnUnpacker<'slice>{
                 }
                 let skip_bottom_row = (y == (chunks_y - 1)) && ((blocks_y & 1) == 1);
                 for x in iter{
-                    let mut alpha0_endpoints = [0 as u32; 4];
-                    let mut alpha1_endpoints = [0 as u32; 4];
+                    let mut alpha0_endpoints = [0_u32; 4];
+                    let mut alpha1_endpoints = [0_u32; 4];
                     if  chunk_encoding_bits == 1 {
                         chunk_encoding_bits = match self.m_codec.decode(&self.m_chunk_encoding_dm){
                             Ok(chunk_encoding_bits) => chunk_encoding_bits,
