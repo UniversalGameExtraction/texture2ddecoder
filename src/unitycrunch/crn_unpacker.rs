@@ -493,8 +493,8 @@ impl<'slice> CrnUnpacker<'slice>{
     }
     pub fn unpack_dxt1(&mut self, p_dst: &mut [u8], output_pitch_in_bytes: u32, output_width: u32, output_height: u32) -> Result<bool, &'static str>{
         let num_color_endpoints: u32 = self.m_color_endpoints.len() as u32;
-        let width: u32 = output_width + 1 & !1;
-        let height: u32 = output_height + 1 & !1;
+        let width: u32 = (output_width + 1) & !1;
+        let height: u32 = (output_height + 1) & !1;
         let delta_pitch_in_dwords: i32 = ((output_pitch_in_bytes >> 2) - (width << 1)) as i32;
         if self.m_block_buffer.len() < width as usize{
             self.m_block_buffer.resize(width as usize, BlockBufferElement::default());
@@ -555,8 +555,8 @@ impl<'slice> CrnUnpacker<'slice>{
     pub fn unpack_dxt5(&mut self, p_dst: &mut [u8], output_pitch_in_bytes: u32, output_width: u32, output_height: u32) -> Result<bool, &'static str>{
         let num_color_endpoints: u32 = self.m_color_endpoints.len() as u32;
         let num_alpha_endpoints: u32 = self.m_alpha_endpoints.len() as u32;
-        let width: u32 = output_width + 1 & !1;
-        let height: u32 = output_height + 1 & !1;
+        let width: u32 = (output_width + 1) & !1;
+        let height: u32 = (output_height + 1) & !1;
         let delta_pitch_in_dwords: i32 = ((output_pitch_in_bytes >> 2) - (width << 2)) as i32;
         if self.m_block_buffer.len() < width as usize{
             self.m_block_buffer.resize(width as usize, BlockBufferElement::default());
@@ -635,8 +635,8 @@ impl<'slice> CrnUnpacker<'slice>{
     }
     pub fn unpack_dxt5a(&mut self, p_dst: &mut [u8], output_pitch_in_bytes: u32, output_width: u32, output_height: u32) -> Result<bool, &'static str>{
         let num_alpha_endpoints: u32 = self.m_alpha_endpoints.len() as u32;
-        let width: u32 = output_width + 1 & !1;
-        let height: u32 = output_height + 1 & !1;
+        let width: u32 = (output_width + 1) & !1;
+        let height: u32 = (output_height + 1) & !1;
         let delta_pitch_in_dwords: i32 = ((output_pitch_in_bytes >> 2) - (width << 1)) as i32;
         if self.m_block_buffer.len() < width as usize{
             self.m_block_buffer.resize(width as usize, BlockBufferElement::default());
@@ -697,8 +697,8 @@ impl<'slice> CrnUnpacker<'slice>{
     }
     pub fn unpack_dxn(&mut self, p_dst: &mut [u8], output_pitch_in_bytes: u32, output_width: u32, output_height: u32) -> Result<bool, &'static str>{
         let num_alpha_endpoints: u32 = self.m_alpha_endpoints.len() as u32;
-        let width: u32 = output_width + 1 & !1;
-        let height: u32 = output_height + 1 & !1;
+        let width: u32 = (output_width + 1) & !1;
+        let height: u32 = (output_height + 1) & !1;
         let delta_pitch_in_dwords: i32 = ((output_pitch_in_bytes >> 2) - (width << 2)) as i32;
         if self.m_block_buffer.len() < width as usize{
             self.m_block_buffer.resize(width as usize, BlockBufferElement::default());
@@ -778,8 +778,8 @@ impl<'slice> CrnUnpacker<'slice>{
     }
     pub fn unpack_etc1(&mut self, p_dst: &mut [u8], output_pitch_in_bytes: u32, output_width: u32, output_height: u32) -> Result<bool, &'static str>{
         let num_color_endpoints: u32 = self.m_color_endpoints.len() as u32;
-        let width: u32 = output_width + 1 & !1;
-        let height: u32 = output_height + 1 & !1;
+        let width: u32 = (output_width + 1) & !1;
+        let height: u32 = (output_height + 1) & !1;
         let delta_pitch_in_dwords: i32 = ((output_pitch_in_bytes >> 2) - (width << 1)) as i32;
         if self.m_block_buffer.len() < (width << 1) as usize{
             self.m_block_buffer.resize((width << 1) as usize, BlockBufferElement::default());
@@ -878,8 +878,8 @@ impl<'slice> CrnUnpacker<'slice>{
     pub fn unpack_etc2a(&mut self, p_dst: &mut [u8], output_pitch_in_bytes: u32, output_width: u32, output_height: u32) -> Result<bool, &'static str>{
         let num_color_endpoints: u32 = self.m_color_endpoints.len() as u32;
         let num_alpha_endpoints: u32 = self.m_alpha_endpoints.len() as u32;
-        let width: u32 = output_width + 1 & !1;
-        let height: u32 = output_height + 1 & !1;
+        let width: u32 = (output_width + 1) & !1;
+        let height: u32 = (output_height + 1) & !1;
         let delta_pitch_in_dwords: i32 = ((output_pitch_in_bytes >> 2) - (width << 2)) as i32;
         if self.m_block_buffer.len() < (width << 1) as usize{
             self.m_block_buffer.resize((width << 1) as usize, BlockBufferElement::default());
