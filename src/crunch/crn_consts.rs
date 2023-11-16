@@ -80,9 +80,9 @@ pub const C_DXT5_SELECTOR_VALUES: usize = 1 << C_DXT5_SELECTOR_BITS;
 // pub const cDXT5SelectorMask: usize = cDXT5SelectorValues - 1;
 
 // pub const g_dxt1_to_linear:             [u8; cDXT1SelectorValues as usize]  = [0, 3, 1, 2];
-pub const G_DXT1_FROM_LINEAR:           [u8; C_DXT1_SELECTOR_VALUES as usize]  = [0, 2, 3, 1];
+pub const G_DXT1_FROM_LINEAR:           [u8; C_DXT1_SELECTOR_VALUES]  = [0, 2, 3, 1];
 // pub const g_dxt5_to_linear:             [u8; cDXT5SelectorValues as usize]  = [0, 7, 1, 2, 3, 4, 5, 6];
-pub const G_DXT5_FROM_LINEAR:           [u8; C_DXT5_SELECTOR_VALUES as usize]  = [0, 2, 3, 4, 5, 6, 7, 1];
+pub const G_DXT5_FROM_LINEAR:           [u8; C_DXT5_SELECTOR_VALUES]  = [0, 2, 3, 4, 5, 6, 7, 1];
 // pub const g_six_alpha_invert_table:     [u8; cDXT5SelectorValues as usize]  = [1, 0, 5, 4, 3, 2, 6, 7];
 // pub const g_eight_alpha_invert_table:   [u8; cDXT5SelectorValues as usize]  = [1, 0, 7, 6, 5, 4, 3, 2];
 
@@ -93,7 +93,7 @@ pub struct crnd_encoding_tile_indices{
     pub m_tiles: [u8; 4]
 } 
 
-pub const G_CRND_CHUNK_ENCODING_TILES: [crnd_encoding_tile_indices; C_NUM_CHUNK_ENCODINGS as usize] = [
+pub const G_CRND_CHUNK_ENCODING_TILES: [crnd_encoding_tile_indices; C_NUM_CHUNK_ENCODINGS] = [
    { crnd_encoding_tile_indices{ m_tiles: [0, 0, 0, 0] } },
    { crnd_encoding_tile_indices{ m_tiles: [0, 0, 1, 1] } },
    { crnd_encoding_tile_indices{ m_tiles: [0, 1, 0, 1] } },
@@ -104,4 +104,4 @@ pub const G_CRND_CHUNK_ENCODING_TILES: [crnd_encoding_tile_indices; C_NUM_CHUNK_
    { crnd_encoding_tile_indices{ m_tiles: [0, 1, 2, 3] } }
 ];
 
-pub const G_CRND_CHUNK_ENCODING_NUM_TILES: [u8; C_NUM_CHUNK_ENCODINGS as usize] = [ 1, 2, 2, 3, 3, 3, 3, 4 ];
+pub const G_CRND_CHUNK_ENCODING_NUM_TILES: [u8; C_NUM_CHUNK_ENCODINGS] = [ 1, 2, 2, 3, 3, 3, 3, 4 ];

@@ -15,8 +15,8 @@ pub struct DecoderTables{
     pub m_min_code_size: u8,
     pub m_max_code_size: u8,
 
-    pub m_max_codes: [u32; (C_MAX_EXPECTED_CODE_SIZE + 1) as usize],
-    pub m_val_ptrs: [i32;  (C_MAX_EXPECTED_CODE_SIZE + 1) as usize],
+    pub m_max_codes: [u32; C_MAX_EXPECTED_CODE_SIZE + 1],
+    pub m_val_ptrs: [i32;  C_MAX_EXPECTED_CODE_SIZE + 1],
 
     pub m_cur_lookup_size: u32,
     pub m_lookup: alloc::vec::Vec<u32>,
@@ -27,14 +27,14 @@ pub struct DecoderTables{
 
 impl DecoderTables{
     pub fn init(&mut self, num_syms: u32, p_codesizes: &[u8], mut table_bits: u32) -> bool{
-        let mut min_codes = [0 as u32; C_MAX_EXPECTED_CODE_SIZE as usize];
+        let mut min_codes = [0 as u32; C_MAX_EXPECTED_CODE_SIZE];
         
         if num_syms == (0 as u32) || table_bits > C_MAX_TABLE_BITS as u32 {
             return false;
         
         }
         self.m_num_syms = num_syms;
-        let mut num_codes = [0 as u32; (C_MAX_EXPECTED_CODE_SIZE + 1) as usize];
+        let mut num_codes = [0 as u32; (C_MAX_EXPECTED_CODE_SIZE + 1)];
         
         for i in 0..num_syms as usize{
             let c = p_codesizes[i];
@@ -43,13 +43,13 @@ impl DecoderTables{
             }
         
         }
-        let mut sorted_positions = [0 as u32; (C_MAX_EXPECTED_CODE_SIZE + 1) as usize];
+        let mut sorted_positions = [0 as u32; (C_MAX_EXPECTED_CODE_SIZE + 1)];
         let mut cur_code: u32 = 0;
         let mut total_used_syms: u32 = 0;
         let mut max_code_size: u32 = 0;
         let mut min_code_size: u32 = u32::MAX;
         
-        for i in 1..=C_MAX_EXPECTED_CODE_SIZE as usize{
+        for i in 1..=C_MAX_EXPECTED_CODE_SIZE{
             let n = num_codes[i];
 
             if n == 0 {
@@ -149,7 +149,7 @@ impl DecoderTables{
             }
         }
 
-        for i in 0..C_MAX_EXPECTED_CODE_SIZE as usize{
+        for i in 0..C_MAX_EXPECTED_CODE_SIZE{
             self.m_val_ptrs[i] -= min_codes[i] as i32;
         }
 
@@ -182,8 +182,8 @@ impl DecoderTables{
             self.m_table_max_code = 0;
         }
         // sentinels
-        self.m_max_codes[C_MAX_EXPECTED_CODE_SIZE as usize] = u32::MAX;
-        self.m_val_ptrs[C_MAX_EXPECTED_CODE_SIZE as usize] = 0xFFFFF;
+        self.m_max_codes[C_MAX_EXPECTED_CODE_SIZE] = u32::MAX;
+        self.m_val_ptrs[C_MAX_EXPECTED_CODE_SIZE] = 0xFFFFF;
 
         self.m_table_shift = 32 - self.m_table_bits;
         true
@@ -198,7 +198,7 @@ impl DecoderTables{
         if k == 0 {
             return Ok(u32::MAX);
         }
-        Ok(((k - 1) >> (16 - len)) as u32)
+        Ok(((k - 1) >> (16 - len)))
     }
 }
 

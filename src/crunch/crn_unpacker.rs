@@ -150,7 +150,7 @@ impl<'slice> CrnUnpacker<'slice>{
         let mut delta1 = [0; (C_MAX_UNIQUE_SELECTOR_DELTAS * C_MAX_UNIQUE_SELECTOR_DELTAS)];
         let mut l: i32 = -(C_MAX_SELECTOR_VALUE as i32);
         let mut m: i32 = -(C_MAX_SELECTOR_VALUE as i32);
-        for i in 0..(C_MAX_UNIQUE_SELECTOR_DELTAS * C_MAX_UNIQUE_SELECTOR_DELTAS) as usize{
+        for i in 0..(C_MAX_UNIQUE_SELECTOR_DELTAS * C_MAX_UNIQUE_SELECTOR_DELTAS){
             delta0[i] = l;
             delta1[i] = m;
             l += 1;
@@ -241,7 +241,7 @@ impl<'slice> CrnUnpacker<'slice>{
         let mut delta1 = [0; (C_MAX_UNIQUE_SELECTOR_DELTAS * C_MAX_UNIQUE_SELECTOR_DELTAS)];
         let mut l: i32 = -(C_MAX_SELECTOR_VALUE as i32);
         let mut m: i32 = -(C_MAX_SELECTOR_VALUE as i32);
-        for i in 0..(C_MAX_UNIQUE_SELECTOR_DELTAS * C_MAX_UNIQUE_SELECTOR_DELTAS) as usize{
+        for i in 0..(C_MAX_UNIQUE_SELECTOR_DELTAS * C_MAX_UNIQUE_SELECTOR_DELTAS){
             delta0[i] = l;
             delta1[i] = m;
             l += 1;
@@ -278,7 +278,7 @@ impl<'slice> CrnUnpacker<'slice>{
         true
     }
     pub fn crnd_unpack_level(&mut self, dst_size_in_bytes: u32, row_pitch_in_bytes: u32, level_index: u32) -> Result<alloc::vec::Vec<u8>, &'static str>{
-        if (dst_size_in_bytes < 8) || (level_index >= C_CRNMAX_LEVELS as u32) {
+        if (dst_size_in_bytes < 8) || (level_index >= C_CRNMAX_LEVELS) {
             return Err("Destination buffer size is too small.");
         }
         self.unpack_level(dst_size_in_bytes, row_pitch_in_bytes, level_index)
@@ -537,7 +537,7 @@ impl<'slice> CrnUnpacker<'slice>{
                         };
                         prev_color_endpoint_index += delta;
                         limit(&mut prev_color_endpoint_index, num_color_endpoints);
-                        color_endpoints[i as usize] = self.m_color_endpoints[prev_color_endpoint_index as usize] as u32;
+                        color_endpoints[i as usize] = self.m_color_endpoints[prev_color_endpoint_index as usize];
                     }
 
                     let mut pd_dst = block_dst;
@@ -568,8 +568,8 @@ impl<'slice> CrnUnpacker<'slice>{
                                     WRITE_TO_INT_BUFFER!(pDst, pd_dst + 3, (self.m_color_selectors[prev_color_selector_index as usize]));
                                 }
                                 #[cfg(target_endian = "little")]{
-                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 0, (alpha_endpoints[tile_index as usize] | ((p_alpha_selectors[0] as u32) << 16) as u32) as u32);
-                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 1, ((p_alpha_selectors[1] as u32) | ((p_alpha_selectors[2] as u32) << 16)) as u32);
+                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 0, (alpha_endpoints[tile_index as usize] | ((p_alpha_selectors[0] as u32) << 16)));
+                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 1, ((p_alpha_selectors[1] as u32) | ((p_alpha_selectors[2] as u32) << 16)));
                                     WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 2, (color_endpoints[tile_index as usize])); 
                                     WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 3, (self.m_color_selectors[prev_color_selector_index as usize]));
                                 }
@@ -653,8 +653,8 @@ impl<'slice> CrnUnpacker<'slice>{
                                     WRITE_TO_INT_BUFFER!(pDst, pd_dst + 1, (((pAlpha0_selectors[1] as u32) << 16) | (pAlpha0_selectors[2] as u32)) as u32);
                                 }
                                 #[cfg(target_endian = "little")]{
-                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 0, (alpha0_endpoints[tile_index as usize] | ((p_alpha0_selectors[0] as u32) << 16) as u32) as u32);
-                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 1, ((p_alpha0_selectors[1] as u32) | ((p_alpha0_selectors[2] as u32) << 16)) as u32);
+                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 0, (alpha0_endpoints[tile_index as usize] | ((p_alpha0_selectors[0] as u32) << 16)));
+                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 1, ((p_alpha0_selectors[1] as u32) | ((p_alpha0_selectors[2] as u32) << 16)));
                                 }
                             }
                             pd_dst += 2;
@@ -759,10 +759,10 @@ impl<'slice> CrnUnpacker<'slice>{
                                     WRITE_TO_INT_BUFFER!(pDst, pd_dst + 3, (((pAlpha1_selectors[1] as u32) << 16) | (pAlpha1_selectors[2] as u32)) as u32);
                                 }
                                 #[cfg(target_endian = "little")]{
-                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 0, (alpha0_endpoints[tile_index as usize] | ((p_alpha0_selectors[0] as u32) << 16) as u32) as u32);
-                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 1, ((p_alpha0_selectors[1] as u32) | ((p_alpha0_selectors[2] as u32) << 16)) as u32);
-                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 2, (alpha1_endpoints[tile_index as usize] | ((p_alpha1_selectors[0] as u32) << 16) as u32) as u32);
-                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 3, ((p_alpha1_selectors[1] as u32) | ((p_alpha1_selectors[2] as u32) << 16)) as u32);
+                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 0, (alpha0_endpoints[tile_index as usize] | ((p_alpha0_selectors[0] as u32) << 16)));
+                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 1, ((p_alpha0_selectors[1] as u32) | ((p_alpha0_selectors[2] as u32) << 16)));
+                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 2, (alpha1_endpoints[tile_index as usize] | ((p_alpha1_selectors[0] as u32) << 16)));
+                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 3, ((p_alpha1_selectors[1] as u32) | ((p_alpha1_selectors[2] as u32) << 16)));
                                 }
                             }
                             pd_dst += 4;
