@@ -149,7 +149,7 @@ impl CrnHeader{
             self.level_ofs.push(CrnPackedUint { buf: [0, 0, 0, 0] });
             self.level_ofs[i].assign_from_buffer(&p_data[70 + (i * 4)..]);
         }
-        if self.sig.cast_to_uint() as u16 != C_CRNSIG_VALUE{
+        if self.sig.cast_to_uint() as u16 != CRNSIG_VALUE{
             return false;
         }
         if self.header_size.cast_to_uint() < core::mem::size_of::<CrnHeader>() as u32 || data_size < self.data_size.cast_to_uint(){
@@ -187,7 +187,7 @@ impl CrnHeader{
 // }
 
 pub fn crnd_unpack_begin(p_data: &[u8], data_size: u32) -> Result<CrnUnpacker, &'static str>{
-    if data_size < C_CRNHEADER_MIN_SIZE as u32{
+    if data_size < CRNHEADER_MIN_SIZE as u32{
         return Err("Data size is below the minimum allowed.");
     }
     let mut p = CrnUnpacker::default();

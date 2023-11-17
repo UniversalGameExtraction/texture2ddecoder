@@ -15,8 +15,8 @@ pub struct DecoderTables{
     pub min_code_size: u8,
     pub max_code_size: u8,
 
-    pub max_codes: [u32; C_MAX_EXPECTED_CODE_SIZE + 1],
-    pub val_ptrs: [i32;  C_MAX_EXPECTED_CODE_SIZE + 1],
+    pub max_codes: [u32; MAX_EXPECTED_CODE_SIZE + 1],
+    pub val_ptrs: [i32;  MAX_EXPECTED_CODE_SIZE + 1],
 
     pub cur_lookup_size: u32,
     pub lookup: alloc::vec::Vec<u32>,
@@ -27,14 +27,14 @@ pub struct DecoderTables{
 
 impl DecoderTables{
     pub fn init(&mut self, num_syms: u32, p_codesizes: &[u8], mut table_bits: u32) -> bool{
-        let mut min_codes = [0_u32; C_MAX_EXPECTED_CODE_SIZE];
+        let mut min_codes = [0_u32; MAX_EXPECTED_CODE_SIZE];
         
-        if num_syms == 0_u32 || table_bits > C_MAX_TABLE_BITS as u32 {
+        if num_syms == 0_u32 || table_bits > MAX_TABLE_BITS as u32 {
             return false;
         
         }
         self.num_syms = num_syms;
-        let mut num_codes = [0_u32; (C_MAX_EXPECTED_CODE_SIZE + 1)];
+        let mut num_codes = [0_u32; (MAX_EXPECTED_CODE_SIZE + 1)];
         
         for &c in p_codesizes.iter().take(num_syms as usize) {
             if c != 0 {
@@ -42,13 +42,13 @@ impl DecoderTables{
             }
         }
         
-        let mut sorted_positions = [0_u32; (C_MAX_EXPECTED_CODE_SIZE + 1)];
+        let mut sorted_positions = [0_u32; (MAX_EXPECTED_CODE_SIZE + 1)];
         let mut cur_code: u32 = 0;
         let mut total_used_syms: u32 = 0;
         let mut max_code_size: u32 = 0;
         let mut min_code_size: u32 = u32::MAX;
         
-        for i in 1..=C_MAX_EXPECTED_CODE_SIZE{
+        for i in 1..=MAX_EXPECTED_CODE_SIZE{
             let n = num_codes[i];
 
             if n == 0 {
@@ -183,8 +183,8 @@ impl DecoderTables{
             self.table_max_code = 0;
         }
         // sentinels
-        self.max_codes[C_MAX_EXPECTED_CODE_SIZE] = u32::MAX;
-        self.val_ptrs[C_MAX_EXPECTED_CODE_SIZE] = 0xFFFFF;
+        self.max_codes[MAX_EXPECTED_CODE_SIZE] = u32::MAX;
+        self.val_ptrs[MAX_EXPECTED_CODE_SIZE] = 0xFFFFF;
 
         self.table_shift = 32 - self.table_bits;
         true
@@ -192,7 +192,7 @@ impl DecoderTables{
 
     #[inline]
     fn get_unshifted_max_code(&mut self, len: u32) -> Result<u32, bool>{
-        if !(len >= 1 && len <= C_MAX_EXPECTED_CODE_SIZE as u32){
+        if !(len >= 1 && len <= MAX_EXPECTED_CODE_SIZE as u32){
             return Err(false);
         }
         let k: u32 = self.max_codes[(len - 1) as usize];
@@ -242,14 +242,14 @@ impl StaticHuffmanDataModel{
     pub fn compute_decoder_table_bits(&mut self) -> u32{
         let mut decoder_table_bits: u32 = 0;
         if self.total_syms > 16 {
-            decoder_table_bits = min(1 + ceil_log2i(self.total_syms), C_MAX_TABLE_BITS as u32);
+            decoder_table_bits = min(1 + ceil_log2i(self.total_syms), MAX_TABLE_BITS as u32);
         }
         decoder_table_bits
     }
 
     pub fn prepare_decoder_tables(&mut self) -> bool{
         let total_syms = self.code_sizes.len();
-        if !(total_syms >= 1 && total_syms as u32 <= C_MAX_SUPPORTED_SYMS as u32){
+        if !(total_syms >= 1 && total_syms as u32 <= MAX_SUPPORTED_SYMS as u32){
             return false;
         }
         self.total_syms = total_syms as u32;

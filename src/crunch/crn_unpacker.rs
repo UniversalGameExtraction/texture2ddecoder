@@ -26,7 +26,7 @@ pub struct CrnUnpacker<'slice>{
 impl<'slice> Default for CrnUnpacker<'slice>{
     fn default() -> Self {
         CrnUnpacker {
-            magic: C_MAGIC_VALUE,
+            magic: MAGIC_VALUE,
             p_data: <&[u8]>::default(),
             data_size: <u32>::default(),
             tmp_header: <CrnHeader>::default(),
@@ -124,7 +124,7 @@ impl<'slice> CrnUnpacker<'slice>{
             CRND_HUFF_DECODE!(self.codec, &dm[0], dd); d = (d + dd) & 31;
             CRND_HUFF_DECODE!(self.codec, &dm[1], de); e = (e + de) & 63;
             CRND_HUFF_DECODE!(self.codec, &dm[0], df); f = (f + df) & 31;
-            if C_CRND_LITTLE_ENDIAN_PLATFORM {
+            if CRND_LITTLE_ENDIAN_PLATFORM {
                 p_dst[0] = c | (b << 5) | (a << 11) | (f << 16) | (e << 21) | (d << 27);
                 p_dst = &mut p_dst[1..];
             }else{
@@ -136,8 +136,8 @@ impl<'slice> CrnUnpacker<'slice>{
         true
     }
     pub fn decode_color_selectors(&mut self) -> bool{
-        const C_MAX_SELECTOR_VALUE: u32 = 3;
-        const C_MAX_UNIQUE_SELECTOR_DELTAS: usize = (C_MAX_SELECTOR_VALUE as usize) * 2 + 1;
+        const MAX_SELECTOR_VALUE: u32 = 3;
+        const MAX_UNIQUE_SELECTOR_DELTAS: usize = (MAX_SELECTOR_VALUE as usize) * 2 + 1;
         let num_color_selectors = self.p_header.color_selectors.num.cast_to_uint();
         let mut res: bool;
         res = self.codec.start_decoding(&self.p_data[(self.p_header.color_selectors.ofs.cast_to_uint() as usize)..], self.p_header.color_selectors.size.cast_to_uint());
@@ -149,23 +149,23 @@ impl<'slice> CrnUnpacker<'slice>{
         if !res {
             return res;
         }
-        let mut delta0 = [0; (C_MAX_UNIQUE_SELECTOR_DELTAS * C_MAX_UNIQUE_SELECTOR_DELTAS)];
-        let mut delta1 = [0; (C_MAX_UNIQUE_SELECTOR_DELTAS * C_MAX_UNIQUE_SELECTOR_DELTAS)];
-        let mut l: i32 = -(C_MAX_SELECTOR_VALUE as i32);
-        let mut m: i32 = -(C_MAX_SELECTOR_VALUE as i32);
-        for i in 0..(C_MAX_UNIQUE_SELECTOR_DELTAS * C_MAX_UNIQUE_SELECTOR_DELTAS){
+        let mut delta0 = [0; (MAX_UNIQUE_SELECTOR_DELTAS * MAX_UNIQUE_SELECTOR_DELTAS)];
+        let mut delta1 = [0; (MAX_UNIQUE_SELECTOR_DELTAS * MAX_UNIQUE_SELECTOR_DELTAS)];
+        let mut l: i32 = -(MAX_SELECTOR_VALUE as i32);
+        let mut m: i32 = -(MAX_SELECTOR_VALUE as i32);
+        for i in 0..(MAX_UNIQUE_SELECTOR_DELTAS * MAX_UNIQUE_SELECTOR_DELTAS){
             delta0[i] = l;
             delta1[i] = m;
             l += 1;
-            if l > C_MAX_SELECTOR_VALUE as i32 {
-                l = -(C_MAX_SELECTOR_VALUE as i32);
+            if l > MAX_SELECTOR_VALUE as i32 {
+                l = -(MAX_SELECTOR_VALUE as i32);
                 m += 1;
             }
         }
         let mut cur = [0_u32; 16];
         self.color_selectors.resize(num_color_selectors as usize, 0);
         let mut p_dst = &mut self.color_selectors[0..];
-        let p_from_linear = &G_DXT1_FROM_LINEAR[0..];
+        let p_from_linear = &DXT1_FROM_LINEAR[0..];
         for _ in 0..num_color_selectors as usize{
             for j in 0..8_usize{
                 let sym: u32 = match self.codec.decode(&dm){
@@ -175,7 +175,7 @@ impl<'slice> CrnUnpacker<'slice>{
                 cur[j*2] = ((delta0[sym as usize] + cur[j*2] as i32) & 3) as u32;
                 cur[j*2+1] = ((delta1[sym as usize] + cur[j*2+1] as i32) & 3) as u32;
             }
-            if C_CRND_LITTLE_ENDIAN_PLATFORM {
+            if CRND_LITTLE_ENDIAN_PLATFORM {
                 p_dst[0] =
                     (p_from_linear[cur[0 ] as usize] as u32) | ((p_from_linear[cur[1 ] as usize] as u32) <<  2) | ((p_from_linear[cur[2 ] as usize] as u32) <<  4) | ((p_from_linear[cur[3 ] as usize] as u32) <<  6) |
                     ((p_from_linear[cur[4 ] as usize] as u32) <<  8) | ((p_from_linear[cur[5 ] as usize] as u32) << 10) | ((p_from_linear[cur[6 ] as usize] as u32) << 12) | ((p_from_linear[cur[7 ] as usize] as u32) << 14) |
@@ -227,8 +227,8 @@ impl<'slice> CrnUnpacker<'slice>{
         true
     }
     pub fn decode_alpha_selectors(&mut self) -> bool{
-        const C_MAX_SELECTOR_VALUE: u32 = 7;
-        const C_MAX_UNIQUE_SELECTOR_DELTAS: usize = (C_MAX_SELECTOR_VALUE as usize) * 2 + 1;
+        const MAX_SELECTOR_VALUE: u32 = 7;
+        const MAX_UNIQUE_SELECTOR_DELTAS: usize = (MAX_SELECTOR_VALUE as usize) * 2 + 1;
         let num_alpha_selectors = self.p_header.alpha_selectors.num.cast_to_uint();
         let mut res: bool;
         res = self.codec.start_decoding(&self.p_data[self.p_header.alpha_selectors.ofs.cast_to_uint() as usize..], self.p_header.alpha_selectors.size.cast_to_uint());
@@ -240,23 +240,23 @@ impl<'slice> CrnUnpacker<'slice>{
         if !res {
             return res;
         }
-        let mut delta0 = [0; (C_MAX_UNIQUE_SELECTOR_DELTAS * C_MAX_UNIQUE_SELECTOR_DELTAS)];
-        let mut delta1 = [0; (C_MAX_UNIQUE_SELECTOR_DELTAS * C_MAX_UNIQUE_SELECTOR_DELTAS)];
-        let mut l: i32 = -(C_MAX_SELECTOR_VALUE as i32);
-        let mut m: i32 = -(C_MAX_SELECTOR_VALUE as i32);
-        for i in 0..(C_MAX_UNIQUE_SELECTOR_DELTAS * C_MAX_UNIQUE_SELECTOR_DELTAS){
+        let mut delta0 = [0; (MAX_UNIQUE_SELECTOR_DELTAS * MAX_UNIQUE_SELECTOR_DELTAS)];
+        let mut delta1 = [0; (MAX_UNIQUE_SELECTOR_DELTAS * MAX_UNIQUE_SELECTOR_DELTAS)];
+        let mut l: i32 = -(MAX_SELECTOR_VALUE as i32);
+        let mut m: i32 = -(MAX_SELECTOR_VALUE as i32);
+        for i in 0..(MAX_UNIQUE_SELECTOR_DELTAS * MAX_UNIQUE_SELECTOR_DELTAS){
             delta0[i] = l;
             delta1[i] = m;
             l += 1;
-            if l > C_MAX_SELECTOR_VALUE as i32 {
-                l = -(C_MAX_SELECTOR_VALUE as i32);
+            if l > MAX_SELECTOR_VALUE as i32 {
+                l = -(MAX_SELECTOR_VALUE as i32);
                 m += 1;
             }
         }
         let mut cur = [0_u32; 16];
         self.alpha_selectors.resize(num_alpha_selectors as usize * 3, 0);
         let mut p_dst = &mut self.alpha_selectors[0..];
-        let p_from_linear = &G_DXT5_FROM_LINEAR[0..];
+        let p_from_linear = &DXT5_FROM_LINEAR[0..];
         for _ in 0..num_alpha_selectors as usize{
             for j in 0..8_usize{
                 let sym: i32 = match self.codec.decode(&dm){
@@ -280,7 +280,7 @@ impl<'slice> CrnUnpacker<'slice>{
         true
     }
     pub fn crnd_unpack_level(&mut self, dst_size_in_bytes: u32, row_pitch_in_bytes: u32, level_index: u32) -> Result<alloc::vec::Vec<u8>, &'static str>{
-        if (dst_size_in_bytes < 8) || (level_index >= C_CRNMAX_LEVELS) {
+        if (dst_size_in_bytes < 8) || (level_index >= CRNMAX_LEVELS) {
             return Err("Destination buffer size is too small.");
         }
         self.unpack_level(dst_size_in_bytes, row_pitch_in_bytes, level_index)
@@ -396,7 +396,7 @@ impl<'slice> CrnUnpacker<'slice>{
                     let chunk_encoding_index = chunk_encoding_bits & 7;
                     chunk_encoding_bits >>= 3;
 
-                    let num_tiles = G_CRND_CHUNK_ENCODING_NUM_TILES[chunk_encoding_index as usize];
+                    let num_tiles = CRND_CHUNK_ENCODING_NUM_TILES[chunk_encoding_index as usize];
                     for color_endpoint in color_endpoints.iter_mut().take(num_tiles as usize){
                         let delta: u32 = match self.codec.decode(&self.endpoint_delta_dm[0]){
                             Ok(delta) => delta,
@@ -407,7 +407,7 @@ impl<'slice> CrnUnpacker<'slice>{
                         *color_endpoint = self.color_endpoints[prev_color_endpoint_index as usize];
                     }
 
-                    let p_tile_indices = G_CRND_CHUNK_ENCODING_TILES[chunk_encoding_index as usize].tiles;
+                    let p_tile_indices = CRND_CHUNK_ENCODING_TILES[chunk_encoding_index as usize].tiles;
                     let skip_right_col = ((blocks_x & 1) == 1) && (x == (chunks_x as i32 - 1));
                     let mut pd_dst = block_dst >> 2;
                     if !skip_bottom_row && !skip_right_col {
@@ -512,8 +512,8 @@ impl<'slice> CrnUnpacker<'slice>{
                     }
                     let chunk_encoding_index: u32 = chunk_encoding_bits & 7;
                     chunk_encoding_bits >>= 3;
-                    let num_tiles = G_CRND_CHUNK_ENCODING_NUM_TILES[chunk_encoding_index as usize] as u32;
-                    let p_tile_indices = G_CRND_CHUNK_ENCODING_TILES[chunk_encoding_index as usize].tiles;
+                    let num_tiles = CRND_CHUNK_ENCODING_NUM_TILES[chunk_encoding_index as usize] as u32;
+                    let p_tile_indices = CRND_CHUNK_ENCODING_TILES[chunk_encoding_index as usize].tiles;
                     let skip_right_col = (blocks_x & 1) != 0 && (x == ((chunks_x as i32) - 1));
                     for i in 0..num_tiles{
                         let delta: u32 = match self.codec.decode(&self.endpoint_delta_dm[1]){
@@ -614,8 +614,8 @@ impl<'slice> CrnUnpacker<'slice>{
                     }
                     let chunk_encoding_index: u32 = chunk_encoding_bits & 7;
                     chunk_encoding_bits >>= 3;
-                    let num_tiles = G_CRND_CHUNK_ENCODING_NUM_TILES[chunk_encoding_index as usize] as u32;
-                    let p_tile_indices = G_CRND_CHUNK_ENCODING_TILES[chunk_encoding_index as usize].tiles;
+                    let num_tiles = CRND_CHUNK_ENCODING_NUM_TILES[chunk_encoding_index as usize] as u32;
+                    let p_tile_indices = CRND_CHUNK_ENCODING_TILES[chunk_encoding_index as usize].tiles;
                     let skip_right_col = (blocks_x & 1) != 0 && (x == ((chunks_x as i32) - 1));
                     for i in 0..num_tiles{
                         let delta: u32 = match self.codec.decode(&self.endpoint_delta_dm[1]){
@@ -698,8 +698,8 @@ impl<'slice> CrnUnpacker<'slice>{
                     }
                     let chunk_encoding_index: u32 = chunk_encoding_bits & 7;
                     chunk_encoding_bits >>= 3;
-                    let num_tiles = G_CRND_CHUNK_ENCODING_NUM_TILES[chunk_encoding_index as usize] as u32;
-                    let p_tile_indices = G_CRND_CHUNK_ENCODING_TILES[chunk_encoding_index as usize].tiles;
+                    let num_tiles = CRND_CHUNK_ENCODING_NUM_TILES[chunk_encoding_index as usize] as u32;
+                    let p_tile_indices = CRND_CHUNK_ENCODING_TILES[chunk_encoding_index as usize].tiles;
                     let skip_right_col = (blocks_x & 1) != 0 && (x == ((chunks_x as i32) - 1));
                     for i in 0..num_tiles{
                         let delta: u32 = match self.codec.decode(&self.endpoint_delta_dm[1]){

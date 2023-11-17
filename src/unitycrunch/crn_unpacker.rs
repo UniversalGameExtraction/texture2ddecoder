@@ -34,7 +34,7 @@ pub struct CrnUnpacker<'slice>{
 impl<'slice> Default for CrnUnpacker<'slice>{
     fn default() -> Self {
         CrnUnpacker {
-            magic: C_MAGIC_VALUE,
+            magic: MAGIC_VALUE,
             p_data: <&[u8]>::default(),
             data_size: <u32>::default(),
             p_header: <CrnHeader>::default(),
@@ -273,7 +273,7 @@ impl<'slice> CrnUnpacker<'slice>{
         self.alpha_selectors.resize((self.p_header.alpha_selectors.num.cast_to_uint() as usize) * 3, 0);
         let mut dxt5_from_linear = [0_u8; 64];
         for i in 0..64{
-            dxt5_from_linear[i] = G_DXT5_FROM_LINEAR[i & 7] | G_DXT5_FROM_LINEAR[i >> 3] << 3;
+            dxt5_from_linear[i] = DXT5_FROM_LINEAR[i & 7] | DXT5_FROM_LINEAR[i >> 3] << 3;
         }
         let mut s0_linear: u32 = 0;
         let mut s1_linear: u32 = 0;
@@ -399,7 +399,7 @@ impl<'slice> CrnUnpacker<'slice>{
         true
     }
     pub fn crnd_unpack_level(&mut self, dst_size_in_bytes: u32, row_pitch_in_bytes: u32, level_index: u32) -> Result<alloc::vec::Vec<u8>, &'static str>{
-        if (dst_size_in_bytes < 8) || (level_index >= C_CRNMAX_LEVELS) {
+        if (dst_size_in_bytes < 8) || (level_index >= CRNMAX_LEVELS) {
             return Err("Destination buffer size is too small.");
         }
         self.unpack_level(dst_size_in_bytes, row_pitch_in_bytes, level_index)

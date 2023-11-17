@@ -39,7 +39,7 @@ impl<'slice> symbol_codec<'slice>{
     }
 
     pub fn decode_receive_static_data_model(&mut self, model: &mut StaticHuffmanDataModel) -> bool{
-        let total_used_syms = match self.decode_bits(total_bits(C_MAX_SUPPORTED_SYMS as u32)){
+        let total_used_syms = match self.decode_bits(total_bits(MAX_SUPPORTED_SYMS as u32)){
             Ok(total_used_syms) => total_used_syms,
             Err(_) => return false
         };
@@ -55,14 +55,14 @@ impl<'slice> symbol_codec<'slice>{
             Err(_) => return false
         };
         
-        if (num_codelength_codes_to_send < 1) || (num_codelength_codes_to_send > C_MAX_CODELENGTH_CODES as u32) {
+        if (num_codelength_codes_to_send < 1) || (num_codelength_codes_to_send > MAX_CODELENGTH_CODES as u32) {
             return false;
         }
         
         let mut dm = StaticHuffmanDataModel::default();
-        dm.code_sizes.resize(C_MAX_CODELENGTH_CODES, 0);
+        dm.code_sizes.resize(MAX_CODELENGTH_CODES, 0);
         
-        for &code_length_code in G_MOST_PROBABLE_CODELENGTH_CODES.iter().take(num_codelength_codes_to_send as usize) {
+        for &code_length_code in MOST_PROBABLE_CODELENGTH_CODES.iter().take(num_codelength_codes_to_send as usize) {
             dm.code_sizes[code_length_code as usize] = match self.decode_bits(3) {
                 Ok(s) => s as u8,
                 Err(_) => return false,
@@ -85,39 +85,39 @@ impl<'slice> symbol_codec<'slice>{
             if code <= 16 {
                 model.code_sizes[ofs as usize] = code as u8;
                 ofs += 1;
-            }else if code == C_SMALL_ZERO_RUN_CODE {
-                let len = match self.decode_bits(C_SMALL_ZERO_RUN_EXTRA_BITS as u32) {
+            }else if code == SMALL_ZERO_RUN_CODE {
+                let len = match self.decode_bits(SMALL_ZERO_RUN_EXTRA_BITS as u32) {
                     Ok(s) => s,
                     Err(_) => return false
-                } + C_MIN_SMALL_ZERO_RUN_SIZE as u32;
+                } + MIN_SMALL_ZERO_RUN_SIZE as u32;
             
                 if len > num_remaining {
                     return false;
                 }
             
                 ofs += len;
-            }else if code == C_LARGE_ZERO_RUN_CODE {
-                let len = match self.decode_bits(C_LARGE_ZERO_RUN_EXTRA_BITS as u32) {
+            }else if code == LARGE_ZERO_RUN_CODE {
+                let len = match self.decode_bits(LARGE_ZERO_RUN_EXTRA_BITS as u32) {
                     Ok(s) => s,
                     Err(_) => return false
-                } + C_MIN_LARGE_ZERO_RUN_SIZE as u32;
+                } + MIN_LARGE_ZERO_RUN_SIZE as u32;
             
                 if len > num_remaining {
                     return false;
                 }
             
                 ofs += len;
-            }else if (code == C_SMALL_REPEAT_CODE) || (code == C_LARGE_REPEAT_CODE) {
+            }else if (code == SMALL_REPEAT_CODE) || (code == LARGE_REPEAT_CODE) {
                 let len: u32;
             
-                if code == C_SMALL_REPEAT_CODE {
-                    match self.decode_bits(C_SMALL_NON_ZERO_RUN_EXTRA_BITS as u32) {
-                        Ok(s) => {len = s + C_SMALL_MIN_NON_ZERO_RUN_SIZE as u32;},
+                if code == SMALL_REPEAT_CODE {
+                    match self.decode_bits(SMALL_NON_ZERO_RUN_EXTRA_BITS as u32) {
+                        Ok(s) => {len = s + SMALL_MIN_NON_ZERO_RUN_SIZE as u32;},
                         Err(_) => return false
                     };
                 }else{
-                    match self.decode_bits(C_LARGE_NON_ZERO_RUN_EXTRA_BITS as u32) {
-                        Ok(s) => {len = s + C_LARGE_MIN_NON_ZERO_RUN_SIZE as u32;},
+                    match self.decode_bits(LARGE_NON_ZERO_RUN_EXTRA_BITS as u32) {
+                        Ok(s) => {len = s + LARGE_MIN_NON_ZERO_RUN_SIZE as u32;},
                         Err(_) => return false
                     };
                 }
@@ -238,12 +238,12 @@ impl<'slice> symbol_codec<'slice>{
                 self.p_decode_buf_next = &self.p_decode_buf_next[1..];
             }
             self.bit_count += 8;
-            if self.bit_count > C_BIT_BUF_SIZE as i32{
+            if self.bit_count > BIT_BUF_SIZE as i32{
                 return Err(false);
             }
-            self.bit_buf |= c << (C_BIT_BUF_SIZE - self.bit_count as usize);
+            self.bit_buf |= c << (BIT_BUF_SIZE - self.bit_count as usize);
         }
-        let result: u32 = self.bit_buf >> (C_BIT_BUF_SIZE - num_bits as usize);
+        let result: u32 = self.bit_buf >> (BIT_BUF_SIZE - num_bits as usize);
         self.bit_buf <<= num_bits;
         self.bit_count -= num_bits as i32;
         Ok(result)
