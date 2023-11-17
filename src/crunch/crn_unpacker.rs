@@ -498,7 +498,7 @@ impl<'slice> CrnUnpacker<'slice>{
                 let skip_bottom_row = (y == (chunks_y - 1)) && ((blocks_y & 1) == 1);
                 for x in iter{
                     let mut color_endpoints = [0_u32; 4];
-                    let mut alpha_endpoints = [0 as u32; 4];
+                    let mut alpha_endpoints = [0_u32; 4];
                     if  chunk_encoding_bits == 1 {
                         chunk_encoding_bits = match self.m_codec.decode(&self.m_chunk_encoding_dm){
                             Ok(chunk_encoding_bits) => chunk_encoding_bits,
@@ -600,7 +600,7 @@ impl<'slice> CrnUnpacker<'slice>{
                 }
                 let skip_bottom_row = (y == (chunks_y - 1)) && ((blocks_y & 1) == 1);
                 for x in iter{
-                    let mut alpha0_endpoints = [0 as u32; 4];
+                    let mut alpha0_endpoints = [0_u32; 4];
                     if  chunk_encoding_bits == 1 {
                         chunk_encoding_bits = match self.m_codec.decode(&self.m_chunk_encoding_dm){
                             Ok(chunk_encoding_bits) => chunk_encoding_bits,
@@ -683,8 +683,8 @@ impl<'slice> CrnUnpacker<'slice>{
                 }
                 let skip_bottom_row = (y == (chunks_y - 1)) && ((blocks_y & 1) == 1);
                 for x in iter{
-                    let mut alpha0_endpoints = [0 as u32; 4];
-                    let mut alpha1_endpoints = [0 as u32; 4];
+                    let mut alpha0_endpoints = [0_u32; 4];
+                    let mut alpha1_endpoints = [0_u32; 4];
                     if  chunk_encoding_bits == 1 {
                         chunk_encoding_bits = match self.m_codec.decode(&self.m_chunk_encoding_dm){
                             Ok(chunk_encoding_bits) => chunk_encoding_bits,
