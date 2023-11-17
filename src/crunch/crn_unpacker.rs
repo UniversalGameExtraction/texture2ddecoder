@@ -301,7 +301,7 @@ impl<'slice> CrnUnpacker<'slice>{
         let height: u32 = core::cmp::max(self.m_p_header.m_height.cast_to_uint() >> level_index, 1);
         let blocks_x: u32 = (width + 3) >> 2;
         let blocks_y: u32 = (height + 3) >> 2;
-        let block_size: u32 = if  self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtDxt1 as u32 || self.m_p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtDxt5a as u32 {
+        let block_size: u32 = if  self.m_p_header.m_format.cast_to_uint() == CrnFormat::Dxt1 as u32 || self.m_p_header.m_format.cast_to_uint() == CrnFormat::Dxt5a as u32 {
             8
         }else{
             16
@@ -323,33 +323,33 @@ impl<'slice> CrnUnpacker<'slice>{
             return Err("Failed to initialize the decoding process.");
         }
         let format = match self.m_p_header.m_format.cast_to_uint() {
-            0          => CrnFormat::CCrnfmtDxt1,
-            1          => CrnFormat::CCrnfmtDxt3,
+            0          => CrnFormat::Dxt1,
+            1          => CrnFormat::Dxt3,
             2          => CrnFormat::CCrnfmtDxt5,
-            3          => CrnFormat::CCrnfmtDxt5CcxY,
-            4          => CrnFormat::CCrnfmtDxt5XGxR,
-            5          => CrnFormat::CCrnfmtDxt5XGbr,
-            6          => CrnFormat::CCrnfmtDxt5Agbr,
-            7          => CrnFormat::CCrnfmtDxnXy,
-            8          => CrnFormat::CCrnfmtDxnYx,
-            9          => CrnFormat::CCrnfmtDxt5a,
-            10         => CrnFormat::CCrnfmtEtc1,
-            11         => CrnFormat::CCrnfmtTotal,
-            _          => CrnFormat::CCrnfmtInvalid
+            3          => CrnFormat::Dxt5CcxY,
+            4          => CrnFormat::Dxt5XGxR,
+            5          => CrnFormat::Dxt5XGbr,
+            6          => CrnFormat::Dxt5Agbr,
+            7          => CrnFormat::DxnXy,
+            8          => CrnFormat::DxnYx,
+            9          => CrnFormat::Dxt5a,
+            10         => CrnFormat::Etc1,
+            11         => CrnFormat::Total,
+            _          => CrnFormat::Invalid
         };
         let unpack_res = match format {
-            CrnFormat::CCrnfmtDxt1 => self.unpack_dxt1(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y, chunks_x, chunks_y),
+            CrnFormat::Dxt1 => self.unpack_dxt1(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y, chunks_x, chunks_y),
 
             CrnFormat::CCrnfmtDxt5 |
-            CrnFormat::CCrnfmtDxt5CcxY |
-            CrnFormat::CCrnfmtDxt5XGbr |
-            CrnFormat::CCrnfmtDxt5Agbr |
-            CrnFormat::CCrnfmtDxt5XGxR => self.unpack_dxt5(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y, chunks_x, chunks_y),
+            CrnFormat::Dxt5CcxY |
+            CrnFormat::Dxt5XGbr |
+            CrnFormat::Dxt5Agbr |
+            CrnFormat::Dxt5XGxR => self.unpack_dxt5(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y, chunks_x, chunks_y),
             
-            CrnFormat::CCrnfmtDxt5a => self.unpack_dxt5a(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y, chunks_x, chunks_y),
+            CrnFormat::Dxt5a => self.unpack_dxt5a(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y, chunks_x, chunks_y),
 
-            CrnFormat::CCrnfmtDxnXy |
-            CrnFormat::CCrnfmtDxnYx => self.unpack_dxn(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y, chunks_x, chunks_y),
+            CrnFormat::DxnXy |
+            CrnFormat::DxnYx => self.unpack_dxn(&mut ret, row_pitch_in_bytes, blocks_x, blocks_y, chunks_x, chunks_y),
 
             _ => return Err("Invalid format for unpacking.")
         };

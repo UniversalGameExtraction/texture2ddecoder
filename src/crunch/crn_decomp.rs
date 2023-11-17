@@ -199,18 +199,18 @@ pub fn crnd_unpack_begin(p_data: &[u8], data_size: u32) -> Result<CrnUnpacker, &
 
 pub fn crnd_get_crn_format_bits_per_texel(fmt: &mut CrnFormat) -> Result<u32, &'static str>{
     match fmt {
-        CrnFormat::CCrnfmtDxt1 |
-        CrnFormat::CCrnfmtDxt5a |
-        CrnFormat::CCrnfmtEtc1 => Ok(4),
+        CrnFormat::Dxt1 |
+        CrnFormat::Dxt5a |
+        CrnFormat::Etc1 => Ok(4),
 
-        CrnFormat::CCrnfmtDxt3 |
+        CrnFormat::Dxt3 |
         CrnFormat::CCrnfmtDxt5 |
-        CrnFormat::CCrnfmtDxnXy |
-        CrnFormat::CCrnfmtDxnYx |
-        CrnFormat::CCrnfmtDxt5CcxY |
-        CrnFormat::CCrnfmtDxt5XGxR |
-        CrnFormat::CCrnfmtDxt5XGbr |
-        CrnFormat::CCrnfmtDxt5Agbr => Ok(8),
+        CrnFormat::DxnXy |
+        CrnFormat::DxnYx |
+        CrnFormat::Dxt5CcxY |
+        CrnFormat::Dxt5XGxR |
+        CrnFormat::Dxt5XGbr |
+        CrnFormat::Dxt5Agbr => Ok(8),
 
         _ => Err("Texture format is not supported.")
     }

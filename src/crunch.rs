@@ -51,18 +51,18 @@ pub fn decode_crunch(data: &[u8], width: usize, height: usize, image: &mut [u32]
         Err(s) => return Err(s)
     };
     match handler.format{
-        CrnFormat::CCrnfmtDxt1 => bcn::decode_bc1(&handler.dxt_data, width, height, image),
+        CrnFormat::Dxt1 => bcn::decode_bc1(&handler.dxt_data, width, height, image),
 
         CrnFormat::CCrnfmtDxt5 |
-        CrnFormat::CCrnfmtDxt5CcxY |
-        CrnFormat::CCrnfmtDxt5XGbr |
-        CrnFormat::CCrnfmtDxt5Agbr |
-        CrnFormat::CCrnfmtDxt5XGxR => bcn::decode_bc3(&handler.dxt_data, width, height, image),
+        CrnFormat::Dxt5CcxY |
+        CrnFormat::Dxt5XGbr |
+        CrnFormat::Dxt5Agbr |
+        CrnFormat::Dxt5XGxR => bcn::decode_bc3(&handler.dxt_data, width, height, image),
 
-        CrnFormat::CCrnfmtDxt5a => bcn::decode_bc4(&handler.dxt_data, width, height, image),
+        CrnFormat::Dxt5a => bcn::decode_bc4(&handler.dxt_data, width, height, image),
         
-        CrnFormat::CCrnfmtDxnXy |
-        CrnFormat::CCrnfmtDxnYx => bcn::decode_bc5(&handler.dxt_data, width, height, image),
+        CrnFormat::DxnXy |
+        CrnFormat::DxnYx => bcn::decode_bc5(&handler.dxt_data, width, height, image),
         _ => Err("Invalid crunch format.")
     }
 }

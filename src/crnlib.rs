@@ -6,37 +6,37 @@ use crate::crunch::crn_decomp::CrnHeader;
 #[derive(PartialEq, PartialOrd)]
 #[repr(u32)]
 pub enum CrnFormat {
-    CCrnfmtInvalid = 4294967295, // u32 -1,
+    Invalid = 4294967295, // u32 -1,
 
-    CCrnfmtDxt1 = 0,
+    Dxt1 = 0,
 
     // cCRNFmtFirstValid = crn_format::cCRNFmtDXT1 as isize, // Rust doesn't allow same value enums, and as far as I see this is not used in the lib.
 
     // cCRNFmtDXT3 is not currently supported when writing to CRN - only DDS.
-    CCrnfmtDxt3,
+    Dxt3,
 
     CCrnfmtDxt5,
 
     // Various DXT5 derivatives
-    CCrnfmtDxt5CcxY,    // Luma-chroma
-    CCrnfmtDxt5XGxR,    // Swizzled 2-component
-    CCrnfmtDxt5XGbr,    // Swizzled 3-component
-    CCrnfmtDxt5Agbr,    // Swizzled 4-component
+    Dxt5CcxY,    // Luma-chroma
+    Dxt5XGxR,    // Swizzled 2-component
+    Dxt5XGbr,    // Swizzled 3-component
+    Dxt5Agbr,    // Swizzled 4-component
 
     // ATI 3DC and X360 DXN
-    CCrnfmtDxnXy,
-    CCrnfmtDxnYx,
+    DxnXy,
+    DxnYx,
 
     // DXT5 alpha blocks only
-    CCrnfmtDxt5a,
+    Dxt5a,
 
-    CCrnfmtEtc1,
-    CCrnfmtEtc2,
-    CCrnfmtEtc2a,
-    CCrnfmtEtc1s,
-    CCrnfmtEtc2as,
+    Etc1,
+    Etc2,
+    Etc2a,
+    Etc1s,
+    Etc2as,
 
-    CCrnfmtTotal
+    Total
 }
 
 #[repr(C)]
@@ -63,7 +63,7 @@ impl CrnTextureInfo{
 			m_bytes_per_block: 0,
 			m_userdata0: 0,
 			m_userdata1: 0,
-			m_format: CrnFormat::CCrnfmtInvalid // Init as invalid?
+			m_format: CrnFormat::Invalid // Init as invalid?
         }
     }
 
@@ -89,46 +89,46 @@ impl CrnTextureInfo{
         self.m_format = match p_header.m_format.cast_to_uint(){
             // -1 => crn_format::cCRNFmtInvalid,
 
-            0 => CrnFormat::CCrnfmtDxt1,
+            0 => CrnFormat::Dxt1,
         
             // 0 => crn_formatcCRNFmtFirstValid,
         
             // cCRNFmtDXT3 is not currently supported when writing to CRN - only DDS.
-            1 => CrnFormat::CCrnfmtDxt3,
+            1 => CrnFormat::Dxt3,
         
             2 => CrnFormat::CCrnfmtDxt5,
         
             // Various DXT5 derivatives
-            3 => CrnFormat::CCrnfmtDxt5CcxY,    // Luma-chroma
-            4 => CrnFormat::CCrnfmtDxt5XGxR,    // Swizzled 2-component
-            5 => CrnFormat::CCrnfmtDxt5XGbr,    // Swizzled 3-component
-            6 => CrnFormat::CCrnfmtDxt5Agbr,    // Swizzled 4-component
+            3 => CrnFormat::Dxt5CcxY,    // Luma-chroma
+            4 => CrnFormat::Dxt5XGxR,    // Swizzled 2-component
+            5 => CrnFormat::Dxt5XGbr,    // Swizzled 3-component
+            6 => CrnFormat::Dxt5Agbr,    // Swizzled 4-component
         
             // ATI 3DC and X360 DXN
-            7 => CrnFormat::CCrnfmtDxnXy,
-            8 => CrnFormat::CCrnfmtDxnYx,
+            7 => CrnFormat::DxnXy,
+            8 => CrnFormat::DxnYx,
         
             // DXT5 alpha blocks only
-            9 => CrnFormat::CCrnfmtDxt5a,
+            9 => CrnFormat::Dxt5a,
         
-            10 => CrnFormat::CCrnfmtEtc1,
-            11 => CrnFormat::CCrnfmtEtc2,
-            12 => CrnFormat::CCrnfmtEtc2a,
-            13 => CrnFormat::CCrnfmtEtc1s,
-            14 => CrnFormat::CCrnfmtEtc2as,
+            10 => CrnFormat::Etc1,
+            11 => CrnFormat::Etc2,
+            12 => CrnFormat::Etc2a,
+            13 => CrnFormat::Etc1s,
+            14 => CrnFormat::Etc2as,
         
-            15 => CrnFormat::CCrnfmtTotal,
+            15 => CrnFormat::Total,
 
-            _ => CrnFormat::CCrnfmtInvalid
+            _ => CrnFormat::Invalid
         };
-        if self.m_format == CrnFormat::CCrnfmtInvalid {
+        if self.m_format == CrnFormat::Invalid {
             return false;
         }
-        if  (p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtDxt1 as u32) ||
-            (p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtDxt5a as u32) ||
-            (p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc1 as u32) ||
-            (p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc2 as u32) ||
-            (p_header.m_format.cast_to_uint() == CrnFormat::CCrnfmtEtc1s as u32) {
+        if  (p_header.m_format.cast_to_uint() == CrnFormat::Dxt1 as u32) ||
+            (p_header.m_format.cast_to_uint() == CrnFormat::Dxt5a as u32) ||
+            (p_header.m_format.cast_to_uint() == CrnFormat::Etc1 as u32) ||
+            (p_header.m_format.cast_to_uint() == CrnFormat::Etc2 as u32) ||
+            (p_header.m_format.cast_to_uint() == CrnFormat::Etc1s as u32) {
             self.m_bytes_per_block = 8;
         }else{
             self.m_bytes_per_block = 16;
