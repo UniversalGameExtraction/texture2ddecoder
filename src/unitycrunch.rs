@@ -18,7 +18,7 @@ fn unity_crunch_unpack_level(data: &[u8], data_size: u32, level_index: u32) -> R
     if tex_info.m_faces != 1 {
         return Err("Texture2D must only have 1 number of faces.");
     }
-    let mut p_context: crn_unpacker::CrnUnpacker<'_> = match crn_decomp::crnd_unpack_begin(&data, data_size){
+    let mut p_context: crn_unpacker::CrnUnpacker<'_> = match crn_decomp::crnd_unpack_begin(data, data_size){
         Ok(p_context) => p_context,
         Err(res) => return Err(res)
     };

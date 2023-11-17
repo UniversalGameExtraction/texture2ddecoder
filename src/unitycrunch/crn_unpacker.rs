@@ -437,7 +437,7 @@ impl<'slice> CrnUnpacker<'slice>{
         if dst_size_in_bytes < (row_pitch_in_bytes * blocks_y) {
             return Err("Destination buffer size is smaller than what expected to decompress.");
         }
-        let res: bool = self.m_codec.start_decoding(&p_src, src_size_in_bytes);
+        let res: bool = self.m_codec.start_decoding(p_src, src_size_in_bytes);
         if !res{
             return Err("Failed to initialize the decoding process.");
         }

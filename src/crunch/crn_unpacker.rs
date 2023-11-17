@@ -315,7 +315,7 @@ impl<'slice> CrnUnpacker<'slice>{
         }
         let chunks_x: u32 = (blocks_x + 1) >> 1;
         let chunks_y: u32 = (blocks_y + 1) >> 1;
-        let res: bool = self.m_codec.start_decoding(&p_src, src_size_in_bytes);
+        let res: bool = self.m_codec.start_decoding(p_src, src_size_in_bytes);
         if !res{
             return Err("Failed to initialize the decoding process.");
         }

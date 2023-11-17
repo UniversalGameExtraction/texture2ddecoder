@@ -23,7 +23,7 @@ fn crunch_unpack_level(data: &[u8], data_size: u32, level_index: u32) -> Result<
         // I think cubemaps have 6, but they are not in the same ballpark as Texture2D?
         return Err("Texture2D must only have 1 number of faces.");
     }
-    let mut p_context: crn_unpacker::CrnUnpacker<'_> = match crn_decomp::crnd_unpack_begin(&data, data_size){
+    let mut p_context: crn_unpacker::CrnUnpacker<'_> = match crn_decomp::crnd_unpack_begin(data, data_size){
         Ok(p_context) => p_context,
         Err(res) => return Err(res)
     };
