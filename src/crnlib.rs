@@ -4,9 +4,9 @@ use crate::crunch::crn_decomp::CrnHeader;
 // Basically all the standard DX9 formats, with some swizzled DXT5 formats
 // (most of them supported by ATI's Compressonator), along with some ATI/X360 GPU specific formats.
 #[derive(PartialEq, PartialOrd)]
-#[repr(C)]
+#[repr(u32)]
 pub enum CrnFormat {
-    CCrnfmtInvalid = -1,
+    CCrnfmtInvalid = 4294967295, // u32 -1,
 
     CCrnfmtDxt1 = 0,
 
@@ -36,9 +36,7 @@ pub enum CrnFormat {
     CCrnfmtEtc1s,
     CCrnfmtEtc2as,
 
-    CCrnfmtTotal,
-
-    CCrnfmtForceDword = 0xFFFFFFFF
+    CCrnfmtTotal
 }
 
 #[repr(C)]
@@ -120,8 +118,6 @@ impl CrnTextureInfo{
             14 => CrnFormat::CCrnfmtEtc2as,
         
             15 => CrnFormat::CCrnfmtTotal,
-        
-            0xFFFFFFFF => CrnFormat::CCrnfmtForceDword,
 
             _ => CrnFormat::CCrnfmtInvalid
         };

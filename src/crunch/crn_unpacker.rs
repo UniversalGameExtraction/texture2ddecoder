@@ -335,7 +335,6 @@ impl<'slice> CrnUnpacker<'slice>{
             9          => CrnFormat::CCrnfmtDxt5a,
             10         => CrnFormat::CCrnfmtEtc1,
             11         => CrnFormat::CCrnfmtTotal,
-            0xFFFFFFFF => CrnFormat::CCrnfmtForceDword,
             _          => CrnFormat::CCrnfmtInvalid
         };
         let unpack_res = match format {

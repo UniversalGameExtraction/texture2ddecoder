@@ -460,7 +460,6 @@ impl<'slice> CrnUnpacker<'slice>{
             13         => CrnFormat::CCrnfmtEtc1s,            
             14         => CrnFormat::CCrnfmtEtc2as,
             15         => CrnFormat::CCrnfmtTotal,
-            0xFFFFFFFF => CrnFormat::CCrnfmtForceDword,
             _          => CrnFormat::CCrnfmtInvalid
         };
         let unpack_res = match format {
