@@ -848,9 +848,7 @@ impl<'slice> CrnUnpacker<'slice>{
                             if diff == 0 {
                                 break;
                             }
-                            if e0[c] + 3 >= e1[c] && e1[c] + 4 >= e0[c]{
-                                diff = diff
-                            }else{
+                            if !(e0[c] + 3 >= e1[c] && e1[c] + 4 >= e0[c]){
                                 diff = 0;
                             }
                         }
@@ -968,9 +966,7 @@ impl<'slice> CrnUnpacker<'slice>{
                             if diff == 0 {
                                 break;
                             }
-                            if e0[c] + 3 >= e1[c] && e1[c] + 4 >= e0[c]{
-                                diff = diff
-                            }else{
+                            if !(e0[c] + 3 >= e1[c] && e1[c] + 4 >= e0[c]){
                                 diff = 0;
                             }
                         }

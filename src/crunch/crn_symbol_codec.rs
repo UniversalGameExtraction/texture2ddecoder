@@ -202,9 +202,6 @@ impl<'slice> symbol_codec<'slice>{
             }
         }else{
             len = p_tables.m_decode_start_code_size;
-            if len == 0 {
-                len = len;
-            }
             loop{
                 if k <= p_tables.m_max_codes[(len - 1) as usize] {
                     break;
