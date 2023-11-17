@@ -86,20 +86,20 @@ mod macros;
 mod astc;
 mod atc;
 mod bcn;
+mod crnlib;
+#[cfg(feature = "alloc")]
+mod crunch;
 mod etc;
 mod pvrtc;
 #[cfg(feature = "alloc")]
-mod crunch;
-#[cfg(feature = "alloc")]
 mod unitycrunch;
-mod crnlib;
 
 // import decode functions
 pub use astc::*;
 pub use atc::*;
 pub use bcn::*;
-pub use etc::*;
-pub use pvrtc::*;
 pub use crnlib::CrnTextureInfo;
 pub use crunch::decode_crunch;
+pub use etc::*;
+pub use pvrtc::*;
 pub use unitycrunch::decode_unity_crunch;

@@ -1,6 +1,6 @@
-use super::CrnFormat;
 use super::crn_consts::*;
 use super::crn_unpacker::*;
+use super::CrnFormat;
 extern crate alloc;
 
 // #[repr(C)]
@@ -20,7 +20,7 @@ extern crate alloc;
 
 // impl crn_file_info{
 //     pub fn default() -> crn_file_info{
-//         return crn_file_info { 
+//         return crn_file_info {
 //             struct_size: core::mem::size_of::<crn_file_info>() as u32,
 //             actual_data_size: 0,
 //             header_size: 0,
@@ -37,46 +37,43 @@ extern crate alloc;
 // }
 
 #[repr(C)]
-pub struct CrnPackedUint<const N: usize>{
-    pub buf: [u8; N]
+pub struct CrnPackedUint<const N: usize> {
+    pub buf: [u8; N],
 }
 
 // no-std, so we can not use std::ops
-impl<const N: usize> CrnPackedUint<N>{
-    pub fn assign_from_buffer(&mut self, other: &[u8]){
+impl<const N: usize> CrnPackedUint<N> {
+    pub fn assign_from_buffer(&mut self, other: &[u8]) {
         self.buf.copy_from_slice(&other[0..N])
     }
 
-    pub fn cast_to_uint(&mut self) -> u32{
+    pub fn cast_to_uint(&mut self) -> u32 {
         match N {
             1 => self.buf[0] as u32,
             2 => u16::from_be_bytes([self.buf[0], self.buf[1]]) as u32,
             3 => (self.buf[0] as u32) << 16 | u16::from_be_bytes([self.buf[1], self.buf[2]]) as u32,
             4 => u32::from_be_bytes([self.buf[0], self.buf[1], self.buf[2], self.buf[3]]),
-            _ => panic!("Packed integer can hold a 4 byte buffer at max!")
+            _ => panic!("Packed integer can hold a 4 byte buffer at max!"),
         }
     }
-
 }
 
-impl<const N: usize> Default for CrnPackedUint<N>{
+impl<const N: usize> Default for CrnPackedUint<N> {
     fn default() -> Self {
-        CrnPackedUint{
-            buf: [0; N]
-        }
+        CrnPackedUint { buf: [0; N] }
     }
 }
 
 #[derive(Default)]
 #[repr(C)]
-pub struct CrnPalette{
-   pub ofs: CrnPackedUint<3>,
-   pub size: CrnPackedUint<3>,
-   pub num: CrnPackedUint<2>
+pub struct CrnPalette {
+    pub ofs: CrnPackedUint<3>,
+    pub size: CrnPackedUint<3>,
+    pub num: CrnPackedUint<2>,
 }
 
-impl CrnPalette{
-    pub fn assign_from_buffer(&mut self, other: &[u8]){
+impl CrnPalette {
+    pub fn assign_from_buffer(&mut self, other: &[u8]) {
         self.ofs.assign_from_buffer(&other[0..]);
         self.size.assign_from_buffer(&other[3..]);
         self.num.assign_from_buffer(&other[6..]);
@@ -85,7 +82,7 @@ impl CrnPalette{
 
 #[derive(Default)]
 #[repr(C)]
-pub struct CrnHeader{
+pub struct CrnHeader {
     pub sig: CrnPackedUint<2>,
     pub header_size: CrnPackedUint<2>,
     pub header_crc16: CrnPackedUint<2>,
@@ -115,12 +112,12 @@ pub struct CrnHeader{
     pub tables_size: CrnPackedUint<2>,
     pub tables_ofs: CrnPackedUint<3>,
 
-    pub level_ofs: alloc::vec::Vec<CrnPackedUint<4>>
+    pub level_ofs: alloc::vec::Vec<CrnPackedUint<4>>,
 }
 
-impl CrnHeader{
-    pub fn crnd_get_header(&mut self, p_data: &[u8], data_size: u32) -> bool{
-        if data_size < (core::mem::size_of::<CrnHeader>() - 8 + 4) as u32{
+impl CrnHeader {
+    pub fn crnd_get_header(&mut self, p_data: &[u8], data_size: u32) -> bool {
+        if data_size < (core::mem::size_of::<CrnHeader>() - 8 + 4) as u32 {
             return false;
         }
         *self = CrnHeader::default();
@@ -145,14 +142,16 @@ impl CrnHeader{
         self.tables_size.assign_from_buffer(&p_data[65..]);
         self.tables_ofs.assign_from_buffer(&p_data[67..]);
         self.level_ofs = alloc::vec![];
-        for i in 0..self.levels.cast_to_uint() as usize{
+        for i in 0..self.levels.cast_to_uint() as usize {
             self.level_ofs.push(CrnPackedUint { buf: [0, 0, 0, 0] });
             self.level_ofs[i].assign_from_buffer(&p_data[70 + (i * 4)..]);
         }
-        if self.sig.cast_to_uint() as u16 != CRNSIG_VALUE{
+        if self.sig.cast_to_uint() as u16 != CRNSIG_VALUE {
             return false;
         }
-        if self.header_size.cast_to_uint() < core::mem::size_of::<CrnHeader>() as u32 || data_size < self.data_size.cast_to_uint(){
+        if self.header_size.cast_to_uint() < core::mem::size_of::<CrnHeader>() as u32
+            || data_size < self.data_size.cast_to_uint()
+        {
             return false;
         }
         true
@@ -186,39 +185,38 @@ impl CrnHeader{
 //     }
 // }
 
-pub fn crnd_unpack_begin(p_data: &[u8], data_size: u32) -> Result<CrnUnpacker, &'static str>{
-    if data_size < CRNHEADER_MIN_SIZE as u32{
+pub fn crnd_unpack_begin(p_data: &[u8], data_size: u32) -> Result<CrnUnpacker, &'static str> {
+    if data_size < CRNHEADER_MIN_SIZE as u32 {
         return Err("Data size is below the minimum allowed.");
     }
     let mut p = CrnUnpacker::default();
-    if !p.init(p_data, data_size){
+    if !p.init(p_data, data_size) {
         return Err("Failed to initialize Crunch decompressor.");
     }
     Ok(p)
 }
 
-pub fn crnd_get_crn_format_bits_per_texel(fmt: &mut CrnFormat) -> Result<u32, &'static str>{
+pub fn crnd_get_crn_format_bits_per_texel(fmt: &mut CrnFormat) -> Result<u32, &'static str> {
     match fmt {
-        CrnFormat::Dxt1 |
-        CrnFormat::Dxt5a |
-        CrnFormat::Etc1 => Ok(4),
+        CrnFormat::Dxt1 | CrnFormat::Dxt5a | CrnFormat::Etc1 => Ok(4),
 
-        CrnFormat::Dxt3 |
-        CrnFormat::CCrnfmtDxt5 |
-        CrnFormat::DxnXy |
-        CrnFormat::DxnYx |
-        CrnFormat::Dxt5CcxY |
-        CrnFormat::Dxt5XGxR |
-        CrnFormat::Dxt5XGbr |
-        CrnFormat::Dxt5Agbr => Ok(8),
+        CrnFormat::Dxt3
+        | CrnFormat::CCrnfmtDxt5
+        | CrnFormat::DxnXy
+        | CrnFormat::DxnYx
+        | CrnFormat::Dxt5CcxY
+        | CrnFormat::Dxt5XGxR
+        | CrnFormat::Dxt5XGbr
+        | CrnFormat::Dxt5Agbr => Ok(8),
 
-        _ => Err("Texture format is not supported.")
+        _ => Err("Texture format is not supported."),
     }
 }
 
-pub fn crnd_get_bytes_per_dxt_block(fmt: &mut CrnFormat) -> Result<u32, &'static str>{
-    Ok((match crnd_get_crn_format_bits_per_texel(fmt){
+pub fn crnd_get_bytes_per_dxt_block(fmt: &mut CrnFormat) -> Result<u32, &'static str> {
+    Ok((match crnd_get_crn_format_bits_per_texel(fmt) {
         Ok(s) => s,
-        Err(e) => return Err(e)
-    } << 4) >> 3)
+        Err(e) => return Err(e),
+    } << 4)
+        >> 3)
 }

@@ -18,10 +18,10 @@ pub enum CrnFormat {
     CCrnfmtDxt5,
 
     // Various DXT5 derivatives
-    Dxt5CcxY,    // Luma-chroma
-    Dxt5XGxR,    // Swizzled 2-component
-    Dxt5XGbr,    // Swizzled 3-component
-    Dxt5Agbr,    // Swizzled 4-component
+    Dxt5CcxY, // Luma-chroma
+    Dxt5XGxR, // Swizzled 2-component
+    Dxt5XGbr, // Swizzled 3-component
+    Dxt5Agbr, // Swizzled 4-component
 
     // ATI 3DC and X360 DXN
     DxnXy,
@@ -36,7 +36,7 @@ pub enum CrnFormat {
     Etc1s,
     Etc2as,
 
-    Total
+    Total,
 }
 
 #[repr(C)]
@@ -49,35 +49,35 @@ pub struct CrnTextureInfo {
     pub bytes_per_block: u32,
     pub userdata0: u32,
     pub userdata1: u32,
-    pub format: CrnFormat
+    pub format: CrnFormat,
 }
 
-impl CrnTextureInfo{
-    pub const fn default() -> Self{
+impl CrnTextureInfo {
+    pub const fn default() -> Self {
         Self {
             struct_size: core::mem::size_of::<CrnTextureInfo>() as u32,
-			width: 0,
-			height: 0,
-			levels: 0,
-			faces: 0,
-			bytes_per_block: 0,
-			userdata0: 0,
-			userdata1: 0,
-			format: CrnFormat::Invalid // Init as invalid?
+            width: 0,
+            height: 0,
+            levels: 0,
+            faces: 0,
+            bytes_per_block: 0,
+            userdata0: 0,
+            userdata1: 0,
+            format: CrnFormat::Invalid, // Init as invalid?
         }
     }
 
-    pub fn crnd_get_texture_info(&mut self, p_data: &[u8], data_size: u32) -> bool{
+    pub fn crnd_get_texture_info(&mut self, p_data: &[u8], data_size: u32) -> bool {
         if data_size < core::mem::size_of::<CrnHeader>() as u32 {
             return false;
         }
 
-        if self.struct_size != core::mem::size_of::<CrnTextureInfo>() as u32{
+        if self.struct_size != core::mem::size_of::<CrnTextureInfo>() as u32 {
             return false;
         }
 
         let mut p_header: CrnHeader = CrnHeader::default();
-        let res: bool = p_header.crnd_get_header(p_data, data_size); 
+        let res: bool = p_header.crnd_get_header(p_data, data_size);
         if !res {
             return res;
         }
@@ -86,51 +86,51 @@ impl CrnTextureInfo{
         self.height = p_header.height.cast_to_uint();
         self.levels = p_header.levels.cast_to_uint();
         self.faces = p_header.faces.cast_to_uint();
-        self.format = match p_header.format.cast_to_uint(){
+        self.format = match p_header.format.cast_to_uint() {
             // -1 => crn_format::cCRNFmtInvalid,
-
             0 => CrnFormat::Dxt1,
-        
+
             // 0 => crn_formatcCRNFmtFirstValid,
-        
+
             // cCRNFmtDXT3 is not currently supported when writing to CRN - only DDS.
             1 => CrnFormat::Dxt3,
-        
+
             2 => CrnFormat::CCrnfmtDxt5,
-        
+
             // Various DXT5 derivatives
-            3 => CrnFormat::Dxt5CcxY,    // Luma-chroma
-            4 => CrnFormat::Dxt5XGxR,    // Swizzled 2-component
-            5 => CrnFormat::Dxt5XGbr,    // Swizzled 3-component
-            6 => CrnFormat::Dxt5Agbr,    // Swizzled 4-component
-        
+            3 => CrnFormat::Dxt5CcxY, // Luma-chroma
+            4 => CrnFormat::Dxt5XGxR, // Swizzled 2-component
+            5 => CrnFormat::Dxt5XGbr, // Swizzled 3-component
+            6 => CrnFormat::Dxt5Agbr, // Swizzled 4-component
+
             // ATI 3DC and X360 DXN
             7 => CrnFormat::DxnXy,
             8 => CrnFormat::DxnYx,
-        
+
             // DXT5 alpha blocks only
             9 => CrnFormat::Dxt5a,
-        
+
             10 => CrnFormat::Etc1,
             11 => CrnFormat::Etc2,
             12 => CrnFormat::Etc2a,
             13 => CrnFormat::Etc1s,
             14 => CrnFormat::Etc2as,
-        
+
             15 => CrnFormat::Total,
 
-            _ => CrnFormat::Invalid
+            _ => CrnFormat::Invalid,
         };
         if self.format == CrnFormat::Invalid {
             return false;
         }
-        if  (p_header.format.cast_to_uint() == CrnFormat::Dxt1 as u32) ||
-            (p_header.format.cast_to_uint() == CrnFormat::Dxt5a as u32) ||
-            (p_header.format.cast_to_uint() == CrnFormat::Etc1 as u32) ||
-            (p_header.format.cast_to_uint() == CrnFormat::Etc2 as u32) ||
-            (p_header.format.cast_to_uint() == CrnFormat::Etc1s as u32) {
+        if (p_header.format.cast_to_uint() == CrnFormat::Dxt1 as u32)
+            || (p_header.format.cast_to_uint() == CrnFormat::Dxt5a as u32)
+            || (p_header.format.cast_to_uint() == CrnFormat::Etc1 as u32)
+            || (p_header.format.cast_to_uint() == CrnFormat::Etc2 as u32)
+            || (p_header.format.cast_to_uint() == CrnFormat::Etc1s as u32)
+        {
             self.bytes_per_block = 8;
-        }else{
+        } else {
             self.bytes_per_block = 16;
         }
         self.userdata0 = p_header.userdata0.cast_to_uint();

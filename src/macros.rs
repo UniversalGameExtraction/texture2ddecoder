@@ -43,11 +43,11 @@ macro_rules! block_decoder{
     };
 }
 
-macro_rules! CRND_HUFF_DECODE{
+macro_rules! CRND_HUFF_DECODE {
     ($codec: expr, $model: expr, $symbol: expr) => {
-        $symbol = match $codec.decode($model){
+        $symbol = match $codec.decode($model) {
             Ok(s) => s,
-            Err(_) => return false
+            Err(_) => return false,
         }
     };
 }
@@ -59,7 +59,10 @@ macro_rules! WRITE_TO_INT_BUFFER {
         let tiles = $val.to_le_bytes();
         #[cfg(target_endian = "big")]
         let tiles = $val.to_be_bytes();
-        $buf[t_index] = tiles[0]; $buf[t_index + 1] = tiles[1]; $buf[t_index + 2] = tiles[2]; $buf[t_index + 3] = tiles[3]
+        $buf[t_index] = tiles[0];
+        $buf[t_index + 1] = tiles[1];
+        $buf[t_index + 2] = tiles[2];
+        $buf[t_index + 3] = tiles[3]
     };
 }
 
@@ -69,10 +72,12 @@ macro_rules! WRITE_OR_U8_INTO_U16_BUFFER {
         let t_val = $buf[t_index].to_be_bytes();
         if $index & 1 != 1 {
             $buf[t_index] = ((t_val[0] as u16) << 8) | ((t_val[1] as u16) | $val as u16);
-        }else{
+        } else {
             $buf[t_index] = (((t_val[0] as u16) | ($val as u16)) << 8) | (t_val[1] as u16);
         }
     };
 }
 
-pub(crate) use {block_decoder, CRND_HUFF_DECODE, WRITE_TO_INT_BUFFER, WRITE_OR_U8_INTO_U16_BUFFER};
+pub(crate) use {
+    block_decoder, CRND_HUFF_DECODE, WRITE_OR_U8_INTO_U16_BUFFER, WRITE_TO_INT_BUFFER,
+};
