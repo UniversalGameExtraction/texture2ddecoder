@@ -17,7 +17,7 @@ A pure Rust no-std texture decoder for the following formats:
  - [BCn - Block Compression](https://en.wikipedia.org/wiki/S3_Texture_Compression)
  - [ETC - Ericsson Texture Compression](https://en.wikipedia.org/wiki/Ericsson_Texture_Compression)
  - [PVRTC - PowerVR Texture Compression](https://en.wikipedia.org/wiki/PVRTC)
- - [Crunch](https://github.com/BinomialLLC/crunch) & [Unity's Crunch](https://github.com/Unity-Technologies/crunch)
+ - [Crunch](https://github.com/BinomialLLC/crunch) & [Unity's Crunch (unity branch)](https://github.com/Unity-Technologies/crunch/tree/unity)
 
 ## Features
 
