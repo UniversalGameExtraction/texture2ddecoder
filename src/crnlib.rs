@@ -55,8 +55,8 @@ pub struct CrnTextureInfo {
 }
 
 impl CrnTextureInfo{
-    pub fn default() -> CrnTextureInfo{
-        CrnTextureInfo {
+    pub const fn default() -> Self{
+        Self {
             m_struct_size: core::mem::size_of::<CrnTextureInfo>() as u32,
 			m_width: 0,
 			m_height: 0,
