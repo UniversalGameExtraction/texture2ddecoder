@@ -111,15 +111,15 @@ impl<'slice> symbol_codec<'slice>{
                 let len: u32;
             
                 if code == C_SMALL_REPEAT_CODE {
-                    len = match self.decode_bits(C_SMALL_NON_ZERO_RUN_EXTRA_BITS as u32) {
-                        Ok(s) => s,
+                    match self.decode_bits(C_SMALL_NON_ZERO_RUN_EXTRA_BITS as u32) {
+                        Ok(s) => {len = s + C_SMALL_MIN_NON_ZERO_RUN_SIZE as u32;},
                         Err(_) => return false
-                    } + C_SMALL_MIN_NON_ZERO_RUN_SIZE as u32;
+                    };
                 }else{
-                    len = match self.decode_bits(C_LARGE_NON_ZERO_RUN_EXTRA_BITS as u32) {
-                        Ok(s) => s,
+                    match self.decode_bits(C_LARGE_NON_ZERO_RUN_EXTRA_BITS as u32) {
+                        Ok(s) => {len = s + C_LARGE_MIN_NON_ZERO_RUN_SIZE as u32;},
                         Err(_) => return false
-                    } + C_LARGE_MIN_NON_ZERO_RUN_SIZE as u32;
+                    };
                 }
             
                 if ofs == 0 || len > num_remaining {

@@ -982,12 +982,11 @@ impl<'slice> CrnUnpacker<'slice>{
                             }
                         }
                         block_endpoint[3] = e0[3] << 5 | e1[3] << 2 | diff << 1 | flip;
-                        let p_alpha0_selectors: &[u16];
-                        if flip != 0 {
-                            p_alpha0_selectors = &self.m_alpha_selectors[alpha0_selector_index * 6 + 3..];
+                        let p_alpha0_selectors: &[u16] = if flip != 0 {
+                            &self.m_alpha_selectors[alpha0_selector_index * 6 + 3..]
                         }else{
-                            p_alpha0_selectors = &self.m_alpha_selectors[alpha0_selector_index * 6 + 0..];
-                        }
+                            &self.m_alpha_selectors[alpha0_selector_index * 6 + 0..]
+                        };
                         WRITE_TO_INT_BUFFER!(p_dst, data_pos + 0, self.m_alpha_endpoints[alpha0_endpoint_index] as u32 | ((p_alpha0_selectors[0] as u32) << 16));
                         WRITE_TO_INT_BUFFER!(p_dst, data_pos + 1, (p_alpha0_selectors[1] as u32) | ((p_alpha0_selectors[2] as u32) << 16));
                         p_dst[(data_pos + 2) * 4 + 0] = block_endpoint[0];

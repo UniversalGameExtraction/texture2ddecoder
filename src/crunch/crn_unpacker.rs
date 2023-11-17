@@ -256,8 +256,7 @@ impl<'slice> CrnUnpacker<'slice>{
         let p_from_linear = &G_DXT5_FROM_LINEAR[0..];
         for _ in 0..num_alpha_selectors as usize{
             for j in 0..8_usize{
-                let sym: i32;
-                sym = match self.m_codec.decode(&dm){
+                let sym: i32 = match self.m_codec.decode(&dm){
                     Ok(s) => s,
                     Err(_) => return false
                 } as i32;
@@ -396,8 +395,7 @@ impl<'slice> CrnUnpacker<'slice>{
                     chunk_encoding_bits >>= 3;
                     let num_tiles = G_CRND_CHUNK_ENCODING_NUM_TILES[chunk_encoding_index as usize];
                     for i in 0..num_tiles as usize{
-                        let delta: u32;
-                        delta = match self.m_codec.decode(&self.m_endpoint_delta_dm[0]){
+                        let delta: u32 = match self.m_codec.decode(&self.m_endpoint_delta_dm[0]){
                             Ok(delta) => delta,
                             Err(_) => return Err("Failed to decord DXT1 Texture")
                         };
@@ -411,8 +409,7 @@ impl<'slice> CrnUnpacker<'slice>{
                     if !skip_bottom_row && !skip_right_col {
                         WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 0, color_endpoints[p_tile_indices[0] as usize]);
 
-                        let delta0: u32;
-                        delta0 = match self.m_codec.decode(&self.m_selector_delta_dm[0]){
+                        let delta0: u32 = match self.m_codec.decode(&self.m_selector_delta_dm[0]){
                             Ok(delta0) => delta0,
                             Err(_) => return Err("Failed to decord DXT1 Texture")
                         };
@@ -421,8 +418,7 @@ impl<'slice> CrnUnpacker<'slice>{
                         WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 1, self.m_color_selectors[prev_color_selector_index as usize]);
                         WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 2, color_endpoints[p_tile_indices[1] as usize]);
                         
-                        let delta1: u32;
-                        delta1 = match self.m_codec.decode(&self.m_selector_delta_dm[0]){
+                        let delta1: u32 = match self.m_codec.decode(&self.m_selector_delta_dm[0]){
                             Ok(delta1) => delta1,
                             Err(_) => return Err("Failed to decord DXT1 Texture")
                         };
@@ -431,8 +427,7 @@ impl<'slice> CrnUnpacker<'slice>{
                         WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 3, self.m_color_selectors[prev_color_selector_index as usize]);
                         WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 0 + row_pitch_in_dwords as usize, color_endpoints[p_tile_indices[2] as usize]);
                         
-                        let delta2: u32;
-                        delta2 = match self.m_codec.decode(&self.m_selector_delta_dm[0]){
+                        let delta2: u32 = match self.m_codec.decode(&self.m_selector_delta_dm[0]){
                             Ok(delta2) => delta2,
                             Err(_) => return Err("Failed to decord DXT1 Texture")
                         };
@@ -441,8 +436,7 @@ impl<'slice> CrnUnpacker<'slice>{
                         WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 1 + row_pitch_in_dwords as usize, self.m_color_selectors[prev_color_selector_index as usize]);
                         WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 2 + row_pitch_in_dwords as usize, color_endpoints[p_tile_indices[3] as usize]);
 
-                        let delta3: u32;
-                        delta3 = match self.m_codec.decode(&self.m_selector_delta_dm[0]){
+                        let delta3: u32 = match self.m_codec.decode(&self.m_selector_delta_dm[0]){
                             Ok(delta3) => delta3,
                             Err(_) => return Err("Failed to decord DXT1 Texture")
                         };
@@ -454,8 +448,7 @@ impl<'slice> CrnUnpacker<'slice>{
                             pd_dst = block_dst + (row_pitch_in_bytes * by) as usize;
                             pd_dst >>= 2;
                             for bx in 0..2{
-                                let delta: u32;
-                                delta = match self.m_codec.decode(&self.m_selector_delta_dm[0]){
+                                let delta: u32 = match self.m_codec.decode(&self.m_selector_delta_dm[0]){
                                     Ok(delta) => delta,
                                     Err(_) => return Err("Failed to decord DXT1 Texture")
                                 };
@@ -519,8 +512,7 @@ impl<'slice> CrnUnpacker<'slice>{
                     let p_tile_indices = G_CRND_CHUNK_ENCODING_TILES[chunk_encoding_index as usize].m_tiles;
                     let skip_right_col = (blocks_x & 1) != 0 && (x == ((chunks_x as i32) - 1));
                     for i in 0..num_tiles{
-                        let delta: u32;
-                        delta = match self.m_codec.decode(&self.m_endpoint_delta_dm[1]){
+                        let delta: u32 = match self.m_codec.decode(&self.m_endpoint_delta_dm[1]){
                             Ok(delta) => delta,
                             Err(_) => return Err("Failed to decord DXT5 Texture")
                         };
@@ -530,8 +522,7 @@ impl<'slice> CrnUnpacker<'slice>{
                     }
                     
                     for i in 0..num_tiles{
-                        let delta: u32;
-                        delta = match self.m_codec.decode(&self.m_endpoint_delta_dm[0]){
+                        let delta: u32 = match self.m_codec.decode(&self.m_endpoint_delta_dm[0]){
                             Ok(delta) => delta,
                             Err(_) => return Err("Failed to decord DXT5 Texture")
                         };
@@ -544,15 +535,13 @@ impl<'slice> CrnUnpacker<'slice>{
                     pd_dst >>= 2;
                     for by in 0..2{
                         for bx in 0..2{
-                            let delta0: u32;
-                            delta0 = match self.m_codec.decode(&self.m_selector_delta_dm[1]){
+                            let delta0: u32 = match self.m_codec.decode(&self.m_selector_delta_dm[1]){
                                 Ok(delta0) => delta0,
                                 Err(_) => return Err("Failed to decord DXT5 Texture")
                             };
                             prev_alpha_selector_index += delta0;
                             limit(&mut prev_alpha_selector_index, num_alpha_selectors);
-                            let delta1: u32;
-                            delta1 = match self.m_codec.decode(&self.m_selector_delta_dm[0]){
+                            let delta1: u32 = match self.m_codec.decode(&self.m_selector_delta_dm[0]){
                                 Ok(delta1) => delta1,
                                 Err(_) => return Err("Failed to decord DXT5 Texture")
                             };
@@ -625,8 +614,7 @@ impl<'slice> CrnUnpacker<'slice>{
                     let p_tile_indices = G_CRND_CHUNK_ENCODING_TILES[chunk_encoding_index as usize].m_tiles;
                     let skip_right_col = (blocks_x & 1) != 0 && (x == ((chunks_x as i32) - 1));
                     for i in 0..num_tiles{
-                        let delta: u32;
-                        delta = match self.m_codec.decode(&self.m_endpoint_delta_dm[1]){
+                        let delta: u32 = match self.m_codec.decode(&self.m_endpoint_delta_dm[1]){
                             Ok(delta) => delta,
                             Err(_) => return Err("Failed to decord DXT5A Texture")
                         };
@@ -638,8 +626,7 @@ impl<'slice> CrnUnpacker<'slice>{
                     pd_dst >>= 2;
                     for by in 0..2{
                         for bx in 0..2{
-                            let delta: u32;
-                            delta = match self.m_codec.decode(&self.m_selector_delta_dm[1]){
+                            let delta: u32 = match self.m_codec.decode(&self.m_selector_delta_dm[1]){
                                 Ok(delta) => delta,
                                 Err(_) => return Err("Failed to decord DXT5A Texture")
                             };
@@ -711,8 +698,7 @@ impl<'slice> CrnUnpacker<'slice>{
                     let p_tile_indices = G_CRND_CHUNK_ENCODING_TILES[chunk_encoding_index as usize].m_tiles;
                     let skip_right_col = (blocks_x & 1) != 0 && (x == ((chunks_x as i32) - 1));
                     for i in 0..num_tiles{
-                        let delta: u32;
-                        delta = match self.m_codec.decode(&self.m_endpoint_delta_dm[1]){
+                        let delta: u32 = match self.m_codec.decode(&self.m_endpoint_delta_dm[1]){
                             Ok(delta) => delta,
                             Err(_) => return Err("Failed to decord DXN Texture")
                         };
@@ -721,8 +707,7 @@ impl<'slice> CrnUnpacker<'slice>{
                         alpha0_endpoints[i as usize] = self.m_alpha_endpoints[prev_alpha0_endpoint_index as usize] as u32;
                     }
                     for i in 0..num_tiles{
-                        let delta: u32;
-                        delta = match self.m_codec.decode(&self.m_endpoint_delta_dm[1]){
+                        let delta: u32 = match self.m_codec.decode(&self.m_endpoint_delta_dm[1]){
                             Ok(delta) => delta,
                             Err(_) => return Err("Failed to decord DXN Texture")
                         };
@@ -734,15 +719,14 @@ impl<'slice> CrnUnpacker<'slice>{
                     pd_dst >>= 2;
                     for by in 0..2{
                         for bx in 0..2{
-                            let delta0: u32;
-                            delta0 = match self.m_codec.decode(&self.m_selector_delta_dm[1]){
+                            let delta0: u32 = match self.m_codec.decode(&self.m_selector_delta_dm[1]){
                                 Ok(delta0) => delta0,
                                 Err(_) => return Err("Failed to decord DXN Texture")
                             };
                             prev_alpha0_selector_index += delta0;
                             limit(&mut prev_alpha0_selector_index, num_alpha_selectors);
-                            let delta1: u32;
-                            delta1 = match self.m_codec.decode(&self.m_selector_delta_dm[1]){
+                            
+                            let delta1: u32 = match self.m_codec.decode(&self.m_selector_delta_dm[1]){
                                 Ok(delta1) => delta1,
                                 Err(_) => return Err("Failed to decord DXN Texture")
                             };
