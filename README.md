@@ -17,6 +17,8 @@ A pure Rust no-std texture decoder for the following formats:
  - [BCn - Block Compression](https://en.wikipedia.org/wiki/S3_Texture_Compression)
  - [ETC - Ericsson Texture Compression](https://en.wikipedia.org/wiki/Ericsson_Texture_Compression)
  - [PVRTC - PowerVR Texture Compression](https://en.wikipedia.org/wiki/PVRTC)
+
+and with alloc:
  - [Crunch](https://github.com/BinomialLLC/crunch) & [Unity's Crunch (unity branch)](https://github.com/Unity-Technologies/crunch/tree/unity)
 
 ## Features
@@ -24,6 +26,7 @@ A pure Rust no-std texture decoder for the following formats:
 ### alloc (optional, default)
 
 - ~35% faster pvrtc decoding
+- crunch decoding
 
 ## Functions
 Provides a decode function for each format, as well as a block decode function all formats besides PVRTC.
@@ -91,9 +94,9 @@ Here is a list of the formats and their corresponding functions:
   - decode_pvrtc_2bpp
   - decode_pvrtc_4bpp
 - Crunch
-  - [`decode_crunch()`]
+  - decode_crunch
 - Unity Crunch
-  - [`decode_unity_crunch()`]
+  - decode_unity_crunch()
 
 ## Roadmap
 - documentation
