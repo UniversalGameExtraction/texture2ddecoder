@@ -542,7 +542,7 @@ impl<'slice> CrnUnpacker<'slice>{
                         Err(_) => return Err("Failed to decode DXT1 Texture.")
                     } as usize;
                     if visible {
-                        WRITE_TO_INT_BUFFER!(p_dst, data_pos + 0, self.m_color_endpoints[color_endpoint_index]);
+                        WRITE_TO_INT_BUFFER!(p_dst, data_pos, self.m_color_endpoints[color_endpoint_index]);
                         WRITE_TO_INT_BUFFER!(p_dst, data_pos + 1, self.m_color_selectors[color_selector_index]);
                     }
                     data_pos += 2;
@@ -621,7 +621,7 @@ impl<'slice> CrnUnpacker<'slice>{
                         } as usize;
                     if visible {
                         let p_alpha0_selectors = &self.m_alpha_selectors[alpha0_selector_index * 3..];
-                        WRITE_TO_INT_BUFFER!(p_dst, data_pos + 0, self.m_alpha_endpoints[alpha0_endpoint_index] as u32 | ((p_alpha0_selectors[0] as u32) << 16));
+                        WRITE_TO_INT_BUFFER!(p_dst, data_pos, self.m_alpha_endpoints[alpha0_endpoint_index] as u32 | ((p_alpha0_selectors[0] as u32) << 16));
                         WRITE_TO_INT_BUFFER!(p_dst, data_pos + 1, (p_alpha0_selectors[1] as u32) | ((p_alpha0_selectors[2] as u32) << 16));
                         WRITE_TO_INT_BUFFER!(p_dst, data_pos + 2, self.m_color_endpoints[color_endpoint_index]);
                         WRITE_TO_INT_BUFFER!(p_dst, data_pos + 3, self.m_color_selectors[color_selector_index]);
@@ -685,7 +685,7 @@ impl<'slice> CrnUnpacker<'slice>{
                         } as usize;
                     if visible {
                         let p_alpha0_selectors = &self.m_alpha_selectors[alpha0_selector_index * 3..];
-                        WRITE_TO_INT_BUFFER!(p_dst, data_pos + 0, self.m_alpha_endpoints[alpha0_endpoint_index] as u32 | ((p_alpha0_selectors[0] as u32) << 16));
+                        WRITE_TO_INT_BUFFER!(p_dst, data_pos, self.m_alpha_endpoints[alpha0_endpoint_index] as u32 | ((p_alpha0_selectors[0] as u32) << 16));
                         WRITE_TO_INT_BUFFER!(p_dst, data_pos + 1, (p_alpha0_selectors[1] as u32) | ((p_alpha0_selectors[2] as u32) << 16));
                     }
                     data_pos += 2;
@@ -764,7 +764,7 @@ impl<'slice> CrnUnpacker<'slice>{
                     if visible {
                         let p_alpha0_selectors = &self.m_alpha_selectors[alpha0_selector_index * 3..];
                         let p_alpha1_selectors = &self.m_alpha_selectors[alpha1_selector_index * 3..];
-                        WRITE_TO_INT_BUFFER!(p_dst, data_pos + 0, self.m_alpha_endpoints[alpha0_endpoint_index] as u32 | ((p_alpha0_selectors[0] as u32) << 16));
+                        WRITE_TO_INT_BUFFER!(p_dst, data_pos, self.m_alpha_endpoints[alpha0_endpoint_index] as u32 | ((p_alpha0_selectors[0] as u32) << 16));
                         WRITE_TO_INT_BUFFER!(p_dst, data_pos + 1, (p_alpha0_selectors[1] as u32) | ((p_alpha0_selectors[2] as u32) << 16));
                         WRITE_TO_INT_BUFFER!(p_dst, data_pos + 2, self.m_alpha_endpoints[alpha1_endpoint_index] as u32 | ((p_alpha1_selectors[0] as u32) << 16));
                         WRITE_TO_INT_BUFFER!(p_dst, data_pos + 3, (p_alpha1_selectors[1] as u32) | ((p_alpha1_selectors[2] as u32) << 16));
@@ -862,7 +862,7 @@ impl<'slice> CrnUnpacker<'slice>{
                             }
                         }
                         block_endpoint[3] = e0[3] << 5 | e1[3] << 2 | diff << 1 | flip;
-                        p_dst[data_pos * 4 + 0] = block_endpoint[0];
+                        p_dst[data_pos * 4] = block_endpoint[0];
                         p_dst[data_pos * 4 + 1] = block_endpoint[1];
                         p_dst[data_pos * 4 + 2] = block_endpoint[2];
                         p_dst[data_pos * 4 + 3] = block_endpoint[3];
@@ -985,11 +985,11 @@ impl<'slice> CrnUnpacker<'slice>{
                         let p_alpha0_selectors: &[u16] = if flip != 0 {
                             &self.m_alpha_selectors[alpha0_selector_index * 6 + 3..]
                         }else{
-                            &self.m_alpha_selectors[alpha0_selector_index * 6 + 0..]
+                            &self.m_alpha_selectors[alpha0_selector_index * 6..]
                         };
-                        WRITE_TO_INT_BUFFER!(p_dst, data_pos + 0, self.m_alpha_endpoints[alpha0_endpoint_index] as u32 | ((p_alpha0_selectors[0] as u32) << 16));
+                        WRITE_TO_INT_BUFFER!(p_dst, data_pos, self.m_alpha_endpoints[alpha0_endpoint_index] as u32 | ((p_alpha0_selectors[0] as u32) << 16));
                         WRITE_TO_INT_BUFFER!(p_dst, data_pos + 1, (p_alpha0_selectors[1] as u32) | ((p_alpha0_selectors[2] as u32) << 16));
-                        p_dst[(data_pos + 2) * 4 + 0] = block_endpoint[0];
+                        p_dst[(data_pos + 2) * 4] = block_endpoint[0];
                         p_dst[(data_pos + 2) * 4 + 1] = block_endpoint[1];
                         p_dst[(data_pos + 2) * 4 + 2] = block_endpoint[2];
                         p_dst[(data_pos + 2) * 4 + 3] = block_endpoint[3];

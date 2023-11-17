@@ -169,7 +169,7 @@ impl<'slice> CrnUnpacker<'slice>{
                     Ok(s) => s,
                     Err(_) => return false
                 };
-                cur[j*2+0] = ((delta0[sym as usize] + cur[j*2+0] as i32) & 3) as u32;
+                cur[j*2] = ((delta0[sym as usize] + cur[j*2] as i32) & 3) as u32;
                 cur[j*2+1] = ((delta1[sym as usize] + cur[j*2+1] as i32) & 3) as u32;
             }
             if C_CRND_LITTLE_ENDIAN_PLATFORM {
@@ -260,7 +260,7 @@ impl<'slice> CrnUnpacker<'slice>{
                     Ok(s) => s,
                     Err(_) => return false
                 } as i32;
-                cur[j*2+0] = ((delta0[sym as usize] + cur[j*2+0] as i32) & 7) as u32;
+                cur[j*2] = ((delta0[sym as usize] + cur[j*2] as i32) & 7) as u32;
                 cur[j*2+1] = ((delta1[sym as usize] + cur[j*2+1] as i32) & 7) as u32;
             }
             p_dst[0] = ((p_from_linear[cur[0 ] as usize] as u32) | ((p_from_linear[cur[1 ] as usize] as u32) << 3) | ((p_from_linear[cur[2 ] as usize] as u32) << 6) | 
@@ -407,7 +407,7 @@ impl<'slice> CrnUnpacker<'slice>{
                     let skip_right_col = ((blocks_x & 1) == 1) && (x == (chunks_x as i32 - 1));
                     let mut pd_dst = block_dst >> 2;
                     if !skip_bottom_row && !skip_right_col {
-                        WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 0, color_endpoints[p_tile_indices[0] as usize]);
+                        WRITE_TO_INT_BUFFER!(p_dst, pd_dst, color_endpoints[p_tile_indices[0] as usize]);
 
                         let delta0: u32 = match self.m_codec.decode(&self.m_selector_delta_dm[0]){
                             Ok(delta0) => delta0,
@@ -425,7 +425,7 @@ impl<'slice> CrnUnpacker<'slice>{
                         prev_color_selector_index += delta1;
                         limit(&mut prev_color_selector_index, num_color_selectors);
                         WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 3, self.m_color_selectors[prev_color_selector_index as usize]);
-                        WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 0 + row_pitch_in_dwords as usize, color_endpoints[p_tile_indices[2] as usize]);
+                        WRITE_TO_INT_BUFFER!(p_dst, pd_dst + row_pitch_in_dwords as usize, color_endpoints[p_tile_indices[2] as usize]);
                         
                         let delta2: u32 = match self.m_codec.decode(&self.m_selector_delta_dm[0]){
                             Ok(delta2) => delta2,
@@ -455,7 +455,7 @@ impl<'slice> CrnUnpacker<'slice>{
                                 prev_color_selector_index += delta;
                                 limit(&mut prev_color_selector_index, num_color_selectors);
                                 if !(((bx != 0) && skip_right_col) || ((by != 0) && skip_bottom_row)) {
-                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 0, color_endpoints[p_tile_indices[(bx + by * 2) as usize] as usize]);
+                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst, color_endpoints[p_tile_indices[(bx + by * 2) as usize] as usize]);
                                     WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 1, self.m_color_selectors[prev_color_selector_index as usize]);
                                 }
                                 pd_dst += 2;
@@ -557,7 +557,7 @@ impl<'slice> CrnUnpacker<'slice>{
                                     WRITE_TO_INT_BUFFER!(pDst, pd_dst + 3, (self.m_color_selectors[prev_color_selector_index as usize]));
                                 }
                                 #[cfg(target_endian = "little")]{
-                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 0, (alpha_endpoints[tile_index as usize] | ((p_alpha_selectors[0] as u32) << 16)));
+                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst, (alpha_endpoints[tile_index as usize] | ((p_alpha_selectors[0] as u32) << 16)));
                                     WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 1, ((p_alpha_selectors[1] as u32) | ((p_alpha_selectors[2] as u32) << 16)));
                                     WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 2, (color_endpoints[tile_index as usize])); 
                                     WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 3, (self.m_color_selectors[prev_color_selector_index as usize]));
@@ -640,7 +640,7 @@ impl<'slice> CrnUnpacker<'slice>{
                                     WRITE_TO_INT_BUFFER!(pDst, pd_dst + 1, (((pAlpha0_selectors[1] as u32) << 16) | (pAlpha0_selectors[2] as u32)) as u32);
                                 }
                                 #[cfg(target_endian = "little")]{
-                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 0, (alpha0_endpoints[tile_index as usize] | ((p_alpha0_selectors[0] as u32) << 16)));
+                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst, (alpha0_endpoints[tile_index as usize] | ((p_alpha0_selectors[0] as u32) << 16)));
                                     WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 1, ((p_alpha0_selectors[1] as u32) | ((p_alpha0_selectors[2] as u32) << 16)));
                                 }
                             }
@@ -743,7 +743,7 @@ impl<'slice> CrnUnpacker<'slice>{
                                     WRITE_TO_INT_BUFFER!(pDst, pd_dst + 3, (((pAlpha1_selectors[1] as u32) << 16) | (pAlpha1_selectors[2] as u32)) as u32);
                                 }
                                 #[cfg(target_endian = "little")]{
-                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 0, (alpha0_endpoints[tile_index as usize] | ((p_alpha0_selectors[0] as u32) << 16)));
+                                    WRITE_TO_INT_BUFFER!(p_dst, pd_dst, (alpha0_endpoints[tile_index as usize] | ((p_alpha0_selectors[0] as u32) << 16)));
                                     WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 1, ((p_alpha0_selectors[1] as u32) | ((p_alpha0_selectors[2] as u32) << 16)));
                                     WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 2, (alpha1_endpoints[tile_index as usize] | ((p_alpha1_selectors[0] as u32) << 16)));
                                     WRITE_TO_INT_BUFFER!(p_dst, pd_dst + 3, ((p_alpha1_selectors[1] as u32) | ((p_alpha1_selectors[2] as u32) << 16)));
