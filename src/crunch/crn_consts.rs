@@ -90,18 +90,18 @@ pub const C_NUM_CHUNK_ENCODINGS: usize = 8;
 
 #[allow(non_camel_case_types)]
 pub struct crnd_encoding_tile_indices{
-    pub m_tiles: [u8; 4]
+    pub tiles: [u8; 4]
 } 
 
 pub const G_CRND_CHUNK_ENCODING_TILES: [crnd_encoding_tile_indices; C_NUM_CHUNK_ENCODINGS] = [
-   { crnd_encoding_tile_indices{ m_tiles: [0, 0, 0, 0] } },
-   { crnd_encoding_tile_indices{ m_tiles: [0, 0, 1, 1] } },
-   { crnd_encoding_tile_indices{ m_tiles: [0, 1, 0, 1] } },
-   { crnd_encoding_tile_indices{ m_tiles: [0, 0, 1, 2] } },
-   { crnd_encoding_tile_indices{ m_tiles: [1, 2, 0, 0] } },
-   { crnd_encoding_tile_indices{ m_tiles: [0, 1, 0, 2] } },
-   { crnd_encoding_tile_indices{ m_tiles: [1, 0, 2, 0] } },
-   { crnd_encoding_tile_indices{ m_tiles: [0, 1, 2, 3] } }
+   { crnd_encoding_tile_indices{ tiles: [0, 0, 0, 0] } },
+   { crnd_encoding_tile_indices{ tiles: [0, 0, 1, 1] } },
+   { crnd_encoding_tile_indices{ tiles: [0, 1, 0, 1] } },
+   { crnd_encoding_tile_indices{ tiles: [0, 0, 1, 2] } },
+   { crnd_encoding_tile_indices{ tiles: [1, 2, 0, 0] } },
+   { crnd_encoding_tile_indices{ tiles: [0, 1, 0, 2] } },
+   { crnd_encoding_tile_indices{ tiles: [1, 0, 2, 0] } },
+   { crnd_encoding_tile_indices{ tiles: [0, 1, 2, 3] } }
 ];
 
 pub const G_CRND_CHUNK_ENCODING_NUM_TILES: [u8; C_NUM_CHUNK_ENCODINGS] = [ 1, 2, 2, 3, 3, 3, 3, 4 ];

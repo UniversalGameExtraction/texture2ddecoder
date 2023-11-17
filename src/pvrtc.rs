@@ -535,17 +535,17 @@ pub fn decode_pvrtc(
 
 pub fn decode_pvrtc_2bpp(
     data: &[u8],
-    m_width: usize,
-    m_height: usize,
+    width: usize,
+    height: usize,
     image: &mut [u32],
 ) -> Result<(), &'static str> {
-    decode_pvrtc(data, m_width, m_height, image, true)
+    decode_pvrtc(data, width, height, image, true)
 }
 pub fn decode_pvrtc_4bpp(
     data: &[u8],
-    m_width: usize,
-    m_height: usize,
+    width: usize,
+    height: usize,
     image: &mut [u32],
 ) -> Result<(), &'static str> {
-    decode_pvrtc(data, m_width, m_height, image, false)
+    decode_pvrtc(data, width, height, image, false)
 }

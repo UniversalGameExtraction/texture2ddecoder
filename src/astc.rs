@@ -1824,11 +1824,11 @@ macro_rules! astc_decode_func {
         paste::item! {
             pub fn [<decode_astc_ $x _ $y>](
                 data: &[u8],
-                m_width: usize,
-                m_height: usize,
+                width: usize,
+                height: usize,
                 image: &mut [u32],
             ) -> Result<(), &'static str> {
-                decode_astc(data, m_width, m_height, $x, $y, image)
+                decode_astc(data, width, height, $x, $y, image)
             }
         }
     };

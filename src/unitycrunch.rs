@@ -15,25 +15,25 @@ fn unity_crunch_unpack_level(data: &[u8], data_size: u32, level_index: u32) -> R
     if !tex_info.crnd_get_texture_info(data, data_size) {
         return Err("Invalid crunch texture encoding.");
     }
-    if tex_info.m_faces != 1 {
+    if tex_info.faces != 1 {
         return Err("Texture2D must only have 1 number of faces.");
     }
     let mut p_context: crn_unpacker::CrnUnpacker<'_> = match crn_decomp::crnd_unpack_begin(data, data_size){
         Ok(p_context) => p_context,
         Err(res) => return Err(res)
     };
-    let width = core::cmp::max(1, tex_info.m_width >> level_index);
-    let height = core::cmp::max(1, tex_info.m_height >> level_index);
+    let width = core::cmp::max(1, tex_info.width >> level_index);
+    let height = core::cmp::max(1, tex_info.height >> level_index);
     let blocks_x: u32 = core::cmp::max(1, ((width + 3) >> 2) as u32);
     let blocks_y: u32 = core::cmp::max(1, ((height + 3) >> 2) as u32);
-    let row_pitch: u32 = blocks_x * match crn_decomp::crnd_get_bytes_per_dxt_block(&mut tex_info.m_format){
+    let row_pitch: u32 = blocks_x * match crn_decomp::crnd_get_bytes_per_dxt_block(&mut tex_info.format){
         Ok(s) => s,
         Err(e) => return Err(e)
     };
     let total_face_size: u32 = row_pitch * blocks_y;
     match p_context.crnd_unpack_level(total_face_size, row_pitch, level_index){
         Ok(res) => Ok(CrunchDecodeHandler{
-            format: tex_info.m_format,
+            format: tex_info.format,
             dxt_data: res
         }),
         Err(err) => Err(err)

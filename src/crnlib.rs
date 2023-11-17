@@ -41,29 +41,29 @@ pub enum CrnFormat {
 
 #[repr(C)]
 pub struct CrnTextureInfo {
-    pub m_struct_size: u32,
-    pub m_width: u32,
-    pub m_height: u32,
-    pub m_levels: u32,
-    pub m_faces: u32,
-    pub m_bytes_per_block: u32,
-    pub m_userdata0: u32,
-    pub m_userdata1: u32,
-    pub m_format: CrnFormat
+    pub struct_size: u32,
+    pub width: u32,
+    pub height: u32,
+    pub levels: u32,
+    pub faces: u32,
+    pub bytes_per_block: u32,
+    pub userdata0: u32,
+    pub userdata1: u32,
+    pub format: CrnFormat
 }
 
 impl CrnTextureInfo{
     pub const fn default() -> Self{
         Self {
-            m_struct_size: core::mem::size_of::<CrnTextureInfo>() as u32,
-			m_width: 0,
-			m_height: 0,
-			m_levels: 0,
-			m_faces: 0,
-			m_bytes_per_block: 0,
-			m_userdata0: 0,
-			m_userdata1: 0,
-			m_format: CrnFormat::Invalid // Init as invalid?
+            struct_size: core::mem::size_of::<CrnTextureInfo>() as u32,
+			width: 0,
+			height: 0,
+			levels: 0,
+			faces: 0,
+			bytes_per_block: 0,
+			userdata0: 0,
+			userdata1: 0,
+			format: CrnFormat::Invalid // Init as invalid?
         }
     }
 
@@ -72,7 +72,7 @@ impl CrnTextureInfo{
             return false;
         }
 
-        if self.m_struct_size != core::mem::size_of::<CrnTextureInfo>() as u32{
+        if self.struct_size != core::mem::size_of::<CrnTextureInfo>() as u32{
             return false;
         }
 
@@ -82,11 +82,11 @@ impl CrnTextureInfo{
             return res;
         }
 
-        self.m_width = p_header.m_width.cast_to_uint();
-        self.m_height = p_header.m_height.cast_to_uint();
-        self.m_levels = p_header.m_levels.cast_to_uint();
-        self.m_faces = p_header.m_faces.cast_to_uint();
-        self.m_format = match p_header.m_format.cast_to_uint(){
+        self.width = p_header.width.cast_to_uint();
+        self.height = p_header.height.cast_to_uint();
+        self.levels = p_header.levels.cast_to_uint();
+        self.faces = p_header.faces.cast_to_uint();
+        self.format = match p_header.format.cast_to_uint(){
             // -1 => crn_format::cCRNFmtInvalid,
 
             0 => CrnFormat::Dxt1,
@@ -121,20 +121,20 @@ impl CrnTextureInfo{
 
             _ => CrnFormat::Invalid
         };
-        if self.m_format == CrnFormat::Invalid {
+        if self.format == CrnFormat::Invalid {
             return false;
         }
-        if  (p_header.m_format.cast_to_uint() == CrnFormat::Dxt1 as u32) ||
-            (p_header.m_format.cast_to_uint() == CrnFormat::Dxt5a as u32) ||
-            (p_header.m_format.cast_to_uint() == CrnFormat::Etc1 as u32) ||
-            (p_header.m_format.cast_to_uint() == CrnFormat::Etc2 as u32) ||
-            (p_header.m_format.cast_to_uint() == CrnFormat::Etc1s as u32) {
-            self.m_bytes_per_block = 8;
+        if  (p_header.format.cast_to_uint() == CrnFormat::Dxt1 as u32) ||
+            (p_header.format.cast_to_uint() == CrnFormat::Dxt5a as u32) ||
+            (p_header.format.cast_to_uint() == CrnFormat::Etc1 as u32) ||
+            (p_header.format.cast_to_uint() == CrnFormat::Etc2 as u32) ||
+            (p_header.format.cast_to_uint() == CrnFormat::Etc1s as u32) {
+            self.bytes_per_block = 8;
         }else{
-            self.m_bytes_per_block = 16;
+            self.bytes_per_block = 16;
         }
-        self.m_userdata0 = p_header.m_userdata0.cast_to_uint();
-        self.m_userdata1 = p_header.m_userdata1.cast_to_uint();
+        self.userdata0 = p_header.userdata0.cast_to_uint();
+        self.userdata1 = p_header.userdata1.cast_to_uint();
         true
     }
 }

@@ -5,24 +5,24 @@ extern crate alloc;
 
 #[derive(Default)]
 pub struct DecoderTables{
-    pub m_num_syms: u32,
-    pub m_total_used_syms: u32,
-    pub m_table_bits: u32,
-    pub m_table_shift: u32,
-    pub m_table_max_code: u32,
-    pub m_decode_start_code_size: u32,
+    pub num_syms: u32,
+    pub total_used_syms: u32,
+    pub table_bits: u32,
+    pub table_shift: u32,
+    pub table_max_code: u32,
+    pub decode_start_code_size: u32,
 
-    pub m_min_code_size: u8,
-    pub m_max_code_size: u8,
+    pub min_code_size: u8,
+    pub max_code_size: u8,
 
-    pub m_max_codes: [u32; C_MAX_EXPECTED_CODE_SIZE + 1],
-    pub m_val_ptrs: [i32;  C_MAX_EXPECTED_CODE_SIZE + 1],
+    pub max_codes: [u32; C_MAX_EXPECTED_CODE_SIZE + 1],
+    pub val_ptrs: [i32;  C_MAX_EXPECTED_CODE_SIZE + 1],
 
-    pub m_cur_lookup_size: u32,
-    pub m_lookup: alloc::vec::Vec<u32>,
+    pub cur_lookup_size: u32,
+    pub lookup: alloc::vec::Vec<u32>,
 
-    pub m_cur_sorted_symbol_order_size: u32,
-    pub m_sorted_symbol_order: alloc::vec::Vec<u16>
+    pub cur_sorted_symbol_order_size: u32,
+    pub sorted_symbol_order: alloc::vec::Vec<u16>
 }
 
 impl DecoderTables{
@@ -33,7 +33,7 @@ impl DecoderTables{
             return false;
         
         }
-        self.m_num_syms = num_syms;
+        self.num_syms = num_syms;
         let mut num_codes = [0_u32; (C_MAX_EXPECTED_CODE_SIZE + 1)];
         
         for &c in p_codesizes.iter().take(num_syms as usize) {
@@ -52,16 +52,16 @@ impl DecoderTables{
             let n = num_codes[i];
 
             if n == 0 {
-                self.m_max_codes[i - 1] = 0;
+                self.max_codes[i - 1] = 0;
             }else{
                 min_code_size = min(min_code_size, i as u32);
                 max_code_size = max(max_code_size, i as u32);
         
                 min_codes[i - 1] = cur_code;
         
-                self.m_max_codes[i - 1] = cur_code + n - 1;
-                self.m_max_codes[i - 1] = 1 + ((self.m_max_codes[i - 1] << (16 - i)) | ((1 << (16 - i)) - 1));
-                self.m_val_ptrs[i - 1] = total_used_syms as i32;
+                self.max_codes[i - 1] = cur_code + n - 1;
+                self.max_codes[i - 1] = 1 + ((self.max_codes[i - 1] << (16 - i)) | ((1 << (16 - i)) - 1));
+                self.val_ptrs[i - 1] = total_used_syms as i32;
                 sorted_positions[i] = total_used_syms;
 
                 cur_code += n;
@@ -70,19 +70,19 @@ impl DecoderTables{
             cur_code <<= 1;
         }
 
-        self.m_total_used_syms = total_used_syms;
-        if total_used_syms > self.m_cur_sorted_symbol_order_size {
-            self.m_cur_sorted_symbol_order_size = total_used_syms;
+        self.total_used_syms = total_used_syms;
+        if total_used_syms > self.cur_sorted_symbol_order_size {
+            self.cur_sorted_symbol_order_size = total_used_syms;
 
             if !is_power_of_2(total_used_syms as usize) {
-                self.m_cur_sorted_symbol_order_size = min(num_syms, next_pow2(total_used_syms as usize) as u32);
+                self.cur_sorted_symbol_order_size = min(num_syms, next_pow2(total_used_syms as usize) as u32);
             }
 
-            self.m_sorted_symbol_order = alloc::vec![0; self.m_cur_sorted_symbol_order_size as usize];
+            self.sorted_symbol_order = alloc::vec![0; self.cur_sorted_symbol_order_size as usize];
         }
 
-        self.m_min_code_size = min_code_size as u8;
-        self.m_max_code_size = max_code_size as u8;
+        self.min_code_size = min_code_size as u8;
+        self.max_code_size = max_code_size as u8;
 
         for (i, &code_size) in p_codesizes.iter().enumerate().take(num_syms as usize) {
             let c: u32 = code_size as u32;
@@ -101,21 +101,21 @@ impl DecoderTables{
                     return false;
                 }
         
-                self.m_sorted_symbol_order[sorted_pos as usize] = i as u16;
+                self.sorted_symbol_order[sorted_pos as usize] = i as u16;
             }
         }
 
-        if table_bits <= self.m_min_code_size as u32 {
+        if table_bits <= self.min_code_size as u32 {
             table_bits = 0;
         }
 
-        self.m_table_bits = table_bits;
+        self.table_bits = table_bits;
         if table_bits != 0 {
             let table_size: u32 = 1 << table_bits;
 
-            if table_size > self.m_cur_lookup_size {
-                self.m_cur_lookup_size = table_size;
-                self.m_lookup = alloc::vec![0; table_size as usize];
+            if table_size > self.cur_lookup_size {
+                self.cur_lookup_size = table_size;
+                self.lookup = alloc::vec![0; table_size as usize];
             }
 
             for codesize in 1..=table_bits{
@@ -130,10 +130,10 @@ impl DecoderTables{
                     Err(_) => return false
                 };
 
-                let val_ptr: u32 = self.m_val_ptrs[(codesize - 1) as usize] as u32;
+                let val_ptr: u32 = self.val_ptrs[(codesize - 1) as usize] as u32;
 
                 for code in min_code..=max_code{
-                    let sym_index: u32 = self.m_sorted_symbol_order[(val_ptr + code - min_code) as usize] as u32;
+                    let sym_index: u32 = self.sorted_symbol_order[(val_ptr + code - min_code) as usize] as u32;
 
                     if p_codesizes[sym_index as usize] as u32 != codesize{
                         return false;
@@ -144,49 +144,49 @@ impl DecoderTables{
                         if t >= (1 << table_bits){
                             return false;
                         }
-                        self.m_lookup[t as usize] = sym_index | (codesize << 16);
+                        self.lookup[t as usize] = sym_index | (codesize << 16);
                     }
                 }
             }
         }
 
-        for (val_ptr, &min_code) in self.m_val_ptrs.iter_mut().zip(min_codes.iter()) {
+        for (val_ptr, &min_code) in self.val_ptrs.iter_mut().zip(min_codes.iter()) {
             *val_ptr -= min_code as i32;
         }
 
-        self.m_table_max_code = 0;
-        self.m_decode_start_code_size = self.m_min_code_size as u32;
+        self.table_max_code = 0;
+        self.decode_start_code_size = self.min_code_size as u32;
 
         if table_bits != 0 {
             let mut i: u32 = table_bits;
 
             while i >= 1 {
                 if num_codes[i as usize] != 0 {
-                    self.m_table_max_code = self.m_max_codes[(i - 1) as usize];
+                    self.table_max_code = self.max_codes[(i - 1) as usize];
                     break;
                 }
                 i -= 1;
             }
 
             if i >= 1 {
-                self.m_decode_start_code_size = table_bits + 1;
+                self.decode_start_code_size = table_bits + 1;
                 for j in table_bits+1..=max_code_size{
                     if num_codes[j as usize] != 0 {
-                        self.m_decode_start_code_size = j;
+                        self.decode_start_code_size = j;
                         break;
                     }
                 }
             }
         }
 
-        if self.m_table_max_code == 0 {
-            self.m_table_max_code = 0;
+        if self.table_max_code == 0 {
+            self.table_max_code = 0;
         }
         // sentinels
-        self.m_max_codes[C_MAX_EXPECTED_CODE_SIZE] = u32::MAX;
-        self.m_val_ptrs[C_MAX_EXPECTED_CODE_SIZE] = 0xFFFFF;
+        self.max_codes[C_MAX_EXPECTED_CODE_SIZE] = u32::MAX;
+        self.val_ptrs[C_MAX_EXPECTED_CODE_SIZE] = 0xFFFFF;
 
-        self.m_table_shift = 32 - self.m_table_bits;
+        self.table_shift = 32 - self.table_bits;
         true
     }
 
@@ -195,7 +195,7 @@ impl DecoderTables{
         if !(len >= 1 && len <= C_MAX_EXPECTED_CODE_SIZE as u32){
             return Err(false);
         }
-        let k: u32 = self.m_max_codes[(len - 1) as usize];
+        let k: u32 = self.max_codes[(len - 1) as usize];
         if k == 0 {
             return Ok(u32::MAX);
         }
@@ -205,9 +205,9 @@ impl DecoderTables{
 
 #[derive(Default)]
 pub struct StaticHuffmanDataModel{
-    pub m_total_syms: u32,
-    pub m_code_sizes: alloc::vec::Vec<u8>,
-    pub m_p_decode_tables: DecoderTables
+    pub total_syms: u32,
+    pub code_sizes: alloc::vec::Vec<u8>,
+    pub p_decode_tables: DecoderTables
 }
 
 impl StaticHuffmanDataModel{
@@ -241,19 +241,19 @@ impl StaticHuffmanDataModel{
 
     pub fn compute_decoder_table_bits(&mut self) -> u32{
         let mut decoder_table_bits: u32 = 0;
-        if self.m_total_syms > 16 {
-            decoder_table_bits = min(1 + ceil_log2i(self.m_total_syms), C_MAX_TABLE_BITS as u32);
+        if self.total_syms > 16 {
+            decoder_table_bits = min(1 + ceil_log2i(self.total_syms), C_MAX_TABLE_BITS as u32);
         }
         decoder_table_bits
     }
 
     pub fn prepare_decoder_tables(&mut self) -> bool{
-        let total_syms = self.m_code_sizes.len();
+        let total_syms = self.code_sizes.len();
         if !(total_syms >= 1 && total_syms as u32 <= C_MAX_SUPPORTED_SYMS as u32){
             return false;
         }
-        self.m_total_syms = total_syms as u32;
+        self.total_syms = total_syms as u32;
         let table_bits = self.compute_decoder_table_bits();
-        self.m_p_decode_tables.init(self.m_total_syms, &self.m_code_sizes, table_bits)
+        self.p_decode_tables.init(self.total_syms, &self.code_sizes, table_bits)
     }
 }

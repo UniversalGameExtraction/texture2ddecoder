@@ -5,54 +5,54 @@ extern crate alloc;
 
 // #[repr(C)]
 // pub struct crn_file_info{
-//     m_struct_size: u32,
-//     m_actual_data_size: u32,
-//     m_header_size: u32,
-//     m_total_palette_size: u32,
-//     m_tables_size: u32,
-//     m_levels: u32,
-//     m_level_compressed_size: [u32; cCRNMaxLevels as usize],
-//     m_color_endpoint_palette_entries: u32,
-//     m_color_selector_palette_entries: u32,
-//     m_alpha_endpoint_palette_entries: u32,
-//     m_alpha_selector_palette_entries: u32
+//     struct_size: u32,
+//     actual_data_size: u32,
+//     header_size: u32,
+//     total_palette_size: u32,
+//     tables_size: u32,
+//     levels: u32,
+//     level_compressed_size: [u32; cCRNMaxLevels as usize],
+//     color_endpoint_palette_entries: u32,
+//     color_selector_palette_entries: u32,
+//     alpha_endpoint_palette_entries: u32,
+//     alpha_selector_palette_entries: u32
 // }
 
 // impl crn_file_info{
 //     pub fn default() -> crn_file_info{
 //         return crn_file_info { 
-//             m_struct_size: core::mem::size_of::<crn_file_info>() as u32,
-//             m_actual_data_size: 0,
-//             m_header_size: 0,
-//             m_total_palette_size: 0,
-//             m_tables_size: 0,
-//             m_levels: 0,
-//             m_level_compressed_size: [0; cCRNMaxLevels as usize],
-//             m_color_endpoint_palette_entries: 0,
-//             m_color_selector_palette_entries: 0,
-//             m_alpha_endpoint_palette_entries: 0,
-//             m_alpha_selector_palette_entries: 0
+//             struct_size: core::mem::size_of::<crn_file_info>() as u32,
+//             actual_data_size: 0,
+//             header_size: 0,
+//             total_palette_size: 0,
+//             tables_size: 0,
+//             levels: 0,
+//             level_compressed_size: [0; cCRNMaxLevels as usize],
+//             color_endpoint_palette_entries: 0,
+//             color_selector_palette_entries: 0,
+//             alpha_endpoint_palette_entries: 0,
+//             alpha_selector_palette_entries: 0
 //         }
 //     }
 // }
 
 #[repr(C)]
 pub struct CrnPackedUint<const N: usize>{
-    pub m_buf: [u8; N]
+    pub buf: [u8; N]
 }
 
 // no-std, so we can not use std::ops
 impl<const N: usize> CrnPackedUint<N>{
     pub fn assign_from_buffer(&mut self, other: &[u8]){
-        self.m_buf.copy_from_slice(&other[0..N])
+        self.buf.copy_from_slice(&other[0..N])
     }
 
     pub fn cast_to_uint(&mut self) -> u32{
         match N {
-            1 => self.m_buf[0] as u32,
-            2 => u16::from_be_bytes([self.m_buf[0], self.m_buf[1]]) as u32,
-            3 => (self.m_buf[0] as u32) << 16 | u16::from_be_bytes([self.m_buf[1], self.m_buf[2]]) as u32,
-            4 => u32::from_be_bytes([self.m_buf[0], self.m_buf[1], self.m_buf[2], self.m_buf[3]]),
+            1 => self.buf[0] as u32,
+            2 => u16::from_be_bytes([self.buf[0], self.buf[1]]) as u32,
+            3 => (self.buf[0] as u32) << 16 | u16::from_be_bytes([self.buf[1], self.buf[2]]) as u32,
+            4 => u32::from_be_bytes([self.buf[0], self.buf[1], self.buf[2], self.buf[3]]),
             _ => panic!("Packed integer can hold a 4 byte buffer at max!")
         }
     }
@@ -62,7 +62,7 @@ impl<const N: usize> CrnPackedUint<N>{
 impl<const N: usize> Default for CrnPackedUint<N>{
     fn default() -> Self {
         CrnPackedUint{
-            m_buf: [0; N]
+            buf: [0; N]
         }
     }
 }
@@ -70,52 +70,52 @@ impl<const N: usize> Default for CrnPackedUint<N>{
 #[derive(Default)]
 #[repr(C)]
 pub struct CrnPalette{
-   pub m_ofs: CrnPackedUint<3>,
-   pub m_size: CrnPackedUint<3>,
-   pub m_num: CrnPackedUint<2>
+   pub ofs: CrnPackedUint<3>,
+   pub size: CrnPackedUint<3>,
+   pub num: CrnPackedUint<2>
 }
 
 impl CrnPalette{
     pub fn assign_from_buffer(&mut self, other: &[u8]){
-        self.m_ofs.assign_from_buffer(&other[0..]);
-        self.m_size.assign_from_buffer(&other[3..]);
-        self.m_num.assign_from_buffer(&other[6..]);
+        self.ofs.assign_from_buffer(&other[0..]);
+        self.size.assign_from_buffer(&other[3..]);
+        self.num.assign_from_buffer(&other[6..]);
     }
 }
 
 #[derive(Default)]
 #[repr(C)]
 pub struct CrnHeader{
-    pub m_sig: CrnPackedUint<2>,
-    pub m_header_size: CrnPackedUint<2>,
-    pub m_header_crc16: CrnPackedUint<2>,
+    pub sig: CrnPackedUint<2>,
+    pub header_size: CrnPackedUint<2>,
+    pub header_crc16: CrnPackedUint<2>,
 
-    pub m_data_size: CrnPackedUint<4>,
-    pub m_data_crc16: CrnPackedUint<2>,
+    pub data_size: CrnPackedUint<4>,
+    pub data_crc16: CrnPackedUint<2>,
 
-    pub m_width: CrnPackedUint<2>,
-    pub m_height: CrnPackedUint<2>,
+    pub width: CrnPackedUint<2>,
+    pub height: CrnPackedUint<2>,
 
-    pub m_levels: CrnPackedUint<1>,
-    pub m_faces: CrnPackedUint<1>,
+    pub levels: CrnPackedUint<1>,
+    pub faces: CrnPackedUint<1>,
 
-    pub m_format: CrnPackedUint<1>,
-    pub m_flags: CrnPackedUint<2>,
+    pub format: CrnPackedUint<1>,
+    pub flags: CrnPackedUint<2>,
 
-    pub m_reserved: CrnPackedUint<4>,
-    pub m_userdata0: CrnPackedUint<4>,
-    pub m_userdata1: CrnPackedUint<4>,
+    pub reserved: CrnPackedUint<4>,
+    pub userdata0: CrnPackedUint<4>,
+    pub userdata1: CrnPackedUint<4>,
 
-    pub m_color_endpoints: CrnPalette,
-    pub m_color_selectors: CrnPalette,
+    pub color_endpoints: CrnPalette,
+    pub color_selectors: CrnPalette,
 
-    pub m_alpha_endpoints: CrnPalette,
-    pub m_alpha_selectors: CrnPalette,
+    pub alpha_endpoints: CrnPalette,
+    pub alpha_selectors: CrnPalette,
 
-    pub m_tables_size: CrnPackedUint<2>,
-    pub m_tables_ofs: CrnPackedUint<3>,
+    pub tables_size: CrnPackedUint<2>,
+    pub tables_ofs: CrnPackedUint<3>,
 
-    pub m_level_ofs: alloc::vec::Vec<CrnPackedUint<4>>
+    pub level_ofs: alloc::vec::Vec<CrnPackedUint<4>>
 }
 
 impl CrnHeader{
@@ -124,35 +124,35 @@ impl CrnHeader{
             return false;
         }
         *self = CrnHeader::default();
-        self.m_sig.assign_from_buffer(&p_data[0..]);
-        self.m_header_size.assign_from_buffer(&p_data[2..]);
-        self.m_header_crc16.assign_from_buffer(&p_data[4..]);
-        self.m_data_size.assign_from_buffer(&p_data[6..]);
-        self.m_data_crc16.assign_from_buffer(&p_data[10..]);
-        self.m_width.assign_from_buffer(&p_data[12..]);
-        self.m_height.assign_from_buffer(&p_data[14..]);
-        self.m_levels.assign_from_buffer(&p_data[16..]);
-        self.m_faces.assign_from_buffer(&p_data[17..]);
-        self.m_format.assign_from_buffer(&p_data[18..]);
-        self.m_flags.assign_from_buffer(&p_data[19..]);
-        self.m_reserved.assign_from_buffer(&p_data[21..]);
-        self.m_userdata0.assign_from_buffer(&p_data[25..]);
-        self.m_userdata1.assign_from_buffer(&p_data[29..]);
-        self.m_color_endpoints.assign_from_buffer(&p_data[33..]);
-        self.m_color_selectors.assign_from_buffer(&p_data[41..]);
-        self.m_alpha_endpoints.assign_from_buffer(&p_data[49..]);
-        self.m_alpha_selectors.assign_from_buffer(&p_data[57..]);
-        self.m_tables_size.assign_from_buffer(&p_data[65..]);
-        self.m_tables_ofs.assign_from_buffer(&p_data[67..]);
-        self.m_level_ofs = alloc::vec![];
-        for i in 0..self.m_levels.cast_to_uint() as usize{
-            self.m_level_ofs.push(CrnPackedUint { m_buf: [0, 0, 0, 0] });
-            self.m_level_ofs[i].assign_from_buffer(&p_data[70 + (i * 4)..]);
+        self.sig.assign_from_buffer(&p_data[0..]);
+        self.header_size.assign_from_buffer(&p_data[2..]);
+        self.header_crc16.assign_from_buffer(&p_data[4..]);
+        self.data_size.assign_from_buffer(&p_data[6..]);
+        self.data_crc16.assign_from_buffer(&p_data[10..]);
+        self.width.assign_from_buffer(&p_data[12..]);
+        self.height.assign_from_buffer(&p_data[14..]);
+        self.levels.assign_from_buffer(&p_data[16..]);
+        self.faces.assign_from_buffer(&p_data[17..]);
+        self.format.assign_from_buffer(&p_data[18..]);
+        self.flags.assign_from_buffer(&p_data[19..]);
+        self.reserved.assign_from_buffer(&p_data[21..]);
+        self.userdata0.assign_from_buffer(&p_data[25..]);
+        self.userdata1.assign_from_buffer(&p_data[29..]);
+        self.color_endpoints.assign_from_buffer(&p_data[33..]);
+        self.color_selectors.assign_from_buffer(&p_data[41..]);
+        self.alpha_endpoints.assign_from_buffer(&p_data[49..]);
+        self.alpha_selectors.assign_from_buffer(&p_data[57..]);
+        self.tables_size.assign_from_buffer(&p_data[65..]);
+        self.tables_ofs.assign_from_buffer(&p_data[67..]);
+        self.level_ofs = alloc::vec![];
+        for i in 0..self.levels.cast_to_uint() as usize{
+            self.level_ofs.push(CrnPackedUint { buf: [0, 0, 0, 0] });
+            self.level_ofs[i].assign_from_buffer(&p_data[70 + (i * 4)..]);
         }
-        if self.m_sig.cast_to_uint() as u16 != C_CRNSIG_VALUE{
+        if self.sig.cast_to_uint() as u16 != C_CRNSIG_VALUE{
             return false;
         }
-        if self.m_header_size.cast_to_uint() < core::mem::size_of::<CrnHeader>() as u32 || data_size < self.m_data_size.cast_to_uint(){
+        if self.header_size.cast_to_uint() < core::mem::size_of::<CrnHeader>() as u32 || data_size < self.data_size.cast_to_uint(){
             return false;
         }
         true
@@ -161,27 +161,27 @@ impl CrnHeader{
 
 // #[repr(C)]
 // pub struct crn_level_info{
-//     m_struct_size: u32,
-//     m_width: u32,
-//     m_height: u32,
-//     m_faces: u32,
-//     m_blocks_x: u32,
-//     m_blocks_y: u32,
-//     m_bytes_per_block: u32,
-//     m_format: crn_format,
+//     struct_size: u32,
+//     width: u32,
+//     height: u32,
+//     faces: u32,
+//     blocks_x: u32,
+//     blocks_y: u32,
+//     bytes_per_block: u32,
+//     format: crn_format,
 // }
 
 // impl crn_level_info{
 //     pub fn default() -> crn_level_info{
 //         return crn_level_info {
-//             m_struct_size: core::mem::size_of::<crn_level_info>() as u32,
-// 			m_width: 0,
-// 			m_height: 0,
-// 			m_faces: 0,
-// 			m_blocks_x: 0,
-// 			m_blocks_y: 0,
-// 			m_bytes_per_block: 0,
-// 			m_format: crn_format::cCRNFmtInvalid // Init as invalid?
+//             struct_size: core::mem::size_of::<crn_level_info>() as u32,
+// 			    width: 0,
+// 			    height: 0,
+// 			    faces: 0,
+// 			    blocks_x: 0,
+// 			    blocks_y: 0,
+// 			    bytes_per_block: 0,
+// 			    format: crn_format::cCRNFmtInvalid // Init as invalid?
 //         }
 //     }
 // }

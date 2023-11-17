@@ -271,7 +271,7 @@ mod tests {
             let crn_data = fs::read(fp).unwrap();
             let mut tex_info = CrnTextureInfo::default();
             tex_info.crnd_get_texture_info(&crn_data, crn_data.len() as u32);
-            Texture::new(core::cmp::max(1, tex_info.m_width), core::cmp::max(1, tex_info.m_height), crn_data)
+            Texture::new(core::cmp::max(1, tex_info.width), core::cmp::max(1, tex_info.height), crn_data)
         }
 
         fn _decode(&self, decode_func: DecodeFunction) -> Vec<u32> {
