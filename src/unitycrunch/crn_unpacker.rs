@@ -126,14 +126,16 @@ impl<'slice> CrnUnpacker<'slice>{
         if !res {
             return res;
         }
+
         let mut dm = [StaticHuffmanDataModel::default(), StaticHuffmanDataModel::default()];
         let range: usize = if has_etc_color_blocks {1} else {2};
-        for i in 0..range{
-            res = self.m_codec.decode_receive_static_data_model(&mut (dm[i]));
+        for dm_item in dm.iter_mut().take(range){
+            res = self.m_codec.decode_receive_static_data_model(dm_item);
             if !res {
                 return res;
             }
         }
+
         let (mut a, mut b, mut c, mut d, mut e, mut f): (u32, u32, u32, u32, u32, u32) = (0, 0, 0, 0, 0, 0);
         let mut p_dst = &mut self.m_color_endpoints[0..];
         for _ in 0..num_color_endpoints{
@@ -242,7 +244,7 @@ impl<'slice> CrnUnpacker<'slice>{
         let p_dst: &mut [u16] = &mut self.m_alpha_endpoints[0..];
         let mut a: u32 = 0;
         let mut b: u32 = 0;
-        for i in 0..num_alpha_endpoints as usize{
+        for p_dst_i in p_dst.iter_mut().take(num_alpha_endpoints as usize){
             let sa = match self.m_codec.decode(&dm) {
                     Ok(s) => s,
                     Err(_) => return false
@@ -253,7 +255,7 @@ impl<'slice> CrnUnpacker<'slice>{
                 };
             a = (sa + a) & 0xFF;
             b = (sb + b) & 0xFF;
-            p_dst[i] = (a | (b << 8)) as u16;
+            *p_dst_i = (a | (b << 8)) as u16;
         }
         self.m_codec.stop_decoding();
         true

@@ -36,13 +36,12 @@ impl DecoderTables{
         self.m_num_syms = num_syms;
         let mut num_codes = [0_u32; (C_MAX_EXPECTED_CODE_SIZE + 1)];
         
-        for i in 0..num_syms as usize{
-            let c = p_codesizes[i];
+        for &c in p_codesizes.iter().take(num_syms as usize) {
             if c != 0 {
                 num_codes[c as usize] += 1;
             }
-        
         }
+        
         let mut sorted_positions = [0_u32; (C_MAX_EXPECTED_CODE_SIZE + 1)];
         let mut cur_code: u32 = 0;
         let mut total_used_syms: u32 = 0;
@@ -85,21 +84,23 @@ impl DecoderTables{
         self.m_min_code_size = min_code_size as u8;
         self.m_max_code_size = max_code_size as u8;
 
-        for i in 0..num_syms as usize{
-            let c: u32 = p_codesizes[i] as u32;
-
+        for (i, &code_size) in p_codesizes.iter().enumerate().take(num_syms as usize) {
+            let c: u32 = code_size as u32;
+        
             if c != 0 {
-                if num_codes[c as usize] == 0{
+                let code_index = c as usize;
+        
+                if num_codes[code_index] == 0 {
                     return false;
                 }
-
-                let sorted_pos: u32 = sorted_positions[c as usize];
-                sorted_positions[c as usize] += 1;
-
-                if sorted_pos >= total_used_syms{
+        
+                let sorted_pos: u32 = sorted_positions[code_index];
+                sorted_positions[code_index] += 1;
+        
+                if sorted_pos >= total_used_syms {
                     return false;
                 }
-
+        
                 self.m_sorted_symbol_order[sorted_pos as usize] = i as u16;
             }
         }
@@ -149,8 +150,8 @@ impl DecoderTables{
             }
         }
 
-        for i in 0..C_MAX_EXPECTED_CODE_SIZE{
-            self.m_val_ptrs[i] -= min_codes[i] as i32;
+        for (val_ptr, &min_code) in self.m_val_ptrs.iter_mut().zip(min_codes.iter()) {
+            *val_ptr -= min_code as i32;
         }
 
         self.m_table_max_code = 0;

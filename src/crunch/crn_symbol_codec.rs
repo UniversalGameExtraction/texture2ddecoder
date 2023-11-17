@@ -62,11 +62,11 @@ impl<'slice> symbol_codec<'slice>{
         let mut dm = StaticHuffmanDataModel::default();
         dm.m_code_sizes.resize(C_MAX_CODELENGTH_CODES, 0);
         
-        for i in 0..num_codelength_codes_to_send as usize{
-            dm.m_code_sizes[G_MOST_PROBABLE_CODELENGTH_CODES[i] as usize] = match self.decode_bits(3){
-                Ok(s) => s,
-                Err(_) => return false
-            } as u8;
+        for &code_length_code in G_MOST_PROBABLE_CODELENGTH_CODES.iter().take(num_codelength_codes_to_send as usize) {
+            dm.m_code_sizes[code_length_code as usize] = match self.decode_bits(3) {
+                Ok(s) => s as u8,
+                Err(_) => return false,
+            };
         }
         
         if !dm.prepare_decoder_tables() {

@@ -100,17 +100,20 @@ impl<'slice> CrnUnpacker<'slice>{
         let num_color_endpoints = self.m_p_header.m_color_endpoints.m_num.cast_to_uint();
         self.m_color_endpoints.resize(num_color_endpoints as usize, 0);
         let mut res: bool;
+
         res = self.m_codec.start_decoding(&self.m_p_data[self.m_p_header.m_color_endpoints.m_ofs.cast_to_uint() as usize..], self.m_p_header.m_color_endpoints.m_size.cast_to_uint());
         if !res {
             return res;
         }
+        
         let mut dm = [StaticHuffmanDataModel::default(), StaticHuffmanDataModel::default()];
-        for i in 0..2{
-            res = self.m_codec.decode_receive_static_data_model(&mut dm[i]);
+        for dm_item in dm.iter_mut().take(2) {
+            res = self.m_codec.decode_receive_static_data_model(dm_item);
             if !res {
-                return res;
+                return false;
             }
         }
+
         let (mut a, mut b, mut c, mut d, mut e, mut f): (u32, u32, u32, u32, u32, u32) = (0, 0, 0, 0, 0, 0);
         let mut p_dst = &mut self.m_color_endpoints[0..];
         for _ in 0..num_color_endpoints{
@@ -207,7 +210,7 @@ impl<'slice> CrnUnpacker<'slice>{
         let p_dst: &mut [u16] = &mut self.m_alpha_endpoints[0..];
         let mut a: u32 = 0;
         let mut b: u32 = 0;
-        for i in 0..num_alpha_endpoints as usize{
+        for p_dst_i in p_dst.iter_mut().take(num_alpha_endpoints as usize){
             let sa = match self.m_codec.decode(&dm){
                 Ok(s) => s,
                 Err(_) => return false
@@ -218,7 +221,7 @@ impl<'slice> CrnUnpacker<'slice>{
             };
             a = (sa + a) & 0xFF;
             b = (sb + b) & 0xFF;
-            p_dst[i] = (a | (b << 8)) as u16;
+            *p_dst_i = (a | (b << 8)) as u16;
         }
         self.m_codec.stop_decoding();
         true
@@ -393,16 +396,18 @@ impl<'slice> CrnUnpacker<'slice>{
                     }
                     let chunk_encoding_index = chunk_encoding_bits & 7;
                     chunk_encoding_bits >>= 3;
+
                     let num_tiles = G_CRND_CHUNK_ENCODING_NUM_TILES[chunk_encoding_index as usize];
-                    for i in 0..num_tiles as usize{
+                    for color_endpoint in color_endpoints.iter_mut().take(num_tiles as usize){
                         let delta: u32 = match self.m_codec.decode(&self.m_endpoint_delta_dm[0]){
                             Ok(delta) => delta,
                             Err(_) => return Err("Failed to decord DXT1 Texture")
                         };
                         prev_color_endpoint_index += delta;
                         limit(&mut prev_color_endpoint_index, num_color_endpoints);
-                        color_endpoints[i] = self.m_color_endpoints[prev_color_endpoint_index as usize];
+                        *color_endpoint = self.m_color_endpoints[prev_color_endpoint_index as usize];
                     }
+
                     let p_tile_indices = G_CRND_CHUNK_ENCODING_TILES[chunk_encoding_index as usize].m_tiles;
                     let skip_right_col = ((blocks_x & 1) == 1) && (x == (chunks_x as i32 - 1));
                     let mut pd_dst = block_dst >> 2;
