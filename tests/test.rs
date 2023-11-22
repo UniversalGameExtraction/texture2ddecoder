@@ -156,6 +156,71 @@ mod tests {
         test_format("EAC_RG11", "ktx2", decode_eacrg)
     }
 
+    #[test]
+    fn test_CRUNCH_DXT1() {
+        test_format("CRUNCH_DXT1", "crn", decode_crunch)
+    }
+
+    #[test]
+    fn test_CRUNCH_DXT5() {
+        test_format("CRUNCH_DXT5", "crn", decode_crunch)
+    }
+
+    #[test]
+    fn test_CRUNCH_DXT5A() {
+        test_format("CRUNCH_DXT5A", "crn", decode_crunch)
+    }
+
+    #[test]
+    fn test_CRUNCH_DXN() {
+        test_format("CRUNCH_DXN", "crn", decode_crunch)
+    }
+
+    #[test]
+    fn test_UNITYCRUNCH_DXT1() {
+        test_format("UNITYCRUNCH_DXT1", "crn", decode_unity_crunch)
+    }
+
+    #[test]
+    fn test_UNITYCRUNCH_DXT5() {
+        test_format("UNITYCRUNCH_DXT5", "crn", decode_unity_crunch)
+    }
+
+    #[test]
+    fn test_UNITYCRUNCH_DXT5A() {
+        test_format("UNITYCRUNCH_DXT5A", "crn", decode_unity_crunch)
+    }
+
+    #[test]
+    fn test_UNITYCRUNCH_DXN() {
+        test_format("UNITYCRUNCH_DXN", "crn", decode_unity_crunch)
+    }
+
+    #[test]
+    fn test_UNITYCRUNCH_ETC1() {
+        test_format("UNITYCRUNCH_ETC1", "crn", decode_unity_crunch)
+    }
+
+    #[test]
+    fn test_UNITYCRUNCH_ETC1S() {
+        test_format("UNITYCRUNCH_ETC1S", "crn", decode_unity_crunch)
+    }
+
+    #[test]
+    fn test_UNITYCRUNCH_ETC2() {
+        test_format("UNITYCRUNCH_ETC2", "crn", decode_unity_crunch)
+    }
+
+    #[test]
+    fn test_UNITYCRUNCH_ETC2A() {
+        test_format("UNITYCRUNCH_ETC2A", "crn", decode_unity_crunch)
+    }
+
+    #[test]
+    fn test_UNITYCRUNCH_ETC2AS() {
+        test_format("UNITYCRUNCH_ETC2AS", "crn", decode_unity_crunch)
+    }
+
     // helper structs and functions
     struct Texture {
         width: u32,
@@ -177,6 +242,7 @@ mod tests {
             match extension {
                 "ktx2" | "KTX2" => Texture::from_ktx2_file(fp),
                 "dds" | "DDS" => Texture::from_dds_file(fp),
+                "crn" | "CRN" => Texture::from_crn_file(fp),
                 _ => panic!("Unsupported file format"),
             }
         }
@@ -199,6 +265,17 @@ mod tests {
             let dds = ddsfile::Dds::read(&dds_data[..]).unwrap();
 
             Texture::new(dds.header.width, dds.header.height, dds.data)
+        }
+
+        fn from_crn_file(fp: &str) -> Texture {
+            let crn_data = fs::read(fp).unwrap();
+            let mut tex_info = CrnTextureInfo::default();
+            tex_info.crnd_get_texture_info(&crn_data, crn_data.len() as u32);
+            Texture::new(
+                core::cmp::max(1, tex_info.width),
+                core::cmp::max(1, tex_info.height),
+                crn_data,
+            )
         }
 
         fn _decode(&self, decode_func: DecodeFunction) -> Vec<u32> {

@@ -17,13 +17,16 @@ A pure Rust no-std texture decoder for the following formats:
  - [BCn - Block Compression](https://en.wikipedia.org/wiki/S3_Texture_Compression)
  - [ETC - Ericsson Texture Compression](https://en.wikipedia.org/wiki/Ericsson_Texture_Compression)
  - [PVRTC - PowerVR Texture Compression](https://en.wikipedia.org/wiki/PVRTC)
- - (WIP) [Crunch](https://github.com/BinomialLLC/crunch) & [Unity's Crunch](https://github.com/Unity-Technologies/crunch)
+
+and with alloc:
+ - [Crunch](https://github.com/BinomialLLC/crunch) & [Unity's Crunch (unity branch)](https://github.com/Unity-Technologies/crunch/tree/unity)
 
 ## Features
 
 ### alloc (optional, default)
 
 - ~35% faster pvrtc decoding
+- crunch decoding
 
 ## Functions
 Provides a decode function for each format, as well as a block decode function all formats besides PVRTC.
@@ -42,7 +45,8 @@ The exceptions are:
 - ASTC: the (block) decode function takes the block size as an additional parameter
 - BC6: there are two additional decode functions for the signed and unsigned variants
 - PVRTC: the decode function takes the block size as an additional parameter, and there are two additional decode functions for the 2bpp and 4bpp variants
-To make these excetions easier to use, there are helper functions to enable decode functions with identical arguments and returns.
+- Crunch & Unity's Crunch: The texture's dimensions and metadata are stored in the file itself, the header must be parsed with crnd_get_texture_info() from CrnTextureInfo struct first, then pass the metadata to the decoder. There's no block decompression function.
+
 Here is a list of the formats and their corresponding functions:
 - ATC
   - decode_atc_rgb4
@@ -89,9 +93,12 @@ Here is a list of the formats and their corresponding functions:
   - decode_pvrtc
   - decode_pvrtc_2bpp
   - decode_pvrtc_4bpp
+- Crunch
+  - decode_crunch
+- Unity Crunch
+  - decode_unity_crunch()
 
 ## Roadmap
-- implementing & testing all formats
 - documentation
 - replacing u32 color output with RGBA structure
 - finding the original sources for the decoders
@@ -117,11 +124,11 @@ Here is a list of the formats and their corresponding functions:
 - [x] ETC2-A8
 - [x] PVRTCI-2bpp
 - [x] PVRTCI-4bpp
-- [ ] Crunched (not implemented)
-  - [ ] DXT1
-  - [ ] DXT5
-  - [ ] ETC1
-  - [ ] ETC2-A8
+- [x] Crunched
+  - [x] DXT1
+  - [x] DXT5
+  - [x] ETC1
+  - [x] ETC2-A8
 
 ## License & Credits
 

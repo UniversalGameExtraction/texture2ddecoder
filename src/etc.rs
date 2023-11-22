@@ -6,8 +6,8 @@ pub(crate) mod etc1;
 pub(crate) mod etc2;
 
 pub use eac::{
-    decode_eac_block, decode_eac_signed_block, decode_eacr_block, decode_eacrg_block,
-    decode_eacrg_signed_block, decode_eacr_signed_block,
+    decode_eac_block, decode_eac_signed_block, decode_eacr_block, decode_eacr_signed_block,
+    decode_eacrg_block, decode_eacrg_signed_block,
 };
 pub use etc1::decode_etc1_block;
 pub use etc2::{
