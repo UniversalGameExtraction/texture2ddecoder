@@ -1,0 +1,35 @@
+[package]
+name = "texture2ddecoder_py"
+version = "0.0.6"
+edition = "2021"
+include = [
+    "src/*",
+    "Cargo.toml",
+    "README.md",
+    "LICENSE-APACHE",
+    "LICENSE-MIT",
+    "COPYRIGHT"
+]
+authors = ["Rudolf Kolbe <rkolbe96@gmail.com>"]
+description = "pure Rust no-std texture decoder"
+documentation = "https://docs.rs/texture2ddecoder"
+homepage = "https://crates.io/crates/texture2ddecoder"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/UniversalGameExtraction/texture2ddecoder"
+categories = [
+    "graphics",
+    "no-std",
+    "no-std::no-alloc",
+    "multimedia::encoding",
+    "multimedia::images"
+]
+
+[lib]
+name = "texture2ddecoder_py"
+crate-type = ["cdylib"]
+
+[dependencies]
+texture2ddecoder = { path = "../.." }
+pyo3 = { version = "^0.20.2", features = ["extension-module"] }
+paste = "^1.0.12"

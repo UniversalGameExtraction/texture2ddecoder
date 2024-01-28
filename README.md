@@ -96,7 +96,7 @@ Here is a list of the formats and their corresponding functions:
 - Crunch
   - decode_crunch
 - Unity Crunch
-  - decode_unity_crunch()
+  - decode_unity_crunch
 
 ## Roadmap
 - documentation
