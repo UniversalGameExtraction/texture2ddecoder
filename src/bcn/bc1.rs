@@ -37,7 +37,7 @@ pub fn decode_bc1_block(data: &[u8], outbuf: &mut [u32]) {
             ((b0 + b1) / 2) as u8,
             255,
         );
-        c[3] = color(0, 0, 0, 255);
+        c[3] = color(0, 0, 0, 0);
     }
     let mut d: usize = u32::from_le_bytes(data[4..8].try_into().unwrap()) as usize;
     (0..16).for_each(|i| {
