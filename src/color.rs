@@ -39,6 +39,29 @@ pub const fn color(r: u8, g: u8, b: u8, a: u8) -> u32 {
 //     TRANSPARENT_MASK | a as u32
 // }
 
+// #[inline]
+// pub fn srgb_transfer(v: f32) -> f32 {
+//     if v < 0.0031308 {
+//         v * 12.9232102
+//     } else {
+//         1.055 * v.powf(1.0 / 2.4) - 0.055
+//     }
+// }
+
+// #[cfg(target_endian = "little")]
+// #[inline]
+// pub fn rgb565_to_srgb888_le(d: u16) -> (u8, u8, u8) {
+//     let r5 = ((d >> 11) & 0x1F) as f32;
+//     let g6 = ((d >> 5) & 0x3F) as f32;
+//     let b5 = (d & 0x1F) as f32;
+
+//     let r8 = srgb_transfer(r5 / 31.0) * 255.0;
+//     let g8 = srgb_transfer(g6 / 63.0) * 255.0;
+//     let b8 = srgb_transfer(b5 / 31.0) * 255.0;
+
+//     (r8 as u8, g8 as u8, b8 as u8)
+// }
+
 // #[cfg(target_endian = "little")]
 #[inline]
 pub const fn rgb565_le(d: u16) -> (u8, u8, u8) {
