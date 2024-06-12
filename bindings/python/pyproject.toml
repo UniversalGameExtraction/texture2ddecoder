@@ -10,6 +10,13 @@ sdist-include = [
     "../../README.md",
     "../../LICENSE-MIT",
     "../../LICENSE-APACHE",
+    "./texture2ddecoder_rs.pyi",
+    "./pyproject.toml",
+    "./Cargo.toml",
+    "./src",
+    "./README.md",
+    "./LICENSE-MIT",
+    "./LICENSE-APACHE",
 ]
 python-source = "python"
 module-name = "texture2ddecoder_rs"

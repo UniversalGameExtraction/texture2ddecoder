@@ -4,6 +4,7 @@ use pyo3::wrap_pyfunction;
 
 #[pymodule]
 fn texture2ddecoder_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    // generic bindings
     // atc
     m.add_function(wrap_pyfunction!(decode_atc_rgb4, m)?)?;
     m.add_function(wrap_pyfunction!(decode_atc_rgba8, m)?)?;
@@ -38,12 +39,18 @@ fn texture2ddecoder_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(decode_eacr, m)?)?;
     m.add_function(wrap_pyfunction!(decode_eacr_signed, m)?)?;
     m.add_function(wrap_pyfunction!(decode_eacrg, m)?)?;
+    m.add_function(wrap_pyfunction!(decode_eacrg_signed, m)?)?;
     // pvrtc
     m.add_function(wrap_pyfunction!(decode_pvrtc_2bpp, m)?)?;
     m.add_function(wrap_pyfunction!(decode_pvrtc_4bpp, m)?)?;
     // crunch
     m.add_function(wrap_pyfunction!(decode_crunch, m)?)?;
     m.add_function(wrap_pyfunction!(decode_unity_crunch, m)?)?;
+
+    // custom bindings
+    m.add_function(wrap_pyfunction!(decode_astc, m)?)?;
+
+    // ---
     Ok(())
 }
 
@@ -54,7 +61,10 @@ macro_rules! pybind {
             pub fn $name<'a>(py: Python<'a>, data: &'a PyBytes, width: usize, height: usize) -> PyResult<&'a PyBytes> {
                 PyBytes::new_with(py, width * height * 4, |image: & mut[u8]|{
                     let image_u32 = unsafe { std::mem::transmute(image) };
-                    texture2ddecoder::$name(data.as_bytes(), width, height, image_u32).unwrap_err();
+                    match texture2ddecoder::$name(data.as_bytes(), width, height, image_u32){
+                        Ok(_) => {}
+                        Err(e) => return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(e.to_string()))
+                    }
                     Ok(())
                 })
             }
@@ -62,6 +72,7 @@ macro_rules! pybind {
     };
 }
 
+// generic bindings
 // atc
 pybind!(decode_atc_rgb4);
 pybind!(decode_atc_rgba8);
@@ -96,9 +107,20 @@ pybind!(decode_etc2_rgba8);
 pybind!(decode_eacr);
 pybind!(decode_eacr_signed);
 pybind!(decode_eacrg);
+pybind!(decode_eacrg_signed);
 // pvrtc
 pybind!(decode_pvrtc_2bpp);
 pybind!(decode_pvrtc_4bpp);
 // crunch
 pybind!(decode_crunch);
 pybind!(decode_unity_crunch);
+
+// custom bindings
+#[pyfunction]
+pub fn decode_astc<'a>(py: Python<'a>, data: &'a PyBytes, width: usize, height: usize, block_width: usize, block_height: usize) -> PyResult<&'a PyBytes> {
+    PyBytes::new_with(py, width * height * 4, |image: & mut[u8]|{
+        let image_u32 = unsafe { std::mem::transmute(image) };
+        texture2ddecoder::decode_astc(data.as_bytes(), width, height, block_width, block_height, image_u32).unwrap_err();
+        Ok(())
+    })
+}

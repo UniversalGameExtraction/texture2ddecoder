@@ -16,6 +16,7 @@ pub struct BlockBufferElement {
 }
 
 pub struct CrnUnpacker<'slice> {
+    #[allow(dead_code)]
     pub magic: u32,
     pub p_data: &'slice [u8],
     pub data_size: u32,

@@ -229,23 +229,25 @@ class Texture:
 
     def save_as_image(self, path: str, decode_func: callable):
         image_data = self._decode(decode_func)
-        image = Image.frombuffer(
+        _image = Image.frombuffer(
             "RGBA", (self.width, self.height), image_data, "raw", "BGRA"
         )
-        image.save(path)
+        # image.save(path)
 
 
 def get_texture_fp(name: str) -> str:
-    return os.path.join(
-        os.path.realpath(__file__),
-        "..",
-        "..",
-        "..",
-        "..",
-        "resources",
-        "tests",
-        "textures",
-        name,
+    return os.path.abspath(
+        os.path.join(
+            os.path.realpath(__file__),
+            "..",
+            "..",
+            "..",
+            "..",
+            "resources",
+            "tests",
+            "textures",
+            name,
+        )
     )
 
 

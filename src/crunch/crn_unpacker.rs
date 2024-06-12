@@ -8,9 +8,11 @@ use crate::macros::*;
 extern crate alloc;
 
 pub struct CrnUnpacker<'slice> {
+    #[allow(dead_code)]
     pub magic: u32,
     pub p_data: &'slice [u8],
     pub data_size: u32,
+    #[allow(dead_code)]
     pub tmp_header: CrnHeader,
     pub p_header: CrnHeader,
     pub codec: symbol_codec<'slice>,

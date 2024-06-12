@@ -15,6 +15,10 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    working-directory: ./bindings/python
+
 jobs:
   lint_and_test:
     runs-on: ubuntu-latest
@@ -34,6 +38,7 @@ jobs:
           target: ${{ matrix.target }}
           args: --release --out dist -i ${{ matrix.python-version }}
           sccache: 'true'
+          working-directory: ./bindings/python
       - name: Install Just
         uses: extractions/setup-just@v2
       - name: Run Cargo Tests
@@ -45,7 +50,7 @@ jobs:
           rm -rf .venv
           python3 -m venv .venv
           . .venv/bin/activate
-          .venv/bin/pip install wheel pytest mkdocs-material
+          .venv/bin/pip install wheel pytest mkdocs-material pillow
           maturin develop
           .venv/bin/pytest
 
@@ -72,11 +77,12 @@ jobs:
           args: --release --out dist -i ${{ matrix.platform.interpreter }}
           sccache: 'true'
           manylinux: auto
+          working-directory: ./bindings/python
       - name: Upload wheels
         uses: actions/upload-artifact@v3
         with:
           name: wheels
-          path: dist
+          path: ./bindings/python/wheels/dist
   musllinux:
     runs-on: ubuntu-latest
     needs: lint_and_test
@@ -108,11 +114,12 @@ jobs:
           args: --release --out dist -i ${{ matrix.platform.interpreter }}
           sccache: 'true'
           manylinux: musllinux_1_1
+          working-directory: ./bindings/python
       - name: Upload wheels
         uses: actions/upload-artifact@v3
         with:
           name: wheels
-          path: dist
+          path: ./bindings/python/wheels/dist
 
   windows:
     runs-on: windows-latest
@@ -134,11 +141,12 @@ jobs:
           target: ${{ matrix.platform.target }}
           args: --release --out dist -i ${{ matrix.platform.interpreter }}
           sccache: 'true'
+          working-directory: ./bindings/python
       - name: Upload wheels
         uses: actions/upload-artifact@v3
         with:
           name: wheels
-          path: dist
+          path: ./bindings/python/wheels/dist
 
   macos:
     runs-on: macos-latest
@@ -160,11 +168,12 @@ jobs:
           target: ${{ matrix.platform.target }}
           args: --release --out dist -i ${{ matrix.platform.interpreter }}
           sccache: 'true'
+          working-directory: ./bindings/python
       - name: Upload wheels
         uses: actions/upload-artifact@v3
         with:
           name: wheels
-          path: dist
+          path: ./bindings/python/wheels/dist
 
   sdist:
     runs-on: ubuntu-latest
@@ -178,11 +187,12 @@ jobs:
         with:
           command: sdist
           args: --out dist
+          working-directory: ./bindings/python
       - name: Upload sdist
         uses: actions/upload-artifact@v3
         with:
           name: wheels
-          path: dist
+          path: ./bindings/python/wheels/dist
 
   release:
     name: Release
@@ -193,6 +203,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: wheels
+          path: ./bindings/python/wheels
       - name: Publish to PyPI
         uses: PyO3/maturin-action@v1
         env:
@@ -200,3 +211,4 @@ jobs:
         with:
           command: upload
           args: --skip-existing *
+          working-directory: ./bindings/python
