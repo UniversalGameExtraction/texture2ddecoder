@@ -1,36 +1,6 @@
 #[inline]
-pub fn is_power_of_2(x: usize) -> bool {
-    if x == 0 {
-        return false;
-    }
-    (x & (x - 1)) == 0
-}
-
-#[inline]
-pub fn next_pow2(mut val: usize) -> usize {
-    val -= 1;
-    val |= val >> 32;
-    val |= val >> 16;
-    val |= val >> 8;
-    val |= val >> 4;
-    val |= val >> 2;
-    val |= val >> 1;
-    val + 1
-}
-
-#[inline]
-pub fn floor_log2i(mut v: u32) -> u32 {
-    let mut l: u32 = 0;
-    while v > 1 {
-        v >>= 1;
-        l += 1;
-    }
-    l
-}
-
-#[inline]
 pub fn ceil_log2i(v: u32) -> u32 {
-    let mut l: u32 = floor_log2i(v);
+    let mut l: u32 = v.ilog2();
     if (l != 32) && (v > (1 << l)) {
         l += 1;
     }

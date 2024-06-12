@@ -74,9 +74,9 @@ impl DecoderTables {
         if total_used_syms > self.cur_sorted_symbol_order_size {
             self.cur_sorted_symbol_order_size = total_used_syms;
 
-            if !is_power_of_2(total_used_syms as usize) {
+            if !total_used_syms.is_power_of_two() {
                 self.cur_sorted_symbol_order_size =
-                    min(num_syms, next_pow2(total_used_syms as usize) as u32);
+                    min(num_syms, total_used_syms.next_power_of_two());
             }
 
             self.sorted_symbol_order = alloc::vec![0; self.cur_sorted_symbol_order_size as usize];

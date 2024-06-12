@@ -49,15 +49,14 @@ fn bit_reverse_u8(c: u8, bits: u8) -> u8 {
 
 #[inline]
 fn bit_reverse_u64(d: u64, bits: usize) -> u64 {
-    let d = d as usize;
-    let ret = (BIT_REVERSE_TABLE[d & 0xff] as u64) << 56
-        | (BIT_REVERSE_TABLE[d >> 8 & 0xff] as u64) << 48
-        | (BIT_REVERSE_TABLE[d >> 16 & 0xff] as u64) << 40
-        | (BIT_REVERSE_TABLE[d >> 24 & 0xff] as u64) << 32
-        | (BIT_REVERSE_TABLE[d >> 32 & 0xff] as u64) << 24
-        | (BIT_REVERSE_TABLE[d >> 40 & 0xff] as u64) << 16
-        | (BIT_REVERSE_TABLE[d >> 48 & 0xff] as u64) << 8
-        | (BIT_REVERSE_TABLE[d >> 56 & 0xff] as u64);
+    let ret = (BIT_REVERSE_TABLE[(d & 0xff) as usize] as u64) << 56
+        | (BIT_REVERSE_TABLE[(d >> 8 & 0xff) as usize] as u64) << 48
+        | (BIT_REVERSE_TABLE[(d >> 16 & 0xff) as usize] as u64) << 40
+        | (BIT_REVERSE_TABLE[(d >> 24 & 0xff) as usize] as u64) << 32
+        | (BIT_REVERSE_TABLE[(d >> 32 & 0xff) as usize] as u64) << 24
+        | (BIT_REVERSE_TABLE[(d >> 40 & 0xff) as usize] as u64) << 16
+        | (BIT_REVERSE_TABLE[(d >> 48 & 0xff) as usize] as u64) << 8
+        | (BIT_REVERSE_TABLE[(d >> 56 & 0xff) as usize] as u64);
     ret >> (64 - bits as u64)
 }
 
