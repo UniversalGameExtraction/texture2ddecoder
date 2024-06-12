@@ -1,10 +1,3 @@
-# texture2ddecoder_py
+# texture2ddecoder_rs
 
 Python bindings for texture2ddecoder.
-
-## build requirements
-
-- python 3.6+
-- rust compiler and cargo installed
-
-## 

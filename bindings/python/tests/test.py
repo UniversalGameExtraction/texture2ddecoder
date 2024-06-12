@@ -4,7 +4,7 @@ from time import time_ns
 
 from PIL import Image
 
-from texture2ddecoder_py import *
+from texture2ddecoder_rs import *
 
 
 def test_ATC_RGB():

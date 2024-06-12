@@ -3,7 +3,7 @@ use pyo3::types::PyBytes;
 use pyo3::wrap_pyfunction;
 
 #[pymodule]
-fn texture2ddecoder_py(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+fn texture2ddecoder_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     // atc
     m.add_function(wrap_pyfunction!(decode_atc_rgb4, m)?)?;
     m.add_function(wrap_pyfunction!(decode_atc_rgba8, m)?)?;
