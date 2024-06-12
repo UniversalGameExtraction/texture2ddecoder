@@ -82,7 +82,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: wheels
-          path: ./bindings/python/wheels/dist
+          path: bindings/python/dist
   musllinux:
     runs-on: ubuntu-latest
     needs: lint_and_test
@@ -119,7 +119,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: wheels
-          path: ./bindings/python/wheels/dist
+          path: bindings/python/dist
 
   windows:
     runs-on: windows-latest
@@ -146,7 +146,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: wheels
-          path: ./bindings/python/wheels/dist
+          path: bindings/python/dist
 
   macos:
     runs-on: macos-latest
@@ -173,7 +173,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: wheels
-          path: ./bindings/python/wheels/dist
+          path: bindings/python/dist
 
   sdist:
     runs-on: ubuntu-latest
@@ -192,7 +192,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: wheels
-          path: ./bindings/python/wheels/dist
+          path: bindings/python/dist
 
   release:
     name: Release
@@ -203,7 +203,6 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: wheels
-          path: ./bindings/python/wheels
       - name: Publish to PyPI
         uses: PyO3/maturin-action@v1
         env:
@@ -211,4 +210,3 @@ jobs:
         with:
           command: upload
           args: --skip-existing *
-          working-directory: ./bindings/python
