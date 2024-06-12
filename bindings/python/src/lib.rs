@@ -24,6 +24,7 @@ fn texture2ddecoder_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(decode_astc_12_12, m)?)?;
     // bcn
     m.add_function(wrap_pyfunction!(decode_bc1, m)?)?;
+    m.add_function(wrap_pyfunction!(decode_bc2, m)?)?;
     m.add_function(wrap_pyfunction!(decode_bc3, m)?)?;
     m.add_function(wrap_pyfunction!(decode_bc4, m)?)?;
     m.add_function(wrap_pyfunction!(decode_bc5, m)?)?;
@@ -82,6 +83,7 @@ pybind!(decode_astc_12_10);
 pybind!(decode_astc_12_12);
 // bcn
 pybind!(decode_bc1);
+pybind!(decode_bc2);
 pybind!(decode_bc3);
 pybind!(decode_bc4);
 pybind!(decode_bc5);

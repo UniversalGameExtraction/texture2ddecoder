@@ -55,6 +55,10 @@ def test_BC1():
     _test_format("BC1", "ktx2", decode_bc1)
 
 
+def test_BC2():
+    _test_format("BC2", "ktx2", decode_bc2)
+
+
 def test_BC3():
     _test_format("BC3", "ktx2", decode_bc3)
 
