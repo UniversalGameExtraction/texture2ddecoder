@@ -82,9 +82,9 @@ pub fn decode_crunch(
 
         CrnFormat::Etc1 => etc::decode_etc1(&handler.dxt_data, width, height, image),
 
-        CrnFormat::Etc2 => etc::decode_etc2(&handler.dxt_data, width, height, image),
+        CrnFormat::Etc2 => etc::decode_etc2_rgb(&handler.dxt_data, width, height, image),
 
-        CrnFormat::Etc2a => etc::decode_etc2a8(&handler.dxt_data, width, height, image),
+        CrnFormat::Etc2a => etc::decode_etc2_rgba8(&handler.dxt_data, width, height, image),
 
         _ => Err("Invalid crunch format."),
     }
