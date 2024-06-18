@@ -6,6 +6,7 @@ pub(crate) mod crn_unpacker;
 pub(crate) mod crn_utils;
 use super::crnlib::{CrnFormat, CrnTextureInfo};
 use crate::bcn;
+use crate::etc;
 use core::cmp::max;
 extern crate alloc;
 
@@ -62,19 +63,29 @@ pub fn decode_crunch(
         Err(s) => return Err(s),
     };
     match handler.format {
-        CrnFormat::Dxt1 => bcn::decode_bc1(&handler.dxt_data, width, height, image),
+        CrnFormat::Dxt1 | CrnFormat::Etc1s => {
+            bcn::decode_bc1(&handler.dxt_data, width, height, image)
+        }
 
         CrnFormat::CCrnfmtDxt5
         | CrnFormat::Dxt5CcxY
         | CrnFormat::Dxt5XGbr
         | CrnFormat::Dxt5Agbr
-        | CrnFormat::Dxt5XGxR => bcn::decode_bc3(&handler.dxt_data, width, height, image),
+        | CrnFormat::Dxt5XGxR
+        | CrnFormat::Etc2as => bcn::decode_bc3(&handler.dxt_data, width, height, image),
 
         CrnFormat::Dxt5a => bcn::decode_bc4(&handler.dxt_data, width, height, image),
 
         CrnFormat::DxnXy | CrnFormat::DxnYx => {
             bcn::decode_bc5(&handler.dxt_data, width, height, image)
         }
+
+        CrnFormat::Etc1 => etc::decode_etc1(&handler.dxt_data, width, height, image),
+
+        CrnFormat::Etc2 => etc::decode_etc2(&handler.dxt_data, width, height, image),
+
+        CrnFormat::Etc2a => etc::decode_etc2a8(&handler.dxt_data, width, height, image),
+
         _ => Err("Invalid crunch format."),
     }
 }
