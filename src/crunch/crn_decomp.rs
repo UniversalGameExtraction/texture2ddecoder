@@ -120,7 +120,7 @@ impl CrnHeader {
     pub const MIN_SIZE: u32 = 74;
 
     pub fn crnd_get_header(&mut self, p_data: &[u8], data_size: u32) -> bool {
-        if data_size < CrnHeader.MIN_SIZE {
+        if data_size < CrnHeader::MIN_SIZE {
             return false;
         }
         *self = CrnHeader::default();
@@ -152,7 +152,7 @@ impl CrnHeader {
         if self.sig.cast_to_uint() as u16 != CRNSIG_VALUE {
             return false;
         }
-        if self.header_size.cast_to_uint() < CrnHeader.MIN_SIZE
+        if self.header_size.cast_to_uint() < CrnHeader::MIN_SIZE
             || data_size < self.data_size.cast_to_uint()
         {
             return false;
