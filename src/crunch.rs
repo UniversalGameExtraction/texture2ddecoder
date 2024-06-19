@@ -34,8 +34,8 @@ fn crunch_unpack_level(
         };
     let width = max(1, tex_info.width >> level_index);
     let height = max(1, tex_info.height >> level_index);
-    let blocks_x: u32 = max(1, ((width + 3) >> 2) as u32);
-    let blocks_y: u32 = max(1, ((height + 3) >> 2) as u32);
+    let blocks_x: u32 = max(1, (width + 3) >> 2);
+    let blocks_y: u32 = max(1, (height + 3) >> 2);
     let row_pitch: u32 = blocks_x
         * match crn_decomp::crnd_get_bytes_per_dxt_block(&mut tex_info.format) {
             Ok(s) => s,
