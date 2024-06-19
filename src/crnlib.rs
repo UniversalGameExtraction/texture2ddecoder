@@ -68,7 +68,7 @@ impl CrnTextureInfo {
     }
 
     pub fn crnd_get_texture_info(&mut self, p_data: &[u8], data_size: u32) -> bool {
-        if data_size < core::mem::size_of::<CrnHeader>() as u32 {
+        if data_size < CrnHeader.MIN_SIZE as u32 {
             return false;
         }
 

@@ -116,8 +116,11 @@ pub struct CrnHeader {
 }
 
 impl CrnHeader {
+    // size of CrnHeader in C++, which uses a hacky struct definition which shouldn't be used in Rust
+    pub const MIN_SIZE: u32 = 74;
+
     pub fn crnd_get_header(&mut self, p_data: &[u8], data_size: u32) -> bool {
-        if data_size < (core::mem::size_of::<CrnHeader>() - 8 + 4) as u32 {
+        if data_size < CrnHeader.MIN_SIZE {
             return false;
         }
         *self = CrnHeader::default();
@@ -149,7 +152,7 @@ impl CrnHeader {
         if self.sig.cast_to_uint() as u16 != CRNSIG_VALUE {
             return false;
         }
-        if self.header_size.cast_to_uint() < core::mem::size_of::<CrnHeader>() as u32
+        if self.header_size.cast_to_uint() < CrnHeader.MIN_SIZE
             || data_size < self.data_size.cast_to_uint()
         {
             return false;
