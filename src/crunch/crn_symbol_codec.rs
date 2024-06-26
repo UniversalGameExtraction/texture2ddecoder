@@ -33,7 +33,7 @@ impl<'slice> symbol_codec<'slice> {
         self.p_decode_buf = p_buf;
         self.p_decode_buf_next = p_buf;
         self.decode_buf_size = buf_size;
-        self.p_decode_buf_end = (&p_buf[(buf_size - 1) as usize]) as *const u8;
+        self.p_decode_buf_end = (&p_buf[buf_size as usize]) as *const u8;
         self.get_bits_init();
         true
     }
@@ -178,17 +178,13 @@ impl<'slice> symbol_codec<'slice> {
                 let mut c0: u32 = 0;
                 let mut c1: u32 = 0;
                 let mut p = self.p_decode_buf_next;
-                if (&(p[0]) as *const u8) <= self.p_decode_buf_end {
+                if (&(p[0]) as *const u8) < self.p_decode_buf_end {
                     c0 = p[0] as u32;
-                    if (&(p[0]) as *const u8) < self.p_decode_buf_end {
-                        p = &p[1..]
-                    }
+                    p = &p[1..]
                 };
-                if (&(p[0]) as *const u8) <= self.p_decode_buf_end {
+                if (&(p[0]) as *const u8) < self.p_decode_buf_end {
                     c1 = p[0] as u32;
-                    if (&(p[0]) as *const u8) < self.p_decode_buf_end {
-                        p = &p[1..]
-                    }
+                    p = &p[1..]
                 };
                 self.p_decode_buf_next = p;
                 self.bit_count += 16;
@@ -196,11 +192,9 @@ impl<'slice> symbol_codec<'slice> {
                 self.bit_buf |= c << (32 - self.bit_count);
             } else {
                 let c: u32;
-                if (&(self.p_decode_buf_next[0]) as *const u8) <= self.p_decode_buf_end {
+                if (&(self.p_decode_buf_next[0]) as *const u8) < self.p_decode_buf_end {
                     c = self.p_decode_buf_next[0] as u32;
-                    if (&(self.p_decode_buf_next[0]) as *const u8) < self.p_decode_buf_end {
-                        self.p_decode_buf_next = &self.p_decode_buf_next[1..];
-                    }
+                    self.p_decode_buf_next = &self.p_decode_buf_next[1..];
                 } else {
                     c = 0
                 };
@@ -254,11 +248,9 @@ impl<'slice> symbol_codec<'slice> {
         }
         while self.bit_count < num_bits as i32 {
             let mut c: u32 = 0;
-            if self.p_decode_buf_next[0] as *const u8 <= self.p_decode_buf_end {
+            if self.p_decode_buf_next[0] as *const u8 != self.p_decode_buf_end {
                 c = self.p_decode_buf_next[0] as u32;
-                if (self.p_decode_buf_next[0] as *const u8) < self.p_decode_buf_end {
-                    self.p_decode_buf_next = &self.p_decode_buf_next[1..];
-                }
+                self.p_decode_buf_next = &self.p_decode_buf_next[1..];
             }
             self.bit_count += 8;
             if self.bit_count > BIT_BUF_SIZE as i32 {
