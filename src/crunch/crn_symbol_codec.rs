@@ -4,9 +4,9 @@ use super::crn_utils::*;
 
 #[allow(non_camel_case_types)]
 pub struct symbol_codec<'slice> {
-    pub p_decode_buf: &'slice [u8],
-    pub p_decode_buf_next: &'slice [u8],
-    pub p_decode_buf_end: *const u8,
+    pub p_decode_buf: core::slice::Iter<'slice, u8>,
+    pub p_decode_buf_next: core::slice::Iter<'slice, u8>,
+    // pub p_decode_buf_end: core::slice::Iter<'slice, u8>,
     pub decode_buf_size: u32,
     pub bit_buf: u32,
     pub bit_count: i32,
@@ -15,9 +15,9 @@ pub struct symbol_codec<'slice> {
 impl<'slice> Default for symbol_codec<'slice> {
     fn default() -> Self {
         symbol_codec {
-            p_decode_buf: &[0; 0],
-            p_decode_buf_next: &[0; 0],
-            p_decode_buf_end: core::ptr::null(),
+            p_decode_buf: [0; 0].iter(),
+            p_decode_buf_next: [0; 0].iter(),
+            // p_decode_buf_end: [0; 0].iter(),
             decode_buf_size: 0,
             bit_buf: 0,
             bit_count: 0,
@@ -30,10 +30,10 @@ impl<'slice> symbol_codec<'slice> {
         if buf_size == 0 {
             return false;
         }
-        self.p_decode_buf = p_buf;
-        self.p_decode_buf_next = p_buf;
+        self.p_decode_buf = p_buf.iter();
+        self.p_decode_buf_next = p_buf.iter();
         self.decode_buf_size = buf_size;
-        self.p_decode_buf_end = (&p_buf[buf_size as usize]) as *const u8;
+        // self.p_decode_buf_end = (&p_buf[buf_size as usize]) as *const u8;
         self.get_bits_init();
         true
     }
@@ -175,28 +175,21 @@ impl<'slice> symbol_codec<'slice> {
         let p_tables = &model.p_decode_tables;
         if self.bit_count < 24 {
             if self.bit_count < 16 {
-                let mut c0: u32 = 0;
-                let mut c1: u32 = 0;
-                let mut p = self.p_decode_buf_next;
-                if (&(p[0]) as *const u8) < self.p_decode_buf_end {
-                    c0 = p[0] as u32;
-                    p = &p[1..]
+                let c0: u32 = match self.p_decode_buf_next.next() {
+                    Some(x) => *x as u32,
+                    None => 0
                 };
-                if (&(p[0]) as *const u8) < self.p_decode_buf_end {
-                    c1 = p[0] as u32;
-                    p = &p[1..]
+                let c1: u32 = match self.p_decode_buf_next.next() {
+                    Some(x) => *x as u32,
+                    None => 0
                 };
-                self.p_decode_buf_next = p;
                 self.bit_count += 16;
                 let c: u32 = (c0 << 8) | c1;
                 self.bit_buf |= c << (32 - self.bit_count);
             } else {
-                let c: u32;
-                if (&(self.p_decode_buf_next[0]) as *const u8) < self.p_decode_buf_end {
-                    c = self.p_decode_buf_next[0] as u32;
-                    self.p_decode_buf_next = &self.p_decode_buf_next[1..];
-                } else {
-                    c = 0
+                let c: u32 = match self.p_decode_buf_next.next() {
+                    Some(x) => *x as u32,
+                    None => 0
                 };
                 self.bit_count += 8;
                 self.bit_buf |= c << (32 - self.bit_count);
@@ -247,11 +240,10 @@ impl<'slice> symbol_codec<'slice> {
             return Err(false);
         }
         while self.bit_count < num_bits as i32 {
-            let mut c: u32 = 0;
-            if self.p_decode_buf_next[0] as *const u8 != self.p_decode_buf_end {
-                c = self.p_decode_buf_next[0] as u32;
-                self.p_decode_buf_next = &self.p_decode_buf_next[1..];
-            }
+            let c: u32 = match self.p_decode_buf_next.next() {
+                Some(x) => *x as u32,
+                None => 0
+            };
             self.bit_count += 8;
             if self.bit_count > BIT_BUF_SIZE as i32 {
                 return Err(false);
