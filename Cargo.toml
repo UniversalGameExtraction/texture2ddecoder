@@ -32,6 +32,7 @@ paste = "^1.0.12"
 [features]
 default = ["alloc"]
 alloc = []
+rgba = []
 
 [dev-dependencies]
 ddsfile = "^0.5.1"
