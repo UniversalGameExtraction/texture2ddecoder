@@ -82,6 +82,16 @@ mod tests {
     }
 
     #[test]
+    fn test_BC1A() {
+        test_format("BC1A", "ktx2", decode_bc1a)
+    }
+
+    #[test]
+    fn test_BC2() {
+        test_format("BC2", "ktx2", decode_bc2)
+    }
+
+    #[test]
     fn test_BC3() {
         test_format("BC3", "ktx2", decode_bc3)
     }

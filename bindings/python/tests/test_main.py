@@ -55,6 +55,14 @@ def test_BC1():
     _test_format("BC1", "ktx2", decode_bc1)
 
 
+def test_BC1A():
+    _test_format("BC1A", "ktx2", decode_bc1a)
+
+
+def test_BC2():
+    _test_format("BC1", "ktx2", decode_bc2)
+
+
 def test_BC3():
     _test_format("BC3", "ktx2", decode_bc3)
 
@@ -193,7 +201,7 @@ class Texture:
 
     @classmethod
     def from_ktx2(cls, data: bytes) -> Texture:
-        assert data[:12] == b"\xABKTX 20\xBB\r\n\x1A\n"
+        assert data[:12] == b"\xabKTX 20\xbb\r\n\x1a\n"
         width = int.from_bytes(data[20:24], "little")
         height = int.from_bytes(data[24:28], "little")
         level_0_offset = int.from_bytes(data[80:88], "little")

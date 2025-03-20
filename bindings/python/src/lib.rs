@@ -1,3 +1,4 @@
+#[cfg(Py_LIMITED_API)]
 use pyo3::prelude::*;
 use pyo3::types::PyBytes;
 use pyo3::wrap_pyfunction;
@@ -25,6 +26,8 @@ fn texture2ddecoder_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(decode_astc_12_12, m)?)?;
     // bcn
     m.add_function(wrap_pyfunction!(decode_bc1, m)?)?;
+    m.add_function(wrap_pyfunction!(decode_bc1a, m)?)?;
+    m.add_function(wrap_pyfunction!(decode_bc2, m)?)?;
     m.add_function(wrap_pyfunction!(decode_bc3, m)?)?;
     m.add_function(wrap_pyfunction!(decode_bc4, m)?)?;
     m.add_function(wrap_pyfunction!(decode_bc5, m)?)?;
@@ -93,6 +96,8 @@ pybind!(decode_astc_12_10);
 pybind!(decode_astc_12_12);
 // bcn
 pybind!(decode_bc1);
+pybind!(decode_bc1a);
+pybind!(decode_bc2);
 pybind!(decode_bc3);
 pybind!(decode_bc4);
 pybind!(decode_bc5);
@@ -117,10 +122,25 @@ pybind!(decode_unity_crunch);
 
 // custom bindings
 #[pyfunction]
-pub fn decode_astc<'a>(py: Python<'a>, data: &'a PyBytes, width: usize, height: usize, block_width: usize, block_height: usize) -> PyResult<&'a PyBytes> {
-    PyBytes::new_with(py, width * height * 4, |image: & mut[u8]|{
+pub fn decode_astc<'a>(
+    py: Python<'a>,
+    data: &'a PyBytes,
+    width: usize,
+    height: usize,
+    block_width: usize,
+    block_height: usize,
+) -> PyResult<&'a PyBytes> {
+    PyBytes::new_with(py, width * height * 4, |image: &mut [u8]| {
         let image_u32 = unsafe { std::mem::transmute(image) };
-        texture2ddecoder::decode_astc(data.as_bytes(), width, height, block_width, block_height, image_u32).unwrap_err();
+        texture2ddecoder::decode_astc(
+            data.as_bytes(),
+            width,
+            height,
+            block_width,
+            block_height,
+            image_u32,
+        )
+        .unwrap_err();
         Ok(())
     })
 }
