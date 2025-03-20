@@ -380,18 +380,10 @@ pub fn decode_pvrtc(
     use alloc::vec::Vec;
 
     let block_width: usize = if is2bpp { 8 } else { 4 };
-    let num_blocks_x: usize = if is2bpp {
-        (width + 7) / 8
-    } else {
-        (width + 3) / 4
-    };
-    let num_blocks_y: usize = (height + 3) / 4;
+    let num_blocks_x: usize = width.div_ceil(block_width);
+    let num_blocks_y: usize = height.div_ceil(4);
     let num_blocks: usize = num_blocks_x * num_blocks_y;
-    let min_num_blocks: usize = if num_blocks_x <= num_blocks_y {
-        num_blocks_x
-    } else {
-        num_blocks_y
-    };
+    let min_num_blocks: usize = num_blocks_x.min(num_blocks_y);
 
     if data.len() < num_blocks * block_width {
         return Err("The data buffer is too small!");

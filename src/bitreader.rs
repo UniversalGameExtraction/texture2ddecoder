@@ -1,7 +1,7 @@
 #[inline]
 fn getbits_raw(buf: &[u8], bit_offset: usize, num_bits: usize, dst: &mut [u8]) {
     let bytes_offset = bit_offset / 8;
-    let bytes_end: usize = (bit_offset + num_bits + 7) / 8;
+    let bytes_end: usize = (bit_offset + num_bits).div_ceil(8);
     dst[0..(bytes_end - bytes_offset)].copy_from_slice(&buf[bytes_offset..bytes_end]);
 }
 

@@ -38,9 +38,5 @@ pub fn crnd_get_crn_format_bits_per_texel(fmt: &mut CrnFormat) -> Result<u32, &'
 }
 
 pub fn crnd_get_bytes_per_dxt_block(fmt: &mut CrnFormat) -> Result<u32, &'static str> {
-    Ok((match crnd_get_crn_format_bits_per_texel(fmt) {
-        Ok(s) => s,
-        Err(e) => return Err(e),
-    } << 4)
-        >> 3)
+    Ok((crnd_get_crn_format_bits_per_texel(fmt)? << 4) >> 3)
 }

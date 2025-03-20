@@ -456,7 +456,7 @@ impl<'slice> CrnUnpacker<'slice> {
             11 => CrnFormat::Total,
             _ => CrnFormat::Invalid,
         };
-        let unpack_res = match format {
+        match format {
             CrnFormat::Dxt1 => self.unpack_dxt1(
                 &mut ret,
                 row_pitch_in_bytes,
@@ -498,11 +498,7 @@ impl<'slice> CrnUnpacker<'slice> {
             ),
 
             _ => return Err("Invalid format for unpacking."),
-        };
-        match unpack_res {
-            Ok(unpack_res) => unpack_res,
-            Err(unpack_res) => return Err(unpack_res),
-        };
+        }?;
         self.codec.stop_decoding();
         Ok(ret)
     }

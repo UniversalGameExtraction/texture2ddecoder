@@ -28,19 +28,12 @@ fn crunch_unpack_level(
         return Err("Texture2D must only have 1 number of faces.");
     }
     let mut p_context: crn_unpacker::CrnUnpacker<'_> =
-        match crn_decomp::crnd_unpack_begin(data, data_size) {
-            Ok(p_context) => p_context,
-            Err(res) => return Err(res),
-        };
+        crn_decomp::crnd_unpack_begin(data, data_size)?;
     let width = max(1, tex_info.width >> level_index);
     let height = max(1, tex_info.height >> level_index);
     let blocks_x: u32 = max(1, (width + 3) >> 2);
     let blocks_y: u32 = max(1, (height + 3) >> 2);
-    let row_pitch: u32 = blocks_x
-        * match crn_decomp::crnd_get_bytes_per_dxt_block(&mut tex_info.format) {
-            Ok(s) => s,
-            Err(e) => return Err(e),
-        };
+    let row_pitch: u32 = blocks_x * crn_decomp::crnd_get_bytes_per_dxt_block(&mut tex_info.format)?;
     let total_face_size: u32 = row_pitch * blocks_y;
     match p_context.crnd_unpack_level(total_face_size, row_pitch, level_index) {
         Ok(res) => Ok(CrunchDecodeHandler {
@@ -57,10 +50,7 @@ pub fn decode_crunch(
     height: usize,
     image: &mut [u32],
 ) -> Result<(), &'static str> {
-    let handler = match crunch_unpack_level(data, data.len() as u32, 0) {
-        Ok(handler) => handler,
-        Err(s) => return Err(s),
-    };
+    let handler = crunch_unpack_level(data, data.len() as u32, 0)?;
     match handler.format {
         CrnFormat::Dxt1 => bcn::decode_bc1(&handler.dxt_data, width, height, image),
 

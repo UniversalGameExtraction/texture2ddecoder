@@ -402,10 +402,10 @@ fn decode_intseq(
     match a {
         3 => {
             let mask = (1 << b) - 1;
-            let block_count = (count + 4) / 5;
+            let block_count = count.div_ceil(5);
             let last_block_count = (count + 4) % 5 + 1;
             let block_size = 8 + 5 * b;
-            let last_block_size = (block_size * last_block_count + 4) / 5;
+            let last_block_size = (block_size * last_block_count).div_ceil(5);
 
             if reverse {
                 (0..block_count).for_each(|i| {
@@ -460,10 +460,10 @@ fn decode_intseq(
         }
         5 => {
             let mask = (1 << b) - 1;
-            let block_count = (count + 2) / 3;
+            let block_count = count.div_ceil(3);
             let last_block_count = (count + 2) % 3 + 1;
             let block_size = 7 + 3 * b;
-            let last_block_size = (block_size * last_block_count + 2) / 3;
+            let last_block_size = (block_size * last_block_count).div_ceil(3);
 
             if reverse {
                 (0..block_count).for_each(|i| {
@@ -671,11 +671,11 @@ fn decode_block_params(buf: &[u8], block_data: &mut BlockData) {
         match CEM_TABLE_A[i] {
             3 => {
                 endpoint_bits = block_data.endpoint_value_num * CEM_TABLE_B[i]
-                    + (block_data.endpoint_value_num * 8 + 4) / 5;
+                    + (block_data.endpoint_value_num * 8).div_ceil(5);
             }
             5 => {
                 endpoint_bits = block_data.endpoint_value_num * CEM_TABLE_B[i]
-                    + (block_data.endpoint_value_num * 7 + 2) / 3;
+                    + (block_data.endpoint_value_num * 7).div_ceil(3);
             }
             _ => {
                 endpoint_bits = block_data.endpoint_value_num * CEM_TABLE_B[i];
@@ -1779,8 +1779,8 @@ pub fn decode_astc(
     block_height: usize,
     image: &mut [u32],
 ) -> Result<(), &'static str> {
-    let num_blocks_x = (width + block_width - 1) / block_width;
-    let num_blocks_y = (height + block_height - 1) / block_height;
+    let num_blocks_x = width.div_ceil(block_width);
+    let num_blocks_y = height.div_ceil(block_height);
     let mut buffer: [u32; 144] = [0; 144];
     let mut data_offset = 0;
 

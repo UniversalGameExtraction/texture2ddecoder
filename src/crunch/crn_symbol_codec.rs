@@ -12,7 +12,7 @@ pub struct symbol_codec<'slice> {
     pub bit_count: i32,
 }
 
-impl<'slice> Default for symbol_codec<'slice> {
+impl Default for symbol_codec<'_> {
     fn default() -> Self {
         symbol_codec {
             p_decode_buf: &[0; 0],
