@@ -1,4 +1,3 @@
-#[cfg(Py_LIMITED_API)]
 use pyo3::prelude::*;
 use pyo3::types::PyBytes;
 use pyo3::wrap_pyfunction;
