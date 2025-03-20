@@ -21,14 +21,16 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.8", "3.12", "pypy3.10"]
+        python-version: ["3.8", "pypy3.8"]
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+      
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -36,11 +38,13 @@ jobs:
           args: --release --out dist -i ${{ matrix.python-version }}
           sccache: "true"
           working-directory: ./bindings/python
+      
       - name: Install Just
         uses: extractions/setup-just@v2
       - name: Run Cargo Tests
         run: |
           cargo test
+      
       - name: Run pytest
         run: |
           # just venv pytest
@@ -59,11 +63,12 @@ jobs:
       matrix:
         platform:
           - target: x64
-            interpreter: 3.8 3.9 3.10 3.11 3.12 pypy3.8 pypy3.9 pypy3.10
+            interpreter: 3.8 3.9 3.10 3.11 3.12 3.13 pypy3.8 pypy3.9 pypy3.10
           - target: aarch64
-            interpreter: 3.8 3.9 3.10 3.11 3.12 pypy3.8 pypy3.9 pypy3.10
+            interpreter: 3.8 3.9 3.10 3.11 3.12 3.13 pypy3.8 pypy3.9 pypy3.10
           - target: armv7
-            interpreter: 3.8 3.9 3.10 3.11 3.12 pypy3.8 pypy3.9 pypy3.10
+            interpreter: 3.8 3.9 3.10 3.11 3.12 3.13 pypy3.8 pypy3.9 pypy3.10
+    
     steps:
       - uses: actions/checkout@v4
         with:
@@ -77,10 +82,12 @@ jobs:
           manylinux: auto
           working-directory: ./bindings/python
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: linux
           path: bindings/python/dist
+          retention-days: 1
+  
   musllinux:
     if: "startsWith(github.ref, 'refs/tags/')"
     runs-on: ubuntu-latest
@@ -90,13 +97,13 @@ jobs:
         platform:
           - target: x86_64-unknown-linux-musl
             arch: x86_64
-            interpreter: 3.8 3.9 3.10 3.11 3.12 pypy3.8 pypy3.9 pypy3.10
+            interpreter: 3.8 3.9 3.10 3.11 3.12 3.13 pypy3.8 pypy3.9 pypy3.10
           - target: i686-unknown-linux-musl
             arch: x86
-            interpreter: 3.8 3.9 3.10 3.11 3.12 pypy3.8 pypy3.9 pypy3.10
+            interpreter: 3.8 3.9 3.10 3.11 3.12 3.13 pypy3.8 pypy3.9 pypy3.10
           - target: aarch64-unknown-linux-musl
             arch: aarch64
-            interpreter: 3.8 3.9 3.10 3.11 3.12 pypy3.8 pypy3.9 pypy3.10
+            interpreter: 3.8 3.9 3.10 3.11 3.12 3.13 pypy3.8 pypy3.9 pypy3.10
         # all values: [x86_64, x86, aarch64, armhf, armv7, ppc64le, riscv64, s390x]
         # { target: "armv7-unknown-linux-musleabihf", image_tag: "armv7" },
         # { target: "powerpc64le-unknown-linux-musl", image_tag: "ppc64le" },
@@ -115,10 +122,11 @@ jobs:
           manylinux: musllinux_1_1
           working-directory: ./bindings/python
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: musllinux
           path: bindings/python/dist
+          retention-days: 1
 
   windows:
     if: "startsWith(github.ref, 'refs/tags/')"
@@ -128,9 +136,9 @@ jobs:
       matrix:
         platform:
           - target: x64
-            interpreter: 3.8 3.9 3.10 3.11 3.12
+            interpreter: 3.8 3.9 3.10 3.11 3.12 3.13
           - target: x86
-            interpreter: 3.8 3.9 3.10 3.11 3.12
+            interpreter: 3.8 3.9 3.10 3.11 3.12 3.13
     steps:
       - uses: actions/checkout@v4
         with:
@@ -143,10 +151,11 @@ jobs:
           sccache: "true"
           working-directory: ./bindings/python
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: windows
           path: bindings/python/dist
+          retention-days: 1
 
   macos:
     if: "startsWith(github.ref, 'refs/tags/')"
@@ -156,9 +165,9 @@ jobs:
       matrix:
         platform:
           - target: x64
-            interpreter: 3.8 3.9 3.10 3.11 3.12 pypy3.8 pypy3.9
+            interpreter: 3.8 3.9 3.10 3.11 3.12 3.13 pypy3.8 pypy3.9 pypy3.10
           - target: aarch64
-            interpreter: 3.8 3.9 3.10 3.11 3.12 pypy3.8 pypy3.9
+            interpreter: 3.8 3.9 3.10 3.11 3.12 3.13 pypy3.8 pypy3.9 pypy3.10
     steps:
       - uses: actions/checkout@v4
         with:
@@ -171,10 +180,11 @@ jobs:
           sccache: "true"
           working-directory: ./bindings/python
       - name: Upload wheels
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: macos
           path: bindings/python/dist
+          retention-days: 1
 
   sdist:
     if: "startsWith(github.ref, 'refs/tags/')"
@@ -191,9 +201,9 @@ jobs:
           args: --out dist
           working-directory: ./bindings/python
       - name: Upload sdist
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: wheels
+          name: sdist
           path: bindings/python/dist
 
   release:
@@ -202,13 +212,11 @@ jobs:
     if: "startsWith(github.ref, 'refs/tags/')"
     needs: [linux, windows, macos, sdist, musllinux]
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: wheels
-      - name: Publish to PyPI
-        uses: PyO3/maturin-action@v1
-        env:
-          MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+          path: dist
+          merge-multiple: true
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          command: upload
-          args: --skip-existing *
+          skip-existing: true
