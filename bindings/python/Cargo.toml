@@ -1,9 +1,10 @@
 [package]
 name = "texture2ddecoder_rs"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 include = [
     "src/*",
+    "texture2ddecoder_rs.pyi",
     "Cargo.toml",
     "README.md",
     "LICENSE-APACHE",
