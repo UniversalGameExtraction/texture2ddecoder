@@ -9,12 +9,13 @@ use crate::bcn;
 use core::cmp::max;
 extern crate alloc;
 
-struct CrunchDecodeHandler {
-    format: CrnFormat,
-    dxt_data: alloc::vec::Vec<u8>,
+pub struct CrunchDecodeHandler {
+    pub format: CrnFormat,
+    pub dxt_data: alloc::vec::Vec<u8>,
+    pub faces: u32,
 }
 
-fn crunch_unpack_level(
+pub fn crunch_unpack_level(
     data: &[u8],
     data_size: u32,
     level_index: u32,
@@ -22,10 +23,6 @@ fn crunch_unpack_level(
     let mut tex_info: CrnTextureInfo = CrnTextureInfo::default();
     if !tex_info.crnd_get_texture_info(data, data_size) {
         return Err("Invalid crunch texture encoding.");
-    }
-    if tex_info.faces != 1 {
-        // I think cubemaps have 6, but they are not in the same ballpark as Texture2D?
-        return Err("Texture2D must only have 1 number of faces.");
     }
     let mut p_context: crn_unpacker::CrnUnpacker<'_> =
         crn_decomp::crnd_unpack_begin(data, data_size)?;
@@ -39,6 +36,7 @@ fn crunch_unpack_level(
         Ok(res) => Ok(CrunchDecodeHandler {
             format: tex_info.format,
             dxt_data: res,
+            faces: tex_info.faces,
         }),
         Err(err) => Err(err),
     }

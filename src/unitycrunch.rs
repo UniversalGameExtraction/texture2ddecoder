@@ -2,15 +2,11 @@ pub(crate) mod crn_decomp;
 pub(crate) mod crn_unpacker;
 use super::crnlib::{CrnFormat, CrnTextureInfo};
 use crate::bcn;
+use crate::crunch::CrunchDecodeHandler;
 use crate::{decode_etc1, decode_etc2_rgb, decode_etc2_rgba8};
 extern crate alloc;
 
-struct CrunchDecodeHandler {
-    format: CrnFormat,
-    dxt_data: alloc::vec::Vec<u8>,
-}
-
-fn unity_crunch_unpack_level(
+pub fn unity_crunch_unpack_level(
     data: &[u8],
     data_size: u32,
     level_index: u32,
@@ -18,9 +14,6 @@ fn unity_crunch_unpack_level(
     let mut tex_info: CrnTextureInfo = CrnTextureInfo::default();
     if !tex_info.crnd_get_texture_info(data, data_size) {
         return Err("Invalid crunch texture encoding.");
-    }
-    if tex_info.faces != 1 {
-        return Err("Texture2D must only have 1 number of faces.");
     }
     let mut p_context: crn_unpacker::CrnUnpacker<'_> =
         crn_decomp::crnd_unpack_begin(data, data_size)?;
@@ -34,6 +27,7 @@ fn unity_crunch_unpack_level(
         Ok(res) => Ok(CrunchDecodeHandler {
             format: tex_info.format,
             dxt_data: res,
+            faces: tex_info.faces,
         }),
         Err(err) => Err(err),
     }

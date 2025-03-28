@@ -431,7 +431,7 @@ impl<'slice> CrnUnpacker<'slice> {
         } else if row_pitch_in_bytes < minimal_row_pitch || (row_pitch_in_bytes & 3) != 0 {
             return Err("Crunch Row size is below the minimum allowed.");
         }
-        let mut ret = alloc::vec![0_u8; dst_size_in_bytes as usize];
+        let mut ret = alloc::vec![0_u8; dst_size_in_bytes as usize * self.p_header.faces.cast_to_uint() as usize];
         if dst_size_in_bytes < (row_pitch_in_bytes * blocks_y) {
             return Err("Destination buffer size is smaller than what expected to decompress.");
         }
@@ -519,8 +519,8 @@ impl<'slice> CrnUnpacker<'slice> {
         let num_faces: u32 = self.p_header.faces.cast_to_uint();
         let row_pitch_in_dwords = row_pitch_in_bytes >> 2;
         let c_bytes_per_block: i32 = 8;
-        for f in 0..num_faces as usize {
-            let mut row_dst = f;
+        let mut row_dst = 0;
+        for _f in 0..num_faces as usize {
             for y in 0..chunks_y {
                 let mut block_dst = row_dst;
                 let iter: alloc::boxed::Box<dyn Iterator<Item = i32>>;
@@ -688,8 +688,8 @@ impl<'slice> CrnUnpacker<'slice> {
         let mut prev_alpha_selector_index: u32 = 0;
         let num_faces = self.p_header.faces.cast_to_uint();
         let c_bytes_per_block: i32 = 16;
-        for f in 0..num_faces as usize {
-            let mut row_dst = f;
+        let mut row_dst = 0;
+        for _f in 0..num_faces as usize {
             for y in 0..chunks_y {
                 let mut block_dst = row_dst;
                 let iter: alloc::boxed::Box<dyn Iterator<Item = i32>>;
@@ -846,8 +846,8 @@ impl<'slice> CrnUnpacker<'slice> {
         let mut prev_alpha0_selector_index: u32 = 0;
         let num_faces = self.p_header.faces.cast_to_uint();
         let c_bytes_per_block = 8;
-        for f in 0..num_faces as usize {
-            let mut row_dst = f;
+        let mut row_dst = 0;
+        for _f in 0..num_faces as usize {
             for y in 0..chunks_y {
                 let mut block_dst = row_dst;
                 let iter: alloc::boxed::Box<dyn Iterator<Item = i32>>;
@@ -966,8 +966,8 @@ impl<'slice> CrnUnpacker<'slice> {
         let mut prev_alpha1_selector_index: u32 = 0;
         let num_faces: u32 = self.p_header.faces.cast_to_uint();
         let c_bytes_per_block: i32 = 16;
-        for f in 0..num_faces as usize {
-            let mut row_dst = f;
+        let mut row_dst = 0;
+        for _f in 0..num_faces as usize {
             for y in 0..chunks_y {
                 let mut block_dst = row_dst;
                 let iter: alloc::boxed::Box<dyn Iterator<Item = i32>>;

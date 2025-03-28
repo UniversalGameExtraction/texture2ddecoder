@@ -571,7 +571,7 @@ impl<'slice> CrnUnpacker<'slice> {
         } else if row_pitch_in_bytes < minimal_row_pitch || (row_pitch_in_bytes & 3) != 0 {
             return Err("Crunch Row size is below the minimum allowed.");
         }
-        let mut ret = alloc::vec![0_u8; dst_size_in_bytes as usize];
+        let mut ret = alloc::vec![0_u8; dst_size_in_bytes as usize * self.p_header.faces.cast_to_uint() as usize];
         if dst_size_in_bytes < (row_pitch_in_bytes * blocks_y) {
             return Err("Destination buffer size is smaller than what expected to decompress.");
         }
@@ -646,8 +646,8 @@ impl<'slice> CrnUnpacker<'slice> {
         }
         let mut color_endpoint_index: usize = 0;
         let mut reference_group: u8 = 0;
-        for f in 0..self.p_header.faces.cast_to_uint() as usize {
-            let mut data_pos: usize = f;
+        let mut data_pos: usize = 0;
+        for _f in 0..self.p_header.faces.cast_to_uint() as usize {
             for y in 0..height {
                 let mut visible = y < output_height;
                 for x in 0..width as usize {
@@ -725,8 +725,8 @@ impl<'slice> CrnUnpacker<'slice> {
         let mut color_endpoint_index: usize = 0;
         let mut alpha0_endpoint_index: usize = 0;
         let mut reference_group: u8 = 0;
-        for f in 0..self.p_header.faces.cast_to_uint() as usize {
-            let mut data_pos: usize = f;
+        let mut data_pos: usize = 0;
+        for _f in 0..self.p_header.faces.cast_to_uint() as usize {
             for y in 0..height {
                 let mut visible = y < output_height;
                 for x in 0..width as usize {
@@ -831,8 +831,8 @@ impl<'slice> CrnUnpacker<'slice> {
         }
         let mut alpha0_endpoint_index: usize = 0;
         let mut reference_group: u8 = 0;
-        for f in 0..self.p_header.faces.cast_to_uint() as usize {
-            let mut data_pos: usize = f;
+        let mut data_pos: usize = 0;
+        for _f in 0..self.p_header.faces.cast_to_uint() as usize {
             for y in 0..height {
                 let mut visible = y < output_height;
                 for x in 0..width as usize {
@@ -912,8 +912,8 @@ impl<'slice> CrnUnpacker<'slice> {
         let mut alpha0_endpoint_index: usize = 0;
         let mut alpha1_endpoint_index: usize = 0;
         let mut reference_group: u8 = 0;
-        for f in 0..self.p_header.faces.cast_to_uint() as usize {
-            let mut data_pos: usize = f;
+        let mut data_pos: usize = 0;
+        for _f in 0..self.p_header.faces.cast_to_uint() as usize {
             for y in 0..height {
                 let mut visible = y < output_height;
                 for x in 0..width as usize {
@@ -1022,8 +1022,8 @@ impl<'slice> CrnUnpacker<'slice> {
         let mut color_endpoint_index: usize = 0;
         let mut diagonal_color_endpoint_index: usize = 0;
         let mut reference_group: u8;
-        for f in 0..self.p_header.faces.cast_to_uint() as usize {
-            let mut data_pos: usize = f;
+        let mut data_pos: usize = 0;
+        for _f in 0..self.p_header.faces.cast_to_uint() as usize {
             for y in 0..height {
                 let mut visible = y < output_height;
                 for x in 0..width as usize {
@@ -1140,8 +1140,8 @@ impl<'slice> CrnUnpacker<'slice> {
         let mut diagonal_color_endpoint_index: usize = 0;
         let mut diagonal_alpha0_endpoint_index: usize = 0;
         let mut reference_group: u8;
-        for f in 0..self.p_header.faces.cast_to_uint() as usize {
-            let mut data_pos: usize = f;
+        let mut data_pos: usize = 0;
+        for _f in 0..self.p_header.faces.cast_to_uint() as usize {
             for y in 0..height {
                 let mut visible = y < output_height;
                 for x in 0..width as usize {
