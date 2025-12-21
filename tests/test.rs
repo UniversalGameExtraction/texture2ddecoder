@@ -267,7 +267,7 @@ mod tests {
             // Read iterator over slices of each mipmap level.
             let levels = reader.levels().collect::<Vec<_>>();
 
-            Texture::new(header.pixel_width, header.pixel_height, levels[0].to_vec())
+            Texture::new(header.pixel_width, header.pixel_height, levels[0].data.to_vec())
         }
 
         fn from_dds_file(fp: &str) -> Texture {
