@@ -35,7 +35,6 @@ alloc = []
 
 [dev-dependencies]
 ddsfile = "^0.5.1"
-image = "^0.24"
-ktx2 = "^0.3.0"
-lazy_static = "^1.4.0"
+image = { version = "^0.25", default-features = false, features = ["png"] }
+ktx2 = "^0.4"
 half = {version="2.3.1", features = []}
