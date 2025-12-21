@@ -3,7 +3,7 @@ use crate::crnlib::CrnFormat;
 use crate::crunch::crn_consts::*;
 extern crate alloc;
 
-pub fn crnd_unpack_begin(p_data: &[u8], data_size: u32) -> Result<CrnUnpacker, &'static str> {
+pub fn crnd_unpack_begin(p_data: &[u8], data_size: u32) -> Result<CrnUnpacker<'_>, &'static str> {
     if data_size < CRNHEADER_MIN_SIZE as u32 {
         return Err("Data size is below the minimum allowed.");
     }
