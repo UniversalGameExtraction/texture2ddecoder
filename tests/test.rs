@@ -21,211 +21,253 @@ mod tests {
     extern crate ddsfile;
     extern crate ktx2;
 
+    #[cfg(feature = "atc")]
     #[test]
     fn test_ATC_RGB() {
         test_format("ATC_RGB", "dds", decode_atc_rgb4)
     }
 
+    #[cfg(feature = "atc")]
     #[test]
     fn test_ATC_RGBA_Explicit() {
         test_format("ATC_RGBA_Explicit", "dds", decode_atc_rgba8)
     }
 
+    #[cfg(feature = "atc")]
     #[test]
     fn test_ATC_RGBA_Interpolated() {
         test_format("ATC_RGBA_Interpolated", "dds", decode_atc_rgba8)
     }
 
+    #[cfg(feature = "astc")]
     #[test]
     fn test_ASTC_4x4() {
         test_format("ASTC_4x4", "ktx2", decode_astc_4_4)
     }
 
+    #[cfg(feature = "astc")]
     #[test]
     fn test_ASTC_5x4() {
         test_format("ASTC_5x4", "ktx2", decode_astc_5_4)
     }
 
+    #[cfg(feature = "astc")]
     #[test]
     fn test_ASTC_5x5() {
         test_format("ASTC_5x5", "ktx2", decode_astc_5_5)
     }
 
+    #[cfg(feature = "astc")]
     #[test]
     fn test_ASTC_6x5() {
         test_format("ASTC_6x5", "ktx2", decode_astc_6_5)
     }
 
+    #[cfg(feature = "astc")]
     #[test]
     fn test_ASTC_6x6() {
         test_format("ASTC_6x6", "ktx2", decode_astc_6_6)
     }
 
+    #[cfg(feature = "astc")]
     #[test]
     fn test_ASTC_8x5() {
         test_format("ASTC_8x5", "ktx2", decode_astc_8_5)
     }
 
+    #[cfg(feature = "astc")]
     #[test]
     fn test_ASTC_8x6() {
         test_format("ASTC_8x6", "ktx2", decode_astc_8_6)
     }
 
+    #[cfg(feature = "astc")]
     #[test]
     fn test_ASTC_8x8() {
         test_format("ASTC_8x8", "ktx2", decode_astc_8_8)
     }
 
+    #[cfg(feature = "bc1")]
     #[test]
     fn test_BC1() {
         test_format("BC1", "ktx2", decode_bc1)
     }
 
+    #[cfg(feature = "bc1")]
     #[test]
     fn test_BC1A() {
         test_format("BC1A", "ktx2", decode_bc1a)
     }
 
+    #[cfg(feature = "bc2")]
     #[test]
     fn test_BC2() {
         test_format("BC2", "ktx2", decode_bc2)
     }
 
+    #[cfg(feature = "bc3")]
     #[test]
     fn test_BC3() {
         test_format("BC3", "ktx2", decode_bc3)
     }
 
+    #[cfg(feature = "bc4")]
     #[test]
     fn test_BC4() {
         test_format("BC4", "ktx2", decode_bc4)
     }
 
+    #[cfg(feature = "bc5")]
     #[test]
     fn test_BC5() {
         test_format("BC5", "ktx2", decode_bc5)
     }
 
+    #[cfg(feature = "bc6")]
     #[test]
     fn test_BC6H() {
         test_format("BC6H", "ktx2", decode_bc6_unsigned)
     }
 
+    #[cfg(feature = "bc7")]
     #[test]
     fn test_BC7() {
         test_format("BC7", "ktx2", decode_bc7)
     }
 
+    #[cfg(feature = "etc")]
     #[test]
     fn test_ETC1_RGB() {
         test_format("ETC1_RGB", "ktx2", decode_etc1)
     }
 
+    #[cfg(feature = "etc")]
     #[test]
     fn test_ETC2_RGB() {
         test_format("ETC2_RGB", "ktx2", decode_etc2_rgb)
     }
 
+    #[cfg(feature = "etc")]
     #[test]
     fn test_ETC2_RGBA() {
         test_format("ETC2_RGBA", "ktx2", decode_etc2_rgba8)
     }
 
+    #[cfg(feature = "etc")]
     #[test]
     fn test_ETC2_RGB_A1() {
         test_format("ETC2_RGB_A1", "ktx2", decode_etc2_rgba1)
     }
 
+    #[cfg(feature = "pvrtc")]
     #[test]
     fn test_PVRTCI_2bpp_RGB() {
         test_format("PVRTCI_2bpp_RGB", "ktx2", decode_pvrtc_2bpp)
     }
 
+    #[cfg(feature = "pvrtc")]
     #[test]
     fn test_PVRTCI_2bpp_RGBA() {
         test_format("PVRTCI_2bpp_RGBA", "ktx2", decode_pvrtc_2bpp)
     }
 
+    #[cfg(feature = "pvrtc")]
     #[test]
     fn test_PVRTCI_4bpp_RGB() {
         test_format("PVRTCI_4bpp_RGB", "ktx2", decode_pvrtc_4bpp)
     }
 
+    #[cfg(feature = "pvrtc")]
     #[test]
     fn test_PVRTCI_4bpp_RGBA() {
         test_format("PVRTCI_4bpp_RGBA", "ktx2", decode_pvrtc_4bpp)
     }
 
+    #[cfg(feature = "etc")]
     #[test]
     fn test_EAC_R11() {
         test_format("EAC_R11", "ktx2", decode_eacr)
     }
 
+    #[cfg(feature = "etc")]
     #[test]
     fn test_EAC_RG11() {
         test_format("EAC_RG11", "ktx2", decode_eacrg)
     }
 
+    #[cfg(feature = "crunch")]
     #[test]
     fn test_CRUNCH_DXT1() {
         test_format("CRUNCH_DXT1", "crn", decode_crunch)
     }
 
+    #[cfg(feature = "crunch")]
     #[test]
     fn test_CRUNCH_DXT5() {
         test_format("CRUNCH_DXT5", "crn", decode_crunch)
     }
 
+    #[cfg(feature = "crunch")]
     #[test]
     fn test_CRUNCH_DXT5A() {
         test_format("CRUNCH_DXT5A", "crn", decode_crunch)
     }
 
+    #[cfg(feature = "crunch")]
     #[test]
     fn test_CRUNCH_DXN() {
         test_format("CRUNCH_DXN", "crn", decode_crunch)
     }
 
+    #[cfg(feature = "crunch")]
     #[test]
     fn test_UNITYCRUNCH_DXT1() {
         test_format("UNITYCRUNCH_DXT1", "crn", decode_unity_crunch)
     }
 
+    #[cfg(feature = "crunch")]
     #[test]
     fn test_UNITYCRUNCH_DXT5() {
         test_format("UNITYCRUNCH_DXT5", "crn", decode_unity_crunch)
     }
 
+    #[cfg(feature = "crunch")]
     #[test]
     fn test_UNITYCRUNCH_DXT5A() {
         test_format("UNITYCRUNCH_DXT5A", "crn", decode_unity_crunch)
     }
 
+    #[cfg(feature = "crunch")]
     #[test]
     fn test_UNITYCRUNCH_DXN() {
         test_format("UNITYCRUNCH_DXN", "crn", decode_unity_crunch)
     }
 
+    #[cfg(feature = "crunch")]
     #[test]
     fn test_UNITYCRUNCH_ETC1() {
         test_format("UNITYCRUNCH_ETC1", "crn", decode_unity_crunch)
     }
 
+    #[cfg(feature = "crunch")]
     #[test]
     fn test_UNITYCRUNCH_ETC1S() {
         test_format("UNITYCRUNCH_ETC1S", "crn", decode_unity_crunch)
     }
 
+    #[cfg(feature = "crunch")]
     #[test]
     fn test_UNITYCRUNCH_ETC2() {
         test_format("UNITYCRUNCH_ETC2", "crn", decode_unity_crunch)
     }
 
+    #[cfg(feature = "crunch")]
     #[test]
     fn test_UNITYCRUNCH_ETC2A() {
         test_format("UNITYCRUNCH_ETC2A", "crn", decode_unity_crunch)
     }
 
+    #[cfg(feature = "crunch")]
     #[test]
     fn test_UNITYCRUNCH_ETC2AS() {
         test_format("UNITYCRUNCH_ETC2AS", "crn", decode_unity_crunch)
@@ -252,6 +294,7 @@ mod tests {
             match extension {
                 "ktx2" | "KTX2" => Texture::from_ktx2_file(fp),
                 "dds" | "DDS" => Texture::from_dds_file(fp),
+                #[cfg(feature = "crunch")]
                 "crn" | "CRN" => Texture::from_crn_file(fp),
                 _ => panic!("Unsupported file format"),
             }
@@ -277,6 +320,7 @@ mod tests {
             Texture::new(dds.header.width, dds.header.height, dds.data)
         }
 
+        #[cfg(feature = "crunch")]
         fn from_crn_file(fp: &str) -> Texture {
             let crn_data = fs::read(fp).unwrap();
             let mut tex_info = CrnTextureInfo::default();

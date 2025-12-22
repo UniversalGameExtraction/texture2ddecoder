@@ -1,5 +1,6 @@
 #![allow(clippy::too_many_arguments)]
 
+#[cfg(feature = "etc")]
 pub static TRANSPARENT_MASK: u32 = {
     #[cfg(target_endian = "little")]
     {
@@ -11,6 +12,7 @@ pub static TRANSPARENT_MASK: u32 = {
     }
 };
 
+#[cfg(feature = "etc")]
 pub static TRANSPARENT_SHIFT: u32 = {
     #[cfg(target_endian = "little")]
     {
@@ -40,6 +42,7 @@ pub const fn color(r: u8, g: u8, b: u8, a: u8) -> u32 {
 // }
 
 // #[cfg(target_endian = "little")]
+#[cfg(feature = "bc1")]
 #[inline]
 pub const fn rgb565_le(d: u16) -> (u8, u8, u8) {
     (

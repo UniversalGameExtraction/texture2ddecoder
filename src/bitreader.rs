@@ -1,3 +1,4 @@
+#[cfg(any(feature = "astc", feature = "bc6", feature = "bc7"))]
 #[inline]
 fn getbits_raw(buf: &[u8], bit_offset: usize, num_bits: usize, dst: &mut [u8]) {
     let bytes_offset = bit_offset / 8;
@@ -5,6 +6,7 @@ fn getbits_raw(buf: &[u8], bit_offset: usize, num_bits: usize, dst: &mut [u8]) {
     dst[0..(bytes_end - bytes_offset)].copy_from_slice(&buf[bytes_offset..bytes_end]);
 }
 
+#[cfg(feature = "astc")]
 #[inline]
 pub fn getbits(buf: &[u8], bit_offset: usize, num_bits: usize) -> i32 {
     let shift = bit_offset % 8;
@@ -16,6 +18,7 @@ pub fn getbits(buf: &[u8], bit_offset: usize, num_bits: usize) -> i32 {
     i32::from_le_bytes(raw) >> shift & ((1 << num_bits) - 1)
 }
 
+#[cfg(feature = "astc")]
 #[inline]
 pub fn getbits64(buf: &[u8], bit: isize, len: usize) -> u64 {
     let mask: u64 = if len == 64 {
@@ -38,11 +41,13 @@ pub fn getbits64(buf: &[u8], bit: isize, len: usize) -> u64 {
     }
 }
 
+#[cfg(any(feature = "bc6", feature = "bc7"))]
 pub struct BitReader<'a> {
     data: &'a [u8],
     bit_pos: usize,
 }
 
+#[cfg(any(feature = "bc6", feature = "bc7"))]
 impl BitReader<'_> {
     #[inline]
     pub const fn new(data: &[u8], bit_pos: usize) -> BitReader {

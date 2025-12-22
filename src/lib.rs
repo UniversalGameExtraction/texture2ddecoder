@@ -80,28 +80,46 @@
 //!
 #![no_std]
 
+#[cfg(not(any(feature = "astc", feature = "atc", feature = "bc1", feature = "bc2", feature = "bc3", feature = "bc4", feature = "bc5", feature = "bc6", feature = "bc7", feature = "crunch", feature = "etc", feature = "pvrtc")))]
+compile_error!("at least one of the texture formats must be enabled");
+
 mod bitreader;
 mod color;
+#[cfg(any(feature = "astc", feature = "bc6"))]
 mod f16;
 mod macros;
 
+#[cfg(feature = "astc")]
 mod astc;
+#[cfg(feature = "atc")]
 mod atc;
+#[cfg(any(feature = "bc1", feature = "bc2", feature = "bc3", feature = "bc4", feature = "bc5", feature = "bc6", feature = "bc7"))]
 mod bcn;
+#[cfg(feature = "crunch")]
 mod crnlib;
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "crunch", feature = "alloc"))]
 mod crunch;
+#[cfg(feature = "etc")]
 mod etc;
+#[cfg(feature = "pvrtc")]
 mod pvrtc;
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "crunch", feature = "alloc"))]
 mod unitycrunch;
 
 // import decode functions
+#[cfg(feature = "astc")]
 pub use astc::*;
+#[cfg(feature = "atc")]
 pub use atc::*;
+#[cfg(any(feature = "bc1", feature = "bc2", feature = "bc3", feature = "bc4", feature = "bc5", feature = "bc6", feature = "bc7"))]
 pub use bcn::*;
+#[cfg(feature = "crunch")]
 pub use crnlib::CrnTextureInfo;
+#[cfg(feature = "crunch")]
 pub use crunch::decode_crunch;
+#[cfg(feature = "etc")]
 pub use etc::*;
+#[cfg(feature = "pvrtc")]
 pub use pvrtc::*;
+#[cfg(feature = "crunch")]
 pub use unitycrunch::decode_unity_crunch;

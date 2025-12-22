@@ -1,4 +1,5 @@
 // macro to generate generic block decoder functions
+#[cfg(any(feature = "atc", feature = "bc1", feature = "bc2", feature = "bc3", feature = "bc4", feature = "bc5", feature = "bc6", feature = "bc7", feature = "etc"))]
 macro_rules! block_decoder{
     ($name: expr, $block_width: expr, $block_height: expr, $raw_block_size: expr, $block_decode_func: expr) => {
         paste::item! {
@@ -43,6 +44,10 @@ macro_rules! block_decoder{
     };
 }
 
+#[cfg(any(feature = "atc", feature = "bc1", feature = "bc2", feature = "bc3", feature = "bc4", feature = "bc5", feature = "bc6", feature = "bc7", feature = "etc"))]
+pub(crate) use block_decoder;
+
+#[cfg(feature = "crunch")]
 macro_rules! CRND_HUFF_DECODE {
     ($codec: expr, $model: expr, $symbol: expr) => {
         $symbol = match $codec.decode($model) {
@@ -52,6 +57,10 @@ macro_rules! CRND_HUFF_DECODE {
     };
 }
 
+#[cfg(feature = "crunch")]
+pub(crate) use CRND_HUFF_DECODE;
+
+#[cfg(feature = "crunch")]
 macro_rules! WRITE_TO_INT_BUFFER {
     ($buf: expr, $index: expr, $val: expr) => {
         let t_index = ($index * 4) as usize;
@@ -66,6 +75,10 @@ macro_rules! WRITE_TO_INT_BUFFER {
     };
 }
 
+#[cfg(feature = "crunch")]
+pub(crate) use WRITE_TO_INT_BUFFER;
+
+#[cfg(feature = "crunch")]
 macro_rules! WRITE_OR_U8_INTO_U16_BUFFER {
     ($buf: expr, $index: expr, $val: expr) => {
         let t_index = ($index >> 1) as usize;
@@ -78,6 +91,5 @@ macro_rules! WRITE_OR_U8_INTO_U16_BUFFER {
     };
 }
 
-pub(crate) use {
-    block_decoder, CRND_HUFF_DECODE, WRITE_OR_U8_INTO_U16_BUFFER, WRITE_TO_INT_BUFFER,
-};
+#[cfg(feature = "crunch")]
+pub(crate) use WRITE_OR_U8_INTO_U16_BUFFER;
