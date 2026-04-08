@@ -30,8 +30,20 @@ categories = [
 paste = "^1.0.12"
 
 [features]
-default = ["alloc"]
+default = ["alloc", "astc", "atc", "bc1", "bc2", "bc3", "bc4", "bc5", "bc6", "bc7", "crunch", "etc", "pvrtc"]
 alloc = []
+astc = []
+atc = ["bc3"]
+bc1 = []
+bc2 = ["bc1"]
+bc3 = ["bc1"]
+bc4 = ["bc3"]
+bc5 = ["bc3"]
+bc6 = []
+bc7 = []
+crunch = ["bc1", "bc3", "bc4", "bc5", "etc"]
+etc = []
+pvrtc = []
 
 [dev-dependencies]
 ddsfile = "^0.5.1"

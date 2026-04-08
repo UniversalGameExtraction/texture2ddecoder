@@ -1,4 +1,5 @@
 // BC 6 & 7
+#[cfg(any(feature = "bc6", feature = "bc7"))]
 pub(crate) static S_BPTC_A2: [usize; 64] = [
     15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 2, 8, 2, 2, 8, 8, 15, 2, 8,
     2, 2, 8, 8, 2, 2, 15, 15, 6, 8, 2, 8, 15, 15, 2, 8, 2, 2, 2, 15, 15, 6, 6, 2, 6, 8, 15, 15, 2,
@@ -6,6 +7,7 @@ pub(crate) static S_BPTC_A2: [usize; 64] = [
 ];
 
 // BC7
+#[cfg(feature = "bc7")]
 pub(crate) static S_BPTC_A3: [[usize; 64]; 2] = [
     [
         3, 3, 15, 15, 8, 3, 15, 15, 8, 8, 6, 6, 6, 5, 3, 3, 3, 3, 8, 15, 3, 3, 6, 10, 5, 8, 8, 6,
@@ -20,6 +22,7 @@ pub(crate) static S_BPTC_A3: [[usize; 64]; 2] = [
 ];
 
 // BC 6 & 7
+#[cfg(any(feature = "bc6", feature = "bc7"))]
 pub(crate) static S_BPTC_FACTORS: [[u8; 16]; 3] = [
     [0, 21, 43, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 9, 18, 27, 37, 46, 55, 64, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -27,6 +30,7 @@ pub(crate) static S_BPTC_FACTORS: [[u8; 16]; 3] = [
 ];
 
 // BC 6 & 7
+#[cfg(any(feature = "bc6", feature = "bc7"))]
 pub(crate) static S_BPTC_P2: [usize; 64] = [
     //  3210     0000000000   1111111111   2222222222   3333333333
     0xcccc, // 0, 0, 1, 1,  0, 0, 1, 1,  0, 0, 1, 1,  0, 0, 1, 1
@@ -96,6 +100,7 @@ pub(crate) static S_BPTC_P2: [usize; 64] = [
 ];
 
 // BC7
+#[cfg(feature = "bc7")]
 pub(crate) static S_BPTC_P3: [usize; 64] = [
     //    76543210     0000   1111   2222   3333   4444   5555   6666   7777
     0xaa685050, // 0, 0,  1, 1,  0, 0,  1, 1,  0, 2,  2, 1,  2, 2,  2, 2
