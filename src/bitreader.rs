@@ -45,7 +45,7 @@ pub struct BitReader<'a> {
 
 impl BitReader<'_> {
     #[inline]
-    pub const fn new(data: &[u8], bit_pos: usize) -> BitReader {
+    pub const fn new(data: &[u8], bit_pos: usize) -> BitReader<'_> {
         BitReader { data, bit_pos }
     }
 
