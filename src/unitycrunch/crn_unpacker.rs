@@ -639,7 +639,7 @@ impl<'slice> CrnUnpacker<'slice> {
         let num_color_endpoints: u32 = self.color_endpoints.len() as u32;
         let width: u32 = (output_width + 1) & !1;
         let height: u32 = (output_height + 1) & !1;
-        let delta_pitch_in_dwords: i32 = ((output_pitch_in_bytes >> 2) - (width << 1)) as i32;
+        let delta_pitch_in_dwords: i32 = (output_pitch_in_bytes >> 2) as i32 - (width << 1) as i32;
         if self.block_buffer.len() < width as usize {
             self.block_buffer
                 .resize(width as usize, BlockBufferElement::default());
@@ -701,7 +701,7 @@ impl<'slice> CrnUnpacker<'slice> {
                     }
                     data_pos += 2;
                 }
-                data_pos += delta_pitch_in_dwords as usize;
+                data_pos = (data_pos as isize + delta_pitch_in_dwords as isize) as usize;
             }
         }
         Ok(true)
@@ -717,7 +717,7 @@ impl<'slice> CrnUnpacker<'slice> {
         let num_alpha_endpoints: u32 = self.alpha_endpoints.len() as u32;
         let width: u32 = (output_width + 1) & !1;
         let height: u32 = (output_height + 1) & !1;
-        let delta_pitch_in_dwords: i32 = ((output_pitch_in_bytes >> 2) - (width << 2)) as i32;
+        let delta_pitch_in_dwords: i32 = (output_pitch_in_bytes >> 2) as i32 - (width << 2) as i32;
         if self.block_buffer.len() < width as usize {
             self.block_buffer
                 .resize(width as usize, BlockBufferElement::default());
@@ -809,7 +809,7 @@ impl<'slice> CrnUnpacker<'slice> {
                     }
                     data_pos += 4;
                 }
-                data_pos += delta_pitch_in_dwords as usize;
+                data_pos = (data_pos as isize + delta_pitch_in_dwords as isize) as usize;
             }
         }
         Ok(true)
@@ -824,7 +824,7 @@ impl<'slice> CrnUnpacker<'slice> {
         let num_alpha_endpoints: u32 = self.alpha_endpoints.len() as u32;
         let width: u32 = (output_width + 1) & !1;
         let height: u32 = (output_height + 1) & !1;
-        let delta_pitch_in_dwords: i32 = ((output_pitch_in_bytes >> 2) - (width << 1)) as i32;
+        let delta_pitch_in_dwords: i32 = (output_pitch_in_bytes >> 2) as i32 - (width << 1) as i32;
         if self.block_buffer.len() < width as usize {
             self.block_buffer
                 .resize(width as usize, BlockBufferElement::default());
@@ -889,7 +889,7 @@ impl<'slice> CrnUnpacker<'slice> {
                     }
                     data_pos += 2;
                 }
-                data_pos += delta_pitch_in_dwords as usize;
+                data_pos = (data_pos as isize + delta_pitch_in_dwords as isize) as usize;
             }
         }
         Ok(true)
@@ -904,7 +904,7 @@ impl<'slice> CrnUnpacker<'slice> {
         let num_alpha_endpoints: u32 = self.alpha_endpoints.len() as u32;
         let width: u32 = (output_width + 1) & !1;
         let height: u32 = (output_height + 1) & !1;
-        let delta_pitch_in_dwords: i32 = ((output_pitch_in_bytes >> 2) - (width << 2)) as i32;
+        let delta_pitch_in_dwords: i32 = (output_pitch_in_bytes >> 2) as i32 - (width << 2) as i32;
         if self.block_buffer.len() < width as usize {
             self.block_buffer
                 .resize(width as usize, BlockBufferElement::default());
@@ -999,7 +999,7 @@ impl<'slice> CrnUnpacker<'slice> {
                     }
                     data_pos += 4;
                 }
-                data_pos += delta_pitch_in_dwords as usize;
+                data_pos = (data_pos as isize + delta_pitch_in_dwords as isize) as usize;
             }
         }
         Ok(true)
@@ -1014,7 +1014,7 @@ impl<'slice> CrnUnpacker<'slice> {
         let num_color_endpoints: u32 = self.color_endpoints.len() as u32;
         let width: u32 = (output_width + 1) & !1;
         let height: u32 = (output_height + 1) & !1;
-        let delta_pitch_in_dwords: i32 = ((output_pitch_in_bytes >> 2) - (width << 1)) as i32;
+        let delta_pitch_in_dwords: i32 = (output_pitch_in_bytes >> 2) as i32 - (width << 1) as i32;
         if self.block_buffer.len() < (width << 1) as usize {
             self.block_buffer
                 .resize((width << 1) as usize, BlockBufferElement::default());
@@ -1114,7 +1114,7 @@ impl<'slice> CrnUnpacker<'slice> {
                     }
                     data_pos += 2;
                 }
-                data_pos += delta_pitch_in_dwords as usize;
+                data_pos = (data_pos as isize + delta_pitch_in_dwords as isize) as usize;
             }
         }
         Ok(true)
@@ -1130,7 +1130,7 @@ impl<'slice> CrnUnpacker<'slice> {
         let num_alpha_endpoints: u32 = self.alpha_endpoints.len() as u32;
         let width: u32 = (output_width + 1) & !1;
         let height: u32 = (output_height + 1) & !1;
-        let delta_pitch_in_dwords: i32 = ((output_pitch_in_bytes >> 2) - (width << 2)) as i32;
+        let delta_pitch_in_dwords: i32 = (output_pitch_in_bytes >> 2) as i32 - (width << 2) as i32;
         if self.block_buffer.len() < (width << 1) as usize {
             self.block_buffer
                 .resize((width << 1) as usize, BlockBufferElement::default());
@@ -1270,7 +1270,7 @@ impl<'slice> CrnUnpacker<'slice> {
                     }
                     data_pos += 4;
                 }
-                data_pos += delta_pitch_in_dwords as usize;
+                data_pos = (data_pos as isize + delta_pitch_in_dwords as isize) as usize;
             }
         }
         Ok(true)
