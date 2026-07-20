@@ -77,6 +77,19 @@ mod tests {
     }
 
     #[test]
+    fn test_ASTC_malformed_block_does_not_panic() {
+        // A malformed block whose weight config leaves no room for the CEM/plane
+        // offsets used to underflow a usize subtraction and panic. It should now
+        // decode to the error color instead.
+        let block: [u8; 16] = [
+            0x0c, 0xbc, 0xc0, 0xc0, 0xc0, 0xc0, 0xc0, 0x44, 0xe0, 0x10, 0x00, 0x00, 0x00, 0xc0,
+            0xc0, 0xc0,
+        ];
+        let mut out = [0u32; 16];
+        assert!(decode_astc_4_4(&block, 4, 4, &mut out).is_ok());
+    }
+
+    #[test]
     fn test_BC1() {
         test_format("BC1", "ktx2", decode_bc1)
     }

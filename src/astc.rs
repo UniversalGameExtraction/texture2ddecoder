@@ -533,7 +533,7 @@ fn decode_intseq(
     }
 }
 
-fn decode_block_params(buf: &[u8], block_data: &mut BlockData) {
+fn decode_block_params(buf: &[u8], block_data: &mut BlockData) -> bool {
     block_data.dual_plane = (buf[1] & 4) != 0;
     block_data.weight_range = ((buf[0] >> 4 & 1) | (buf[1] << 2 & 8)) as usize;
 
@@ -610,6 +610,14 @@ fn decode_block_params(buf: &[u8], block_data: &mut BlockData) {
         _ => block_data.weight_num as i32 * WEIGHT_PREC_TABLE_B[block_data.weight_range],
     };
 
+    // The CEM and dual-plane offsets below subtract `weight_bits` (derived from
+    // untrusted block bytes) from fixed bit positions. A malformed block can push
+    // `weight_bits` past those positions, underflowing the `usize` subtraction. Such
+    // a block is not decodable, so reject it here instead of panicking.
+    if weight_bits < 0 || weight_bits as usize + block_data.part_num * 3 > 120 {
+        return false;
+    }
+
     if block_data.part_num == 1 {
         block_data.cem[0] = (u8ptr_to_u16(&buf[1..]) >> 5 & 0xf) as usize;
         config_bits = 17;
@@ -659,7 +667,13 @@ fn decode_block_params(buf: &[u8], block_data: &mut BlockData) {
         ) as usize;
     }
 
-    let remain_bits = 128 - config_bits - weight_bits as usize;
+    let remain_bits = match (128usize)
+        .checked_sub(config_bits)
+        .and_then(|v| v.checked_sub(weight_bits as usize))
+    {
+        Some(v) => v,
+        None => return false,
+    };
 
     block_data.endpoint_value_num = 0;
 
@@ -686,6 +700,8 @@ fn decode_block_params(buf: &[u8], block_data: &mut BlockData) {
             break;
         }
     }
+
+    true
 }
 
 fn decode_endpoints_hdr7(endpoints: &mut [i32], v: &[i32]) {
@@ -1761,7 +1777,11 @@ pub fn decode_astc_block(buf: &[u8], block_width: usize, block_height: usize, ou
         let mut block_data = BlockData::default();
         block_data.bw = block_width;
         block_data.bh = block_height;
-        decode_block_params(buf, &mut block_data);
+        if !decode_block_params(buf, &mut block_data) {
+            let c: u32 = color(255, 0, 255, 255);
+            outbuf[0..(block_width * block_height)].fill(c);
+            return;
+        }
         decode_endpoints(buf, &mut block_data);
         decode_weights(buf, &mut block_data);
         if block_data.part_num > 1 {
